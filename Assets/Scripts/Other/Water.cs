@@ -119,10 +119,10 @@ public class Water : MonoBehaviour
 
         gameObject.AddComponent<MeshFilter>().mesh = mesh;
 
-        xmin = transform.position.x + xStart;
-        zmin = transform.position.z + zStart;
-        xmax = xmin + vertexTick * xCount;
-        zmax = zmin + vertexTick * zCount;
+        xmin = transform.position.x + xStart + vertexTick;
+        zmin = transform.position.z + zStart + vertexTick;
+        xmax = xmin + vertexTick * (xCount - 1);
+        zmax = zmin + vertexTick * (zCount - 1);
     }
 
     private Matrix4x4 GenerateReflectMatrix()
@@ -159,20 +159,22 @@ public class Water : MonoBehaviour
 
     private void Update()
     {
+        //interact with water
         var pos = player.position;
         if (pos.x > xmin && pos.z > zmin && pos.x < xmax && pos.z < zmax)
         {
-            int x = Mathf.FloorToInt((pos.x - xmin) / vertexTick);
-            int z = Mathf.FloorToInt((pos.z - zmin) / vertexTick);
+            int x = Mathf.FloorToInt((pos.x - xmin) / vertexTick) + 1;
+            int z = Mathf.FloorToInt((pos.z - zmin) / vertexTick) + 1;
             var p = prev[x + xCount * z];
             prev[x + xCount * z] = new Vector3(p.x, p.y - 0.002f * player.velocity.magnitude, p.z);
         }
 
+        //generate random wave
         noiseTimer += Time.deltaTime;
         if (noiseTimer > noiseTime)
         {
-            int x = Random.Range(0, xCount);
-            int z = Random.Range(0, zCount);
+            int x = Random.Range(1, xCount - 1);
+            int z = Random.Range(1, zCount - 1);
             var p = prev[x + xCount * z];
             prev[x + xCount * z] = new Vector3(p.x, p.y - noiseAmplitude, p.z);
             noiseTimer = 0;
