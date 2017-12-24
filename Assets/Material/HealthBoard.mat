@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Grass
-  m_Shader: {fileID: 4800000, guid: 1fb1d93e64a2ee24faaa05fa278244b0, type: 3}
+  m_Name: HealthBoard
+  m_Shader: {fileID: 4800000, guid: 9ae871ad19fc48b45924db3e58bb0628, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -18,10 +18,6 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _AlphaTex:
-        m_Texture: {fileID: 2800000, guid: c7ccb1f106d48684cb568e205928a4e7, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -43,7 +39,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 5c96132c847f528468686fb0ab568c65, type: 3}
+        m_Texture: {fileID: 2800000, guid: 88fa1590f7d1ce04ba9935b80f30ce2d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -66,9 +62,8 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Height: 1
-    - _LOD0: 10
-    - _LOD1: 30
+    - _Health: 1
+    - _Height: 0.4
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -77,13 +72,8 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Width: 0.04
-    - _Wind: 1.55
-    - _WindAmplitude: 0.1
-    - _WindFrequency: 50
+    - _Width: 2
     - _ZWrite: 1
     m_Colors:
-    - _Albedo: {r: 0.05071366, g: 0.9852941, b: 0.057158988, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PlayerPos: {r: 28.261757, g: 0.00012212992, b: 31.943995, a: 0}

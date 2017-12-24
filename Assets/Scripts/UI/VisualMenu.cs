@@ -3,37 +3,41 @@ using UnityEngine.UI;
 
 public class VisualMenu : Menu<VisualMenu>
 {
-    private Dropdown[] dropdowns;
-
     private void OnEnable()
     {
-        dropdowns = GetComponentsInChildren<Dropdown>();
+        var dropdowns = GetComponentsInChildren<Dropdown>();
+        var toggle = GetComponentInChildren<Toggle>();
 
-        if (Screen.width==1366)
+        //get resolution setting
+        if (Screen.width == 1366)
         {
             dropdowns[0].value = 0;
         }
-        else if (Screen.width==1280)
+        else if (Screen.width == 1280)
         {
             dropdowns[0].value = 1;
         }
-        else if (Screen.width==800)
+        else if (Screen.width == 800)
         {
             dropdowns[0].value = 2;
         }
 
-        if (QualitySettings.GetQualityLevel()==5)
+        //get quality level setting
+        if (QualitySettings.GetQualityLevel() == 5)
         {
             dropdowns[1].value = 0;
         }
-        else if (QualitySettings.GetQualityLevel()==3)
+        else if (QualitySettings.GetQualityLevel() == 3)
         {
             dropdowns[1].value = 1;
         }
-        else if (QualitySettings.GetQualityLevel()==1)
+        else if (QualitySettings.GetQualityLevel() == 1)
         {
             dropdowns[1].value = 2;
         }
+
+        //get water setting
+        toggle.isOn = Water.isRef;
     }
 
     public void SetResolution(int index)
@@ -68,4 +72,8 @@ public class VisualMenu : Menu<VisualMenu>
         }
     }
 
+    public void SetWater(bool isOn)
+    {
+        Water.SetRef(isOn);
+    }
 }

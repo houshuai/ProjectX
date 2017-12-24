@@ -13,9 +13,4 @@ public class PlayAnimationEvent : MonoBehaviour
     {
         playerMove.PlayRunAudio();
     }
-
-    private void SideFinished()
-    {
-        playerMove.SideFinished();
-    }
 }

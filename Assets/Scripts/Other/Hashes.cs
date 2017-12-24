@@ -12,9 +12,6 @@ public static class Hashes
     public static readonly int CrouchBool;
     public static readonly int FightBool;
     public static readonly int PunchIndexInt;
-    public static readonly int RightTrigger;
-    public static readonly int LeftTrigger;
-    public static readonly int BackTrigger;
     public static readonly int CrouchState;
     public static readonly int FightMoveState;
     public static readonly int DamageState;
@@ -42,9 +39,6 @@ public static class Hashes
         CrouchBool = Animator.StringToHash("Crouch");
         FightBool = Animator.StringToHash("Fight");
         PunchIndexInt = Animator.StringToHash("PunchIndex");
-        RightTrigger = Animator.StringToHash("Right");
-        LeftTrigger = Animator.StringToHash("Left");
-        BackTrigger = Animator.StringToHash("Back");
         CrouchState = Animator.StringToHash("Crouch");
         FightMoveState = Animator.StringToHash("FightMove");
         DamageState = Animator.StringToHash("damage_20");

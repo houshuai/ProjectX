@@ -2,6 +2,11 @@
 
 public class Water : MonoBehaviour
 {
+    public static bool isRef = true;        //is reflcet and refract
+    public static Material mat;
+    public static Shader refShader;
+    public static Shader noRefShader;
+
     public Camera mainCam;
     public float vertexTick = 3;
     public int xCount = 5;
@@ -11,7 +16,6 @@ public class Water : MonoBehaviour
     public int noiseFrequency = 2;
     public float noiseAmplitude = 0.2f;
 
-    private Material mat;
     private Camera reflectCamera;
     private Matrix4x4 reflectMatrix;
     private Vector4 reflectClipPlane;
@@ -31,7 +35,13 @@ public class Water : MonoBehaviour
 
     private void Start()
     {
-        mat = GetComponent<MeshRenderer>().sharedMaterial;
+        if (mat==null)
+        {
+            mat = GetComponent<MeshRenderer>().sharedMaterial;
+            refShader = Shader.Find("Unlit/Water");
+            noRefShader = Shader.Find("Unlit/WaterNoRef");
+        }
+        
         GenerateReflectCamera();
         GenerateRefractCamera();
 
@@ -51,8 +61,10 @@ public class Water : MonoBehaviour
 
     private void GenerateRefractCamera()
     {
-        var texture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24);
-        texture.wrapMode = TextureWrapMode.Repeat;
+        var texture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24)
+        {
+            wrapMode = TextureWrapMode.Repeat
+        };
 
         var gameObject = new GameObject("RefractCamera");
         refractCamera = gameObject.AddComponent<Camera>();
@@ -64,8 +76,10 @@ public class Water : MonoBehaviour
 
     private void GenerateReflectCamera()
     {
-        var texture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24);
-        texture.wrapMode = TextureWrapMode.Repeat;
+        var texture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24)
+        {
+            wrapMode = TextureWrapMode.Repeat
+        };
 
         var gameObject = new GameObject("ReflectCamera");
         reflectCamera = gameObject.AddComponent<Camera>();
@@ -112,8 +126,10 @@ public class Water : MonoBehaviour
             }
         }
 
-        mesh = new Mesh();
-        mesh.vertices = curr;
+        mesh = new Mesh
+        {
+            vertices = curr
+        };
         mesh.SetIndices(indices, MeshTopology.Triangles, 0);
         mesh.RecalculateNormals();
 
@@ -130,26 +146,28 @@ public class Water : MonoBehaviour
         var normal = new Vector3(0, 1, 0);
         float d = -Vector3.Dot(transform.position, normal);            //distance of mirror to origin(0,0,0)
 
-        var matrix = new Matrix4x4();
-        matrix.m00 = 1 - 2 * normal.x * normal.x;
-        matrix.m01 = -2 * normal.x * normal.y;
-        matrix.m02 = -2 * normal.x * normal.z;
-        matrix.m03 = -2 * normal.x * d;
+        var matrix = new Matrix4x4
+        {
+            m00 = 1 - 2 * normal.x * normal.x,
+            m01 = -2 * normal.x * normal.y,
+            m02 = -2 * normal.x * normal.z,
+            m03 = -2 * normal.x * d,
 
-        matrix.m10 = -2 * normal.x * normal.y;
-        matrix.m11 = 1 - 2 * normal.y * normal.y;
-        matrix.m12 = -2 * normal.y * normal.z;
-        matrix.m13 = -2 * normal.y * d;
+            m10 = -2 * normal.x * normal.y,
+            m11 = 1 - 2 * normal.y * normal.y,
+            m12 = -2 * normal.y * normal.z,
+            m13 = -2 * normal.y * d,
 
-        matrix.m20 = -2 * normal.x * normal.z;
-        matrix.m21 = -2 * normal.y * normal.z;
-        matrix.m22 = 1 - 2 * normal.z * normal.z;
-        matrix.m23 = -2 * normal.z * d;
+            m20 = -2 * normal.x * normal.z,
+            m21 = -2 * normal.y * normal.z,
+            m22 = 1 - 2 * normal.z * normal.z,
+            m23 = -2 * normal.z * d,
 
-        matrix.m30 = 0;
-        matrix.m31 = 0;
-        matrix.m32 = 0;
-        matrix.m33 = 1;
+            m30 = 0,
+            m31 = 0,
+            m32 = 0,
+            m33 = 1
+        };
 
         reflectClipPlane = new Vector4(0, 1, 0, d);
         refractClipPlane = new Vector4(0, -1, 0, -d);
@@ -203,6 +221,8 @@ public class Water : MonoBehaviour
 
     void OnWillRenderObject()
     {
+        if (!isRef) return;
+
         //reflect
         reflectCamera.worldToCameraMatrix = mainCam.worldToCameraMatrix * reflectMatrix;
         var matrix = reflectCamera.projectionMatrix;
@@ -253,4 +273,20 @@ public class Water : MonoBehaviour
         mat.SetTexture("_RefractTex", refractCamera.targetTexture);
     }
 
+    public static void SetRef(bool isOn)
+    {
+        if (isRef != isOn)
+        {
+            isRef = isOn;
+            if (isRef)
+            {
+                mat.shader = refShader;
+            }
+            else
+            {
+                mat.shader = noRefShader;
+            }
+        }
+
+    }
 }

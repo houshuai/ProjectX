@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Dragon : Monster
 {
@@ -33,6 +34,7 @@ public class Dragon : Monster
     public AudioClip damageClip;
     public Transform flamePos;
     public FloatVariable playerHealth;
+    public Slider healthSlider;
 
     private Rigidbody rb;
 
@@ -51,6 +53,7 @@ public class Dragon : Monster
     {
         anim = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
+        health = totalHealth;
         rb = GetComponent<Rigidbody>();
 
         currState = FSMState.Chase;
@@ -371,6 +374,7 @@ public class Dragon : Monster
         }
 
         base.TakeDamage(damage);
+        healthSlider.value = health;
 
         if ((health < 700 && !firstFly) || (health < 400 && !secondFly))
         {

@@ -4,12 +4,10 @@ using UnityEngine.UI;
 public class AudioMenu : Menu<AudioMenu>
 {
     public AudioMixer audioMixer;
-
-    private Slider[] slideres;
-
+    
     private void OnEnable()
     {
-        slideres = GetComponentsInChildren<Slider>();
+        var slideres = GetComponentsInChildren<Slider>();
 
         float value;
         audioMixer.GetFloat("master",out value);

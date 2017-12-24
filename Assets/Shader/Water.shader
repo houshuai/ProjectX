@@ -2,7 +2,6 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
 		_ReflectTex ("Reflect Texture", 2D) = "white" {}
 		_SkyBox ("Sky Box", Cube) = "blue"
 		_RefractTex ("Refract Texture", 2D) = "white" {}
@@ -26,20 +25,16 @@
 			{
 				float4 vertex : POSITION;
 				float3 normal : NORMAL;
-				float2 uv : TEXCOORD0;
 			};
 
 			struct v2f
 			{
-				float2 uv : TEXCOORD0;
-				float3 worldNormal : TEXCOORD1;
+				float3 worldNormal : TEXCOORD0;
 				float4 vertex : SV_POSITION;
-				float4 screenPos : TEXCOORD2;
-				float3 viewDir : TEXCOORD3;
+				float4 screenPos : TEXCOORD1;
+				float3 viewDir : TEXCOORD2;
 			};
 
-			sampler2D _MainTex;
-			float4 _MainTex_ST;
 			sampler2D _ReflectTex;
 			samplerCUBE _SkyBox;
 			sampler2D _RefractTex;
@@ -50,7 +45,6 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.worldNormal = UnityObjectToWorldNormal(v.normal);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				o.screenPos = ComputeScreenPos(o.vertex);
 				o.viewDir = normalize(WorldSpaceViewDir(v.vertex));
 				return o;
@@ -78,11 +72,12 @@
 				col.xyz = lerp(refractCol.xyz, reflectCol.xyz, fresnel);
 
 				float3 halfVec = normalize(_WorldSpaceLightPos0.xyz + i.viewDir);
-				fixed3 specular = _LightColor0*pow(DotClamped(halfVec, i.worldNormal), _Smooth*100);
+				fixed3 specular = _LightColor0 * pow(DotClamped(halfVec, i.worldNormal), _Smooth*100);
 				col.xyz = col.xyz + specular;
 				return col;
 			}
 			ENDCG
 		}
+
 	}
 }

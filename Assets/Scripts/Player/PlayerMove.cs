@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -17,26 +18,31 @@ public class PlayerMove : MonoBehaviour
     [HideInInspector]
     public bool isInGrass;
     [HideInInspector]
-    public bool isCrouch = false;
+    public bool isCrouch;
+    [HideInInspector]
+    public bool isLock;
+    [HideInInspector]
+    public Transform currEnemy;
     [HideInInspector]
     public Animator anim;
 
     private Transform cam;
     private Rigidbody rb;
 
-    private float groundCheckDistance = 0.3f;
+    private float groundCheckDistance = 0.2f;
     private float[] speeds;
     private int currSpeedIndex = 0;
     private float currSpeed;
     private bool isGround;
-    private bool isSide;
+    private List<Monster> enemyList;
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         cam = Camera.main.transform;
-        if (anim == null) anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        if (anim == null) anim = GetComponentInChildren<Animator>();
+        enemyList = new List<Monster>();
 
         speeds = new float[3];
         speeds[0] = runSpeed;
@@ -73,23 +79,34 @@ public class PlayerMove : MonoBehaviour
             anim.SetBool(Hashes.CrouchBool, isCrouch);
         }
 
+        if (Input.GetKeyDown(KeyCode.F) && enemyList.Count > 0)
+        {
+            if (isLock)
+            {
+                isLock = false;
+                currEnemy = null;
+            }
+            else
+            {
+                isLock = true;
+                currEnemy = enemyList[0].transform;
+            }
+        }
+
         CheckIsGround();
 
         if (isGround)
         {
-            if (!isSide)
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+            var animState = anim.GetCurrentAnimatorStateInfo(0).shortNameHash;
+            if (animState == Hashes.LocomotionState || animState == Hashes.CrouchState)
             {
-                float h = Input.GetAxis("Horizontal");
-                float v = Input.GetAxis("Vertical");
-                var animState = anim.GetCurrentAnimatorStateInfo(0).shortNameHash;
-                if (animState == Hashes.LocomotionState || animState == Hashes.CrouchState)
-                {
-                    Locomotion(h, v);
-                }
-                else if (animState == Hashes.FightMoveState)
-                {
-                    FightMove(h, v);
-                }
+                Locomotion(h, v);
+            }
+            else if (animState == Hashes.FightMoveState)
+            {
+                FightMove(h, v);
             }
         }
         else
@@ -97,9 +114,8 @@ public class PlayerMove : MonoBehaviour
             rb.AddForce(Physics.gravity);         // extra gravity
             if (rb.velocity.y < 0)
             {
-                groundCheckDistance = 0.3f;
+                groundCheckDistance = 0.2f;
             }
-
         }
     }
 
@@ -121,34 +137,10 @@ public class PlayerMove : MonoBehaviour
 
     private void FightMove(float h, float v)
     {
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (h > 0.2)
-            {
-                anim.SetTrigger(Hashes.RightTrigger);
-                rb.velocity = transform.right * sideSpeed;
-                isSide = true;
-            }
-            else if (h < -0.2)
-            {
-                anim.SetTrigger(Hashes.LeftTrigger);
-                rb.velocity = -transform.right * sideSpeed;
-                isSide = true;
-            }
-            else if (v < -0.2)
-            {
-                anim.SetTrigger(Hashes.BackTrigger);
-                rb.velocity = -transform.forward * sideSpeed;
-                isSide = true;
-            }
-        }
-        else
-        {
-            var move = (v * transform.forward + h * transform.right).normalized * runSpeed;
-            Translate(move);
-            var rotate = new Vector3(cam.forward.x, 0, cam.forward.z);
-            Rotate(rotate);
-        }
+        var move = (v * transform.forward + h * transform.right).normalized * runSpeed;
+        Translate(move);
+        var rotate = new Vector3(cam.forward.x, 0, cam.forward.z);
+        Rotate(rotate);
     }
 
     private void Jump()
@@ -190,7 +182,21 @@ public class PlayerMove : MonoBehaviour
 
     private void CheckIsGround()
     {
-        isGround = Physics.Raycast(transform.position + new Vector3(0, 0.2f, 0), Vector3.down, groundCheckDistance);
+        if (Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0), Vector3.down, groundCheckDistance))
+        {
+            isGround = true;
+        }
+        else if (Physics.Raycast(transform.position + new Vector3(0.1f, 0.1f, 0), Vector3.down, groundCheckDistance) ||
+            Physics.Raycast(transform.position + new Vector3(-0.1f, 0.1f, 0), Vector3.down, groundCheckDistance) ||
+            Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0.1f), Vector3.down, groundCheckDistance) ||
+            Physics.Raycast(transform.position + new Vector3(0, 0.1f, -0.1f), Vector3.down, groundCheckDistance))
+        {
+            isGround = true;
+        }
+        else
+        {
+            isGround = false;
+        }
     }
 
     private bool CheckTerrainNormal()
@@ -224,8 +230,25 @@ public class PlayerMove : MonoBehaviour
 
     }
 
-    public void SideFinished()
+    public void AddEnemy(Monster enemy)
     {
-        isSide = false;
+        if (!enemyList.Contains(enemy))
+        {
+            enemyList.Add(enemy);
+        }
+    }
+
+    public void RemoveEnemy(Monster enemy)
+    {
+        if (enemyList.Contains(enemy))
+        {
+            enemyList.Remove(enemy);
+        }
+
+        if (enemyList.Count==0)
+        {
+            isLock = false;
+            currEnemy = null;
+        }
     }
 }

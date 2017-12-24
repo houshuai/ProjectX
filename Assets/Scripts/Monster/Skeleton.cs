@@ -20,6 +20,7 @@ public class Skeleton : Monster
     public Transform[] patrolPos;
     public FloatVariable playerHealth;
 
+    private HealthBoard healthBoard;
     private NavMeshAgent nav;
     private CapsuleCollider capsuleCollider;
     private int patrolPosCount;
@@ -32,14 +33,15 @@ public class Skeleton : Monster
     private FSMState currState;
     private Transform playerPos;
     private PlayerMove playerMove;
-    private PlayerAttack playerAttack;
 
     private void Start()
     {
+        healthBoard = GetComponentInChildren<HealthBoard>();
         nav = GetComponent<NavMeshAgent>();
         capsuleCollider = GetComponent<CapsuleCollider>();
         anim = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
+        health = totalHealth;
         if (patrolPos != null)
         {
             patrolPosCount = patrolPos.Length;
@@ -51,7 +53,6 @@ public class Skeleton : Monster
         var playerObj = GameObject.FindGameObjectWithTag(Tags.Player);
         playerPos = playerObj.transform;
         playerMove = playerObj.GetComponent<PlayerMove>();
-        playerAttack = playerObj.GetComponent<PlayerAttack>();
         isDead = false;
     }
 
@@ -76,8 +77,6 @@ public class Skeleton : Monster
             default:
                 break;
         }
-
-        healthSlider.transform.LookAt(Camera.main.transform);
     }
 
     private void UpdatePatrol()
@@ -89,7 +88,6 @@ public class Skeleton : Monster
              distance < sightRange && angle < sightAngle / 2)
         {
             ChangeToChase();
-            playerAttack.EnemyCount++;
             return;
         }
 
@@ -188,7 +186,7 @@ public class Skeleton : Monster
         nav.destination = patrolPos[currPatrolPos].position;
         nav.speed = patrolSpeed;
         nav.isStopped = false;
-        playerAttack.EnemyCount--;
+        playerMove.RemoveEnemy(this);
     }
 
     private void ChangeToChase()
@@ -197,6 +195,7 @@ public class Skeleton : Monster
         nav.destination = playerPos.position;
         nav.speed = chaseSpeed;
         nav.isStopped = false;
+        playerMove.AddEnemy(this);
     }
 
     private void ChangeToAttack()
@@ -213,19 +212,19 @@ public class Skeleton : Monster
         }
 
         base.TakeDamage(damage);
+        healthBoard.ChangeMaterial(health / totalHealth);
 
         if (isDead)
         {
             nav.isStopped = true;
             capsuleCollider.enabled = false;
-            playerAttack.EnemyCount--;
+            playerMove.RemoveEnemy(this);
         }
         else
         {
             if (currState==FSMState.Patrol)
             {
                 ChangeToChase();
-                playerAttack.EnemyCount++;
             }
         }
     }

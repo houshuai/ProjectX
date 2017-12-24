@@ -29,8 +29,6 @@
 
 			struct v2g
 			{
-				float2 uv : TEXCOORD0;
-				float3 normal : NORMAL;
 				float4 vertex : POSITION;
 			};
 
@@ -55,8 +53,6 @@
 			{
 				v2g o;
 				o.vertex = v.vertex;
-				o.normal = v.normal;
-				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 				return o;
 			}
 

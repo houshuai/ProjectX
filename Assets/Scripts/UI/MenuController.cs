@@ -124,6 +124,10 @@ public class MenuController : MonoBehaviour
         {
             menuStack.Peek().gameObject.SetActive(true);
         }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     public void CloseAll()

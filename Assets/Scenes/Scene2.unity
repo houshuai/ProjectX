@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 197478340}
-  m_IndirectSpecularColor: {r: 0.5444003, g: 0.5069907, b: 0.52424306, a: 1}
+  m_IndirectSpecularColor: {r: 0.25329474, g: 0.21699166, b: 0.23320198, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -394,6 +394,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 114757782809590196, guid: 59c100dd669d88f46b60555886d4dae7,
+        type: 2}
+      propertyPath: healthSlider
+      value: 
+      objectReference: {fileID: 642051132}
     - target: {fileID: 449822, guid: 59c100dd669d88f46b60555886d4dae7, type: 2}
       propertyPath: m_LocalRotation.x
       value: -0.34885344
@@ -409,15 +414,6 @@ Prefab:
     - target: {fileID: 449822, guid: 59c100dd669d88f46b60555886d4dae7, type: 2}
       propertyPath: m_LocalRotation.w
       value: 0.6592659
-      objectReference: {fileID: 0}
-    - target: {fileID: 114757782809590196, guid: 59c100dd669d88f46b60555886d4dae7,
-        type: 2}
-      propertyPath: healthSlider
-      value: 
-      objectReference: {fileID: 642051132}
-    - target: {fileID: 101568, guid: 59c100dd669d88f46b60555886d4dae7, type: 2}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 59c100dd669d88f46b60555886d4dae7, type: 2}
@@ -701,7 +697,7 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 1
+  m_HDR: 0
   m_AllowMSAA: 1
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1

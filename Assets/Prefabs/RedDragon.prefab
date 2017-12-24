@@ -2852,9 +2852,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4298a4550c281545a796abb5eb9e9cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 1000
+  totalHealth: 1000
   deadClip: {fileID: 8300000, guid: 8b11570f65fa08249a846016c5b7fee4, type: 3}
-  healthSlider: {fileID: 0}
   turnSpeed: 1
   walkSpeed: 2
   runSpeed: 4
@@ -2875,6 +2874,7 @@ MonoBehaviour:
   damageClip: {fileID: 8300000, guid: a4581c70f314827498f4e1a13465929f, type: 3}
   flamePos: {fileID: 4472901939965248}
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
+  healthSlider: {fileID: 0}
   flyTimer: 0
 --- !u!136 &136011834494390882
 CapsuleCollider:

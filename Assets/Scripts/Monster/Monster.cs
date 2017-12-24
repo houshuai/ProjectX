@@ -1,20 +1,18 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 public class Monster : MonoBehaviour
 {
-    public float health = 100f;
+    public float totalHealth = 100f;
     public AudioClip deadClip;
-    public Slider healthSlider;
 
     protected Animator anim;
     protected AudioSource audioSource;
+    protected float health;
     protected bool isDead;
 
     public virtual void TakeDamage(float damage)
     {
         health -= damage;
-        healthSlider.value = health;
 
         if (health <= 0)
         {

@@ -17,6 +17,7 @@ public class CameraLook : MonoBehaviour
     private float yMax = 80.0f;
     private float zMin = 2f;
     private float zMax = 5f;
+    private PlayerMove player;
 
 
     void Start()
@@ -26,7 +27,9 @@ public class CameraLook : MonoBehaviour
         y = angles.x;
         z = -distance;
 
-        if (EventSystem.current==null)
+        player = FindObjectOfType<PlayerMove>();
+
+        if (EventSystem.current == null)
         {
             var go = new GameObject("EventSystem");
             go.AddComponent<EventSystem>();
@@ -40,13 +43,23 @@ public class CameraLook : MonoBehaviour
         {
             return;
         }
-        x += Input.GetAxis("Mouse X") * xSpeed;
-        y -= Input.GetAxis("Mouse Y") * ySpeed;
-        z += Input.GetAxis("Mouse ScrollWheel") * zSpeed;
-        y = Mathf.Clamp(y, yMin, yMax);
-        z = Mathf.Clamp(z, -zMax, -zMin);
-        RotatePosition();
-        UpdatePosition();
+
+        if (player.isLock)
+        {
+            var direction = (player.currEnemy.position - rig.position).normalized;
+            transform.position = rig.position + new Vector3(direction.x * z, 0, direction.z * z);
+            transform.LookAt(player.currEnemy);
+        }
+        else
+        {
+            x += Input.GetAxis("Mouse X") * xSpeed;
+            y -= Input.GetAxis("Mouse Y") * ySpeed;
+            z += Input.GetAxis("Mouse ScrollWheel") * zSpeed;
+            y = Mathf.Clamp(y, yMin, yMax);
+            z = Mathf.Clamp(z, -zMax, -zMin);
+            RotatePosition();
+            UpdatePosition();
+        }
 
     }
 
@@ -64,10 +77,6 @@ public class CameraLook : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(rig.position, transform.position - rig.position, out hit, zMax))
         {
-            if (hit.collider.gameObject.tag == Tags.AirWall)
-            {
-                return;
-            }
             if (hit.collider.gameObject.tag != Tags.MainCamera)
             {
                 transform.position = hit.point;

@@ -14,25 +14,13 @@ public class PlayerAttack : MonoBehaviour
 
     [HideInInspector]
     public Animator anim;
-    [HideInInspector]
-    public int EnemyCount
-    {
-        set
-        {
-            enemyCount = value;
-            anim.SetBool(Hashes.FightBool, true);
-        }
 
-        get { return enemyCount; }
-    }
-
-    private int enemyCount;
     private PlayerMove playerMove;
     private Vector3 attackPos;
     private int attackCombo = 0;
     private float comboTime = 1;
     private float comboTimer = 0;
-    private float fightTime = 3;
+    private float fightTime = 1.5f;
     private float fightTimer;
     private int fireInputCount;
     private float[] punchTime;
@@ -63,7 +51,7 @@ public class PlayerAttack : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && fireInputCount < 3) //记录最多三次攻击输入
         {
-            if (enemyCount > 0 || fightTimer > 0)
+            if (fightTimer > 0)
             {
                 fireInputCount++;
             }
@@ -83,9 +71,7 @@ public class PlayerAttack : MonoBehaviour
         {
             Punch();
         }
-
-
-
+        
         if (comboTimer > 0)
         {
             comboTimer -= Time.deltaTime;
@@ -102,16 +88,13 @@ public class PlayerAttack : MonoBehaviour
 
         }
 
-        if (enemyCount == 0)
+        if (fightTimer > 0)
         {
-            if (fightTimer > 0)
-            {
-                fightTimer -= Time.deltaTime;
-            }
-            else
-            {
-                anim.SetBool(Hashes.FightBool, false);
-            }
+            fightTimer -= Time.deltaTime;
+        }
+        else
+        {
+            anim.SetBool(Hashes.FightBool, false);
         }
 
     }
