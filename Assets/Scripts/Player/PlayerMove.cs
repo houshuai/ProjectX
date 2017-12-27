@@ -28,6 +28,7 @@ public class PlayerMove : MonoBehaviour
 
     private Transform cam;
     private Rigidbody rb;
+    private Footprint footprint;
 
     private float groundCheckDistance = 0.2f;
     private float[] speeds;
@@ -41,6 +42,7 @@ public class PlayerMove : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         cam = Camera.main.transform;
         rb = GetComponent<Rigidbody>();
+        footprint = GetComponent<Footprint>();
         if (anim == null) anim = GetComponentInChildren<Animator>();
         enemyList = new List<Monster>();
 
@@ -60,7 +62,7 @@ public class PlayerMove : MonoBehaviour
 
         if (transform.position.y < -10)
         {
-            transform.position = new Vector3(35, 0, 33);
+            transform.position = new Vector3(35, 10, 33);
         }
 
         if (Input.GetKeyDown(KeyCode.C))
@@ -227,7 +229,7 @@ public class PlayerMove : MonoBehaviour
         {
             audioSource.Play();
         }
-
+        footprint.ShowFootprint();
     }
 
     public void AddEnemy(Monster enemy)

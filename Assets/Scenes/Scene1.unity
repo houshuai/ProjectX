@@ -639,19 +639,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 12
       objectReference: {fileID: 0}
-    - target: {fileID: 54600675247344468, guid: 351ebe4b80b7e3940adfd634eed39f98,
-        type: 2}
-      propertyPath: m_Constraints
-      value: 112
-      objectReference: {fileID: 0}
-    - target: {fileID: 4508079431140306, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4508925895899750, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
   m_IsPrefabParent: 0
@@ -895,10 +882,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 42
       objectReference: {fileID: 0}
-    - target: {fileID: 1000014111768446, guid: 2cf13a738fc434c46bda5ebf7ca44756, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2cf13a738fc434c46bda5ebf7ca44756, type: 2}
   m_IsPrefabParent: 0
@@ -949,10 +932,6 @@ Prefab:
     - target: {fileID: 1000013410243764, guid: 56b36da289d9a9e4cb37c5f588e23748, type: 2}
       propertyPath: m_Name
       value: Carrot_Plant (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000013410243764, guid: 56b36da289d9a9e4cb37c5f588e23748, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 56b36da289d9a9e4cb37c5f588e23748, type: 2}
@@ -2329,10 +2308,6 @@ Prefab:
       propertyPath: m_Name
       value: Tomato_Plant (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 1000013832410636, guid: 323e5d46aea633c42bfadb66b36971d8, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 323e5d46aea633c42bfadb66b36971d8, type: 2}
   m_IsPrefabParent: 0
@@ -2670,6 +2645,11 @@ Prefab:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 64520051451360658, guid: 1bbb91c8d96cb2446a07151ce95d1f0f,
+        type: 2}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1bbb91c8d96cb2446a07151ce95d1f0f, type: 2}
   m_IsPrefabParent: 0
@@ -2859,10 +2839,6 @@ Prefab:
     - target: {fileID: 4000013164392252, guid: 1c8776a0b36cd9a4f813bf0d2d59d109, type: 2}
       propertyPath: m_RootOrder
       value: 46
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000012235373026, guid: 1c8776a0b36cd9a4f813bf0d2d59d109, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1c8776a0b36cd9a4f813bf0d2d59d109, type: 2}
@@ -3233,10 +3209,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 39
       objectReference: {fileID: 0}
-    - target: {fileID: 1000012003911730, guid: 0adfa404918648e42a1fb073ef9010d3, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0adfa404918648e42a1fb073ef9010d3, type: 2}
   m_IsPrefabParent: 0
@@ -3283,10 +3255,6 @@ Prefab:
     - target: {fileID: 4000014221411770, guid: 9c0476b14d8c518499bcc0adff155ff8, type: 2}
       propertyPath: m_RootOrder
       value: 37
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000013984154124, guid: 9c0476b14d8c518499bcc0adff155ff8, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9c0476b14d8c518499bcc0adff155ff8, type: 2}
@@ -3844,10 +3812,6 @@ Prefab:
       propertyPath: m_Name
       value: Pumpkin_Plant (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 1000010824186820, guid: 30319199574ca3644bf3898bb5cac486, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 30319199574ca3644bf3898bb5cac486, type: 2}
   m_IsPrefabParent: 0
@@ -3953,10 +3917,6 @@ Prefab:
       propertyPath: m_Name
       value: Eggplant_Plant (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 1000012171661116, guid: 97c7589824dbbb24cbc2b95a9345ebb1, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 97c7589824dbbb24cbc2b95a9345ebb1, type: 2}
   m_IsPrefabParent: 0
@@ -4003,10 +3963,6 @@ Prefab:
     - target: {fileID: 4000011252979702, guid: ad3b2f45225bb0c4f8f80eacd5111af1, type: 2}
       propertyPath: m_RootOrder
       value: 38
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000010004241426, guid: ad3b2f45225bb0c4f8f80eacd5111af1, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ad3b2f45225bb0c4f8f80eacd5111af1, type: 2}
@@ -4385,10 +4341,6 @@ Prefab:
       propertyPath: m_Name
       value: Eggplant_Fruit (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 1000011817031034, guid: 92417dd2b68fd6147a711fb2af4275b1, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 92417dd2b68fd6147a711fb2af4275b1, type: 2}
   m_IsPrefabParent: 0
@@ -4592,22 +4544,6 @@ Prefab:
     - target: {fileID: 1000012087161104, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}
       propertyPath: m_Name
       value: Corn_Fruit (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000010845709248, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 90
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000010845709248, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000010845709248, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000012087161104, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}
-      propertyPath: m_StaticEditorFlags
-      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8490d29919917de4ca0c5297d93090d7, type: 2}

@@ -128,9 +128,9 @@ public class Water : MonoBehaviour
 
         mesh = new Mesh
         {
-            vertices = curr
+            vertices = curr,
+            triangles = indices
         };
-        mesh.SetIndices(indices, MeshTopology.Triangles, 0);
         mesh.RecalculateNormals();
 
         gameObject.AddComponent<MeshFilter>().mesh = mesh;

@@ -46,8 +46,10 @@ public class CameraLook : MonoBehaviour
 
         if (player.isLock)
         {
-            var direction = (player.currEnemy.position - rig.position).normalized;
-            transform.position = rig.position + new Vector3(direction.x * z, 0, direction.z * z);
+            var direction = player.currEnemy.position - rig.position;
+            direction.y = -0.2f;
+            direction = direction.normalized;
+            transform.position = rig.position + direction * z;
             transform.LookAt(player.currEnemy);
         }
         else
@@ -77,7 +79,7 @@ public class CameraLook : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(rig.position, transform.position - rig.position, out hit, zMax))
         {
-            if (hit.collider.gameObject.tag != Tags.MainCamera)
+            if (!hit.collider.gameObject.CompareTag(Tags.MainCamera))
             {
                 transform.position = hit.point;
             }

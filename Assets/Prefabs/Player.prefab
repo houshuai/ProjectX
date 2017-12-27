@@ -208,6 +208,7 @@ GameObject:
   - component: {fileID: 114209001213052080}
   - component: {fileID: 114762458424947496}
   - component: {fileID: 82060778030480822}
+  - component: {fileID: 114637851012966550}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -2797,12 +2798,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1095166236532776}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26.35, y: 0, z: 7.17}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 40.81, y: 0, z: 32.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 4508079431140306}
   - {fileID: 4508925895899750}
+  - {fileID: 4508079431140306}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
@@ -2914,7 +2915,7 @@ Transform:
   - {fileID: 4778052275187136}
   - {fileID: 4856121209854198}
   m_Father: {fileID: 4459203699165252}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4508925895899750
 Transform:
@@ -2927,7 +2928,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4459203699165252}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 22.271002, y: 0, z: 0}
 --- !u!4 &4513749701772508
 Transform:
@@ -4089,6 +4090,7 @@ MonoBehaviour:
   crouchSpeed: 1
   turnSpeed: 5
   jumpSpeed: 6
+  sideSpeed: 10
   audioSource: {fileID: 82227712664518508}
   runClip: {fileID: 8300000, guid: 273506faca677e344a51e80e95a96e2a, type: 3}
   jumpClip: {fileID: 8300000, guid: 39deb3d14e5bc7249b09a75350a5f8c1, type: 3}
@@ -4096,6 +4098,8 @@ MonoBehaviour:
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
   isInGrass: 0
   isCrouch: 0
+  isLock: 0
+  currEnemy: {fileID: 0}
   anim: {fileID: 0}
 --- !u!114 &114612008175684350
 MonoBehaviour:
@@ -4118,6 +4122,18 @@ MonoBehaviour:
   attackClip: {fileID: 8300000, guid: f6c55b892be48964a84b76a6f23036d1, type: 3}
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
   anim: {fileID: 0}
+--- !u!114 &114637851012966550
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1095166236532776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68a15e599100bc94fb853c05d365c869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: 7f23c67f81597cf46a8315cbf7db581e, type: 2}
 --- !u!114 &114762458424947496
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4130,7 +4146,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: 12
-  saveData: {fileID: 11400000, guid: d746b88eface1da4a8e026cc994e15c3, type: 2}
+  inventory:
+    current: 
+    itemList: []
 --- !u!136 &136990766078608928
 CapsuleCollider:
   m_ObjectHideFlags: 1
