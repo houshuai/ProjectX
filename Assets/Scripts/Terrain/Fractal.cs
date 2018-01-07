@@ -15,10 +15,10 @@ public class Fractal : MonoBehaviour
         var result = new float[count, count];
         float h = 2;
 
-        result[0, 0] = Random.value;
-        result[count - 1, 0] = Random.value;
-        result[0, count - 1] = Random.value;
-        result[count - 1, count - 1] = Random.value;
+        result[0, 0] = (Random.value - 0.5f) * h;
+        result[count - 1, 0] = (Random.value - 0.5f) * h;
+        result[0, count - 1] = (Random.value - 0.5f) * h;
+        result[count - 1, count - 1] = (Random.value - 0.5f) * h;
 
         int step = (count - 1) / 2; //每个循环中“正方形”阶段的正方形边长的网格步数
         while (step > 0)

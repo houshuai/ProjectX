@@ -1,83 +1,75 @@
-﻿Shader "Unlit/Water"
+﻿Shader "Custom/Water"
 {
 	Properties
 	{
 		_ReflectTex ("Reflect Texture", 2D) = "white" {}
 		_SkyBox ("Sky Box", Cube) = "blue"
 		_RefractTex ("Refract Texture", 2D) = "white" {}
-		_Smooth ("Specular Smooth", float) = 1
+		_Glossiness ("Smoothness", Range(0,1)) = 0.5
+		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" "Queue" = "Transparent"}
 		LOD 100
 
-		Pass
+		CGPROGRAM
+		// Physically based Standard lighting model, and enable shadows on all light types
+		#pragma surface surf Standard fullforwardshadows
+
+		// Use shader model 4.0 target, to get nicer looking lighting
+		#pragma target 4.0
+		#pragma multi_compile _REF _NOREF
+		
+		struct Input
 		{
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			
-			#include "UnityCG.cginc"
-			#include "UnityPBSLighting.cginc"
+			float3 viewDir;
+			float3 worldNormal;
+			float4 screenPos;
+		};
 
-			struct appdata
-			{
-				float4 vertex : POSITION;
-				float3 normal : NORMAL;
-			};
-
-			struct v2f
-			{
-				float3 worldNormal : TEXCOORD0;
-				float4 vertex : SV_POSITION;
-				float4 screenPos : TEXCOORD1;
-				float3 viewDir : TEXCOORD2;
-			};
-
-			sampler2D _ReflectTex;
-			samplerCUBE _SkyBox;
-			sampler2D _RefractTex;
-			float _Smooth;
-			
-			v2f vert (appdata v)
-			{
-				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.worldNormal = UnityObjectToWorldNormal(v.normal);
-				o.screenPos = ComputeScreenPos(o.vertex);
-				o.viewDir = normalize(WorldSpaceViewDir(v.vertex));
-				return o;
-			}
-
-			inline float FastFresnel(float3 i, float3 h, float f0) 
-			{
-				float cosin = saturate(1 - dot(i, h));
-				float i2 = cosin * cosin, i4 = i2 * i2;
-				return f0 + (1 - f0) * (cosin * i4);
-			}
-			
-			fixed4 frag (v2f i) : SV_Target
-			{
-				fixed4 col = fixed4(1,1,1,1);
-				float2 offsets = i.worldNormal.xz * i.viewDir.y;
-				fixed4 reflectCol = tex2D(_ReflectTex, i.screenPos.xy / i.screenPos.w + offsets);
-				float3 reflectUV = reflect(-i.viewDir, i.worldNormal);
-				fixed4 sky = texCUBE(_SkyBox, reflectUV);
-				reflectCol.xyz = lerp(sky.xyz, reflectCol.xyz, reflectCol.a);
-				fixed4 refractCol = tex2D(_RefractTex, i.screenPos.xy / i.screenPos.w + offsets);
-
-				//float fresnel = FastFresnel(i.viewDir, i.worldNormal, 0.02f);
-				float fresnel = 0.55 + 0.5*(pow(clamp(1 - dot(i.viewDir, i.worldNormal), 0.0f, 1.0f), 2));
-				col.xyz = lerp(refractCol.xyz, reflectCol.xyz, fresnel);
-
-				float3 halfVec = normalize(_WorldSpaceLightPos0.xyz + i.viewDir);
-				fixed3 specular = _LightColor0 * pow(DotClamped(halfVec, i.worldNormal), _Smooth*100);
-				col.xyz = col.xyz + specular;
-				return col;
-			}
-			ENDCG
+		sampler2D _ReflectTex;
+		samplerCUBE _SkyBox;
+		sampler2D _RefractTex;
+		half _Glossiness;
+		half _Metallic;
+		
+		inline float FastFresnel(float3 i, float3 h, float f0) 
+		{
+			float cosin = saturate(1 - dot(i, h));
+			float i2 = cosin * cosin, i4 = i2 * i2;
+			return f0 + (1 - f0) * (cosin * i4);
 		}
+		
+		void surf (Input IN, inout SurfaceOutputStandard o) 
+		{
+		#ifdef _REF
+			fixed3 col = fixed3(1,1,1);
+			float2 offsets = IN.worldNormal.xz * IN.viewDir.y;
+			fixed4 reflectCol = tex2D(_ReflectTex, IN.screenPos.xy / IN.screenPos.w + offsets);
 
+			float3 skyUV = reflect(-IN.viewDir, IN.worldNormal);
+			fixed4 sky = texCUBE(_SkyBox, skyUV);
+			reflectCol.xyz = lerp(sky.xyz, reflectCol.xyz, reflectCol.a);
+
+			fixed4 refractCol = tex2D(_RefractTex, IN.screenPos.xy / IN.screenPos.w + offsets);
+
+			//float fresnel = FastFresnel(i.viewDir, i.worldNormal, 0.02f);
+			float fresnel = 0.55 + 0.5*(pow(clamp(1 - dot(IN.viewDir, IN.worldNormal), 0.0f, 1.0f), 2));
+			col.xyz = lerp(refractCol.xyz, reflectCol.xyz, fresnel);
+
+			o.Albedo = col;
+		#else
+			float3 skyUV = reflect(-IN.viewDir, IN.worldNormal);
+			o.Albedo = texCUBE(_SkyBox, skyUV);
+		#endif
+			// Metallic and smoothness come from slider variables
+			o.Metallic = _Metallic;
+			o.Smoothness = _Glossiness;
+			o.Alpha = 1;
+		}
+		ENDCG
 	}
+	FallBack "Custom/WaterNoRef"
 }
+

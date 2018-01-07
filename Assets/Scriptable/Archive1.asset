@@ -13,7 +13,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isNew: 0
   title: test1
-  currScene: Scene1
+  currScene: Scene3
   inventory:
     current: jersey
     itemList:
