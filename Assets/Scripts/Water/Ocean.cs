@@ -102,7 +102,7 @@ public class Ocean : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //GerstnerWave();
+        GerstnerWave();
     }
 }
 

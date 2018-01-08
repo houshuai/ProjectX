@@ -25,28 +25,19 @@ public class TerrainGenerator : MonoBehaviour
     public float thirdHeight = 10;
 
     private SimplexNoise noise;
-    private int vertexCount;
-    private float xTick, yTick, u, v;
     private float[,] heights;                 //0 1 2
     private float[,] moisture;                //3 4 5
     private Transform player;                 //6 7 8
     private Rect[] rects = new Rect[9];       //0-8 is leftTop top rightTop left center right leftBottom bottom rightBottom
     private List<Terrain> allTerrain;
 
-    private Mesh waterMesh;
-
     private void Start()
     {
         noise = new SimplexNoise(scale, persistence, octave, pow, seed);
-        vertexCount = xCount * yCount;
-        xTick = xLength / (xCount - 1);
-        yTick = yLength / (yCount - 1);
-        u = 1.0f / (xCount - 1);
-        v = 1.0f / (yCount - 1);
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
         player = GameObject.FindGameObjectWithTag(Tags.Player).transform;
-        player.position = new Vector3(player.position.x, 
+        player.position = new Vector3(player.position.x,
             noise.Get2DPow(player.position.x, player.position.z) * (maxHeight - minHeight), player.position.z);
 
         allTerrain = new List<Terrain>();
@@ -64,7 +55,6 @@ public class TerrainGenerator : MonoBehaviour
             GenerateTerrain(rect);
         }
 
-        waterMesh = GetWaterMesh();
         var center = FindTerrain(rects[4]);
         GenerateWater(center.terrainObject.GetComponent<MeshFilter>().mesh.vertices);
     }
@@ -119,21 +109,17 @@ public class TerrainGenerator : MonoBehaviour
     /// </summary>
     private Terrain GenerateTerrain(Rect rect)
     {
+        int vertexCount = xCount * yCount;
+        float xTick = xLength / (xCount - 1);
+        float yTick = yLength / (yCount - 1);
+        float u = 1.0f / (xCount - 1);
+        float v = 1.0f / (yCount - 1);
         var uvs = new Vector2[vertexCount];
         int index = 0;
-        for (int j = 0; j < yCount; j++)
-        {
-            for (int i = 0; i < xCount; i++)
-            {
-                uvs[index++] = new Vector2(i * u, j * v);
-            }
-        }
 
         index = 0;
         var vertices = new Vector3[vertexCount];
         float range = maxHeight - minHeight;
-        //var heights = Fractal.RandomMap(n, smooth);
-        //EdgeJoint(heights, rect, range);
         for (int j = 0; j < yCount; j++)
         {
             for (int i = 0; i < xCount; i++)
@@ -143,31 +129,16 @@ public class TerrainGenerator : MonoBehaviour
                 var height = noise.Get2DPow(rect.x + x, rect.y + y) * range;
                 heights[i, j] = height;
                 moisture[i, j] = noise.Get2D(rect.x + x, rect.y + y);
-                vertices[index++] = new Vector3(x, height, y);
-            }
-        }
-
-        index = 0;
-        var indices = new int[(xCount - 1) * (yCount - 1) * 6];
-        for (int j = 0; j < yCount - 1; j++)
-        {
-            for (int i = 0; i < xCount - 1; i++)
-            {
-                int self = i + (j * xCount);
-                int next = i + ((j + 1) * xCount);
-                indices[index++] = self;
-                indices[index++] = next;
-                indices[index++] = next + 1;
-                indices[index++] = self;
-                indices[index++] = next + 1;
-                indices[index++] = self + 1;
+                vertices[index] = new Vector3(x, height, y);
+                uvs[index] = new Vector2(i * u, j * v);
+                index++;
             }
         }
 
         var mesh = new Mesh()
         {
             vertices = vertices,
-            triangles = indices,
+            triangles = GetIndices(xCount, yCount),
             uv = uvs
         };
         mesh.RecalculateNormals();
@@ -355,33 +326,64 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    private Mesh GetWaterMesh()
+    private int[] GetIndices(int xNum, int yNum)
     {
-        var vertices = new Vector3[]
+        int index = 0;
+        var indices = new int[(xNum - 1) * (yNum - 1) * 6];
+        for (int j = 0; j < yNum - 1; j++)
         {
-            new Vector3(0, 0, 0),
-            new Vector3(1, 0, 0),
-            new Vector3(0, 0, 1),
-            new Vector3(1, 0, 1),
-        };
-        var indices = new int[]
+            for (int i = 0; i < xNum - 1; i++)
+            {
+                int self = i + (j * xNum);
+                int next = i + ((j + 1) * xNum);
+                indices[index++] = self;
+                indices[index++] = next;
+                indices[index++] = next + 1;
+                indices[index++] = self;
+                indices[index++] = next + 1;
+                indices[index++] = self + 1;
+            }
+        }
+
+        return indices;
+    }
+
+    private Mesh GetWaterMesh(int xNum, int yNum, float xLen, float yLen)
+    {
+        var vertexCount = xNum * yNum;
+        var xTick = xLen / (xNum - 1);
+        var yTick = yLen / (yNum - 1);
+        var u = 1.0f / (xNum - 1);
+        var v = 1.0f / (yNum - 1);
+
+        var vertices = new Vector3[vertexCount];
+        var uv = new Vector2[vertexCount];
+
+        int index = 0;
+        for (int j = 0; j < yNum; j++)
         {
-            0, 2, 3,
-            0, 3, 1,
-        };
+            for (int i = 0; i < xNum; i++)
+            {
+                vertices[index] = new Vector3(i * xTick, 0, j * yTick);
+                uv[index] = new Vector2(i * u, j * v);
+                index++;
+            }
+        }
 
         var mesh = new Mesh()
         {
             vertices = vertices,
-            triangles = indices,
+            uv = uv,
+            triangles = GetIndices(xNum, yNum),
         };
         mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
         return mesh;
     }
 
     private void GenerateWater(Vector3[] terrainVertices)
     {
+        float xTick = xLength / (xCount - 1);
+        float yTick = yLength / (yCount - 1);
         var isSearched = new bool[xCount, yCount];
 
         for (int i = 0; i < xCount; i++)
@@ -425,11 +427,14 @@ public class TerrainGenerator : MonoBehaviour
 
                     if (rect.width > 0 && rect.height > 0)
                     {
+                        float xLen = (rect.width + 2) * xTick;
+                        float yLen = (rect.height + 2) * yTick;
+                        int xNum = Mathf.FloorToInt(xLen);
+                        int yNum = Mathf.FloorToInt(yLen);
                         var waterObject = new GameObject("Water");
-                        waterObject.AddComponent<MeshFilter>().mesh = waterMesh;
+                        waterObject.AddComponent<MeshFilter>().mesh = GetWaterMesh(xNum, yNum, xLen, yLen);
                         waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
                         waterObject.transform.position = new Vector3((rect.x - 1) * xTick, thirdHeight, (rect.y - 1) * yTick);
-                        waterObject.transform.localScale = new Vector3((rect.width + 2) * xTick, 1, (rect.height + 2) * yTick);
                     }
 
                 }
