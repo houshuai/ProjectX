@@ -56,7 +56,7 @@ public class TerrainGenerator : MonoBehaviour
         }
 
         var center = FindTerrain(rects[4]);
-        GenerateWater(center.terrainObject.GetComponent<MeshFilter>().mesh.vertices);
+        GenerateWater(center.terrainObject.GetComponent<MeshFilter>().mesh);
     }
 
     private void Update()
@@ -135,10 +135,27 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
 
+        index = 0;
+        var indices = new int[(xCount - 1) * (yCount - 1) * 6];
+        for (int j = 0; j < yCount - 1; j++)
+        {
+            for (int i = 0; i < xCount - 1; i++)
+            {
+                int self = i + (j * xCount);
+                int next = i + ((j + 1) * xCount);
+                indices[index++] = self;
+                indices[index++] = next;
+                indices[index++] = next + 1;
+                indices[index++] = self;
+                indices[index++] = next + 1;
+                indices[index++] = self + 1;
+            }
+        }
+
         var mesh = new Mesh()
         {
             vertices = vertices,
-            triangles = GetIndices(xCount, yCount),
+            triangles = indices,
             uv = uvs
         };
         mesh.RecalculateNormals();
@@ -325,124 +342,53 @@ public class TerrainGenerator : MonoBehaviour
 
         }
     }
-
-    private int[] GetIndices(int xNum, int yNum)
+    
+    private void GenerateWater(Mesh terrainMesh)
     {
+        var terrainVertices = terrainMesh.vertices;
+        var terrainIndices = terrainMesh.triangles;
+        int vertexCount = (xCount - 1) * (yCount - 1) * 6;
+
+        var vertexList = new List<Vector3>();
+        var indexList = new List<int>();
+        
         int index = 0;
-        var indices = new int[(xNum - 1) * (yNum - 1) * 6];
-        for (int j = 0; j < yNum - 1; j++)
+        for (int i = 0; i < vertexCount; i += 3)
         {
-            for (int i = 0; i < xNum - 1; i++)
+            int index1 = terrainIndices[i];
+            int index2 = terrainIndices[i + 1];
+            int index3 = terrainIndices[i + 2];
+            var vertex1 = terrainVertices[index1];
+            var vertex2 = terrainVertices[index2];
+            var vertex3 = terrainVertices[index3];
+            if (vertex1.y < thirdHeight ||
+                vertex2.y < thirdHeight ||
+                vertex3.y < thirdHeight)
             {
-                int self = i + (j * xNum);
-                int next = i + ((j + 1) * xNum);
-                indices[index++] = self;
-                indices[index++] = next;
-                indices[index++] = next + 1;
-                indices[index++] = self;
-                indices[index++] = next + 1;
-                indices[index++] = self + 1;
+                vertexList.Add(new Vector3(vertex1.x, 0, vertex1.z));
+                vertexList.Add(new Vector3(vertex2.x, 0, vertex2.z));
+                vertexList.Add(new Vector3(vertex3.x, 0, vertex3.z));
+                indexList.Add(index++);
+                indexList.Add(index++);
+                indexList.Add(index++);
             }
         }
 
-        return indices;
-    }
-
-    private Mesh GetWaterMesh(int xNum, int yNum, float xLen, float yLen)
-    {
-        var vertexCount = xNum * yNum;
-        var xTick = xLen / (xNum - 1);
-        var yTick = yLen / (yNum - 1);
-        var u = 1.0f / (xNum - 1);
-        var v = 1.0f / (yNum - 1);
-
-        var vertices = new Vector3[vertexCount];
-        var uv = new Vector2[vertexCount];
-
-        int index = 0;
-        for (int j = 0; j < yNum; j++)
-        {
-            for (int i = 0; i < xNum; i++)
-            {
-                vertices[index] = new Vector3(i * xTick, 0, j * yTick);
-                uv[index] = new Vector2(i * u, j * v);
-                index++;
-            }
-        }
+        var vertices = vertexList.ToArray();
+        var indices = indexList.ToArray();
 
         var mesh = new Mesh()
         {
             vertices = vertices,
-            uv = uv,
-            triangles = GetIndices(xNum, yNum),
+            triangles = indices,
         };
-        mesh.RecalculateNormals();
-        return mesh;
+
+        var waterObject = new GameObject("Water");
+        waterObject.AddComponent<MeshFilter>().mesh = mesh;
+        waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
+        waterObject.transform.position = new Vector3(0, thirdHeight,0);
     }
-
-    private void GenerateWater(Vector3[] terrainVertices)
-    {
-        float xTick = xLength / (xCount - 1);
-        float yTick = yLength / (yCount - 1);
-        var isSearched = new bool[xCount, yCount];
-
-        for (int i = 0; i < xCount; i++)
-        {
-            for (int j = 0; j < yCount; j++)
-            {
-                if (terrainVertices[i + xCount * j].y < thirdHeight && !isSearched[i, j])
-                {
-                    var rect = new Rect(i, j, 0, 0);
-                    var queue = new Queue<Point2Int>();
-                    queue.Enqueue(new Point2Int(i, j));
-                    isSearched[i, j] = true;
-                    while (queue.Count > 0)
-                    {
-                        var point = queue.Dequeue();
-                        rect.xMin = rect.xMin < point.x ? rect.xMin : point.x;
-                        rect.yMin = rect.yMin < point.y ? rect.yMin : point.y;
-                        rect.xMax = rect.xMax > point.x ? rect.xMax : point.x;
-                        rect.yMax = rect.yMax > point.y ? rect.yMax : point.y;
-                        if (point.x > 0 && !isSearched[point.x - 1, point.y] && terrainVertices[point.x - 1 + xCount * point.y].y < thirdHeight)
-                        {
-                            queue.Enqueue(new Point2Int(point.x - 1, point.y));
-                            isSearched[point.x - 1, point.y] = true;
-                        }
-                        if (point.x < xCount - 1 && !isSearched[point.x + 1, point.y] && terrainVertices[point.x + 1 + xCount * point.y].y < thirdHeight)
-                        {
-                            queue.Enqueue(new Point2Int(point.x + 1, point.y));
-                            isSearched[point.x + 1, point.y] = true;
-                        }
-                        if (point.y > 0 && !isSearched[point.x, point.y - 1] && terrainVertices[point.x + xCount * (point.y - 1)].y < thirdHeight)
-                        {
-                            queue.Enqueue(new Point2Int(point.x, point.y - 1));
-                            isSearched[point.x, point.y - 1] = true;
-                        }
-                        if (point.y < yCount - 1 && !isSearched[point.x, point.y + 1] && terrainVertices[point.x + xCount * (point.y + 1)].y < thirdHeight)
-                        {
-                            queue.Enqueue(new Point2Int(point.x, point.y + 1));
-                            isSearched[point.x, point.y + 1] = true;
-                        }
-                    }
-
-                    if (rect.width > 0 && rect.height > 0)
-                    {
-                        float xLen = (rect.width + 2) * xTick;
-                        float yLen = (rect.height + 2) * yTick;
-                        int xNum = Mathf.FloorToInt(xLen);
-                        int yNum = Mathf.FloorToInt(yLen);
-                        var waterObject = new GameObject("Water");
-                        waterObject.AddComponent<MeshFilter>().mesh = GetWaterMesh(xNum, yNum, xLen, yLen);
-                        waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
-                        waterObject.transform.position = new Vector3((rect.x - 1) * xTick, thirdHeight, (rect.y - 1) * yTick);
-                    }
-
-                }
-            }
-        }
-
-
-    }
+    
 }
 
 class Terrain
@@ -498,4 +444,3 @@ internal struct Point2Int
         return false;
     }
 }
-
