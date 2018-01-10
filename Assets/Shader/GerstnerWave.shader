@@ -7,6 +7,8 @@
 		_Dx ("Direction x", Vector) = (1,2,3,4)
 		_Dz ("Direction z", Vector) = (1,2,3,4)
 		_L ("Wave Length", Vector) = (1,2,3,4)
+		_Q ("Steepness", Vector) = (0.1, 0.2, 0.3, 0.4)
+		_Tess ("Tessellation", float) = 12
 		//_SkyBox ("Sky Box", Cube) = "blue" {}
 		_MainTex ("Tex", 2D) = "blue" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
@@ -19,10 +21,12 @@
 		
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard vertex:vert
+		#pragma surface surf Standard fullforwardshadows vertex:vert tessellate:tess
 
-		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 3.0
+		// Use shader model 5.0 target, to get nicer looking lighting
+		#pragma target 5.0           
+		#include "Tessellation.cginc"
+
 
 		struct Input 
 		{
@@ -32,10 +36,16 @@
 		};
 		
 		float4 _A, _S, _Dx, _Dz, _L, _Q;
+		float _Tess;
 		//samplerCUBE _SkyBox;
 		sampler2D _MainTex;
 		half _Glossiness;
 		half _Metallic;
+
+		float4 tess(appdata_full v0, appdata_full v1, appdata_full v2)
+		{
+			return UnityDistanceBasedTess(v0.vertex, v1.vertex, v2.vertex, 10, 50, _Tess);
+		}
 
 		void vert (inout appdata_full v) 
 		{
@@ -44,7 +54,7 @@
 			float4 w = 2 * PI * G / _L;
 			float4 psi = _S * w;
 			float x=0,y=0,z=0;
-			float4 q = float4(1.0f / w[0] / _A[0],1.0f / w[1] / _A[1],1.0f / w[2] / _A[2],1.0f / w[3] / _A[3]);
+			//float4 q = float4(1.5f / w[0] / _A[0],1.5f / w[1] / _A[1],1.5f / w[2] / _A[2],1.5f / w[3] / _A[3]);
 			for(int i = 0; i < 4; i++)
 			{
 				float2 D = float2(_Dx[i], _Dz[i]);
@@ -53,8 +63,8 @@
 				float sinp, cosp;
 				sincos(phase, sinp, cosp);
 				//float qq = 1.0f / w[i] / _A[i];
-				x += q[i] * _A[i] * D.x * cosp;
-				z += q[i] * _A[i] * D.y * cosp;
+				x += _Q[i] * _A[i] * D.x * cosp;
+				z += _Q[i] * _A[i] * D.y * cosp;
 				y += _A[i] * sinp;
 			}
 			
@@ -72,7 +82,7 @@
 				sincos(phase, sinp, cosp);
 				x -= w[i] * D.x * _A[i] * cosp;
 				z -= w[i] * D.y * _A[i] * cosp;
-				y -= q[i] * w[i] * _A[i] * sinp;
+				y -= _Q[i] * w[i] * _A[i] * sinp;
 			}
 
 			v.normal.x = x;

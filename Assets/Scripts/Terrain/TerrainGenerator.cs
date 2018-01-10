@@ -7,6 +7,7 @@ public class TerrainGenerator : MonoBehaviour
 {
     public Material material;
     public Material waterMat;
+    public GameObject[] trees;
     public float xLength = 100;
     public float yLength = 50;
     public int xCount = 20;
@@ -23,6 +24,8 @@ public class TerrainGenerator : MonoBehaviour
     public float firstHeight = 30;
     public float secondHeight = 20;
     public float thirdHeight = 10;
+    public float tree1Random = 0.98f;
+    public float tree2Random = 0.93f;
 
     private SimplexNoise noise;
     private float[,] heights;                 //0 1 2
@@ -31,8 +34,13 @@ public class TerrainGenerator : MonoBehaviour
     private Rect[] rects = new Rect[9];       //0-8 is leftTop top rightTop left center right leftBottom bottom rightBottom
     private List<Terrain> allTerrain;
 
+    private float xTick;
+    private float yTick;
+
     private void Start()
     {
+        xTick = xLength / (xCount - 1);
+        yTick = yLength / (yCount - 1);
         noise = new SimplexNoise(scale, persistence, octave, pow, seed);
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
@@ -55,8 +63,6 @@ public class TerrainGenerator : MonoBehaviour
             GenerateTerrain(rect);
         }
 
-        var center = FindTerrain(rects[4]);
-        GenerateWater(center.terrainObject.GetComponent<MeshFilter>().mesh);
     }
 
     private void Update()
@@ -110,8 +116,6 @@ public class TerrainGenerator : MonoBehaviour
     private Terrain GenerateTerrain(Rect rect)
     {
         int vertexCount = xCount * yCount;
-        float xTick = xLength / (xCount - 1);
-        float yTick = yLength / (yCount - 1);
         float u = 1.0f / (xCount - 1);
         float v = 1.0f / (yCount - 1);
         var uvs = new Vector2[vertexCount];
@@ -164,14 +168,22 @@ public class TerrainGenerator : MonoBehaviour
         terrainObject.AddComponent<MeshFilter>().mesh = mesh;
         var renderer = terrainObject.AddComponent<MeshRenderer>();
         renderer.material = material;
-        renderer.material.SetTexture("_Mask", GetMaskTexture(heights));
+        var texture = GetMaskTexture();
+        renderer.material.SetTexture("_Mask", texture);
         terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
+
+        var waterObject = GenerateWater(mesh);
+        waterObject.transform.position = new Vector3(rect.x, thirdHeight, rect.y);
+
+        var treeObjects = SetTree(rect, texture);
 
         var terrain = new Terrain()
         {
             rect = rect,
-            terrainObject = terrainObject
+            terrainObject = terrainObject,
+            waterObject = waterObject,
+            treeObjects = treeObjects,
         };
         allTerrain.Add(terrain);
 
@@ -259,7 +271,7 @@ public class TerrainGenerator : MonoBehaviour
     //    }
     //}
 
-    private Texture2D GetMaskTexture(float[,] heightMap)
+    private Texture2D GetMaskTexture()
     {
         var texture = new Texture2D(xCount, yCount, TextureFormat.ARGB32, false);
         var red = new Color32(255, 0, 0, 0);
@@ -270,11 +282,11 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int j = 0; j < yCount; j++)
             {
-                if (heightMap[i, j] > firstHeight)
+                if (heights[i, j] > firstHeight)
                 {
                     texture.SetPixel(i, j, red);
                 }
-                else if (heightMap[i, j] > secondHeight)
+                else if (heights[i, j] > secondHeight)
                 {
                     if (moisture[i, j] > 0.7f)
                     {
@@ -286,7 +298,7 @@ public class TerrainGenerator : MonoBehaviour
                     }
 
                 }
-                else if (heightMap[i, j] > thirdHeight)
+                else if (heights[i, j] > thirdHeight)
                 {
                     if (moisture[i, j] > 0.4f)
                     {
@@ -336,14 +348,21 @@ public class TerrainGenerator : MonoBehaviour
             }
             if (!exist)
             {
-                Destroy(allTerrain[i].terrainObject);
+                var terrain = allTerrain[i];
+                Destroy(terrain.terrainObject);
+                Destroy(terrain.waterObject);
+                for (int j = terrain.treeObjects.Count - 1; j >= 0; j--)
+                {
+                    Destroy(terrain.treeObjects[j]);
+                }
+
                 allTerrain.RemoveAt(i);
             }
 
         }
     }
-    
-    private void GenerateWater(Mesh terrainMesh)
+
+    private GameObject GenerateWater(Mesh terrainMesh)
     {
         var terrainVertices = terrainMesh.vertices;
         var terrainIndices = terrainMesh.triangles;
@@ -351,7 +370,7 @@ public class TerrainGenerator : MonoBehaviour
 
         var vertexList = new List<Vector3>();
         var indexList = new List<int>();
-        
+
         int index = 0;
         for (int i = 0; i < vertexCount; i += 3)
         {
@@ -386,15 +405,52 @@ public class TerrainGenerator : MonoBehaviour
         var waterObject = new GameObject("Water");
         waterObject.AddComponent<MeshFilter>().mesh = mesh;
         waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
-        waterObject.transform.position = new Vector3(0, thirdHeight,0);
+
+        return waterObject;
     }
-    
+
+    private List<GameObject> SetTree(Rect rect, Texture2D texture)
+    {
+        var treeList = new List<GameObject>();
+        var red = new Color32(255, 0, 0, 0);
+        var green = new Color32(0, 255, 0, 0);
+        var blue = new Color32(0, 0, 255, 0);
+        var alpha = new Color32(0, 0, 0, 255);
+
+        for (int j = 0; j < yCount; j++)
+        {
+            for (int i = 0; i < xCount; i++)
+            {
+                var height = heights[i, j];
+                var random = height - Mathf.Floor(height);
+                var color = texture.GetPixel(i, j);
+                GameObject tree = null;
+                if (color == blue && random > tree1Random)
+                {
+                    tree = Instantiate(trees[0]);
+                }
+                else if (color == green && random > tree2Random)
+                {
+                    tree = Instantiate(trees[1]);
+                }
+
+                if (tree != null)
+                {
+                    tree.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+                    treeList.Add(tree);
+                }
+            }
+        }
+        return treeList;
+    }
 }
 
 class Terrain
 {
     public Rect rect;
     public GameObject terrainObject;
+    public GameObject waterObject;
+    public List<GameObject> treeObjects;
 }
 
 internal struct Point2Int
