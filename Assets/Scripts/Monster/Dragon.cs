@@ -6,6 +6,7 @@ public class Dragon : Monster
 {
     public enum FSMState
     {
+        Idle,
         Chase,
         FlyChase,
         Attack,
@@ -20,6 +21,7 @@ public class Dragon : Monster
     public float glideSpeed = 5f;
     public float flySpeed = 8f;
     public float flyTime = 50f;
+    public float chaseDistance = 30f;
     public float nearby = 10f;
     public float flameRange = 15f;
     public float attackRange = 5f;
@@ -40,11 +42,13 @@ public class Dragon : Monster
 
     private FSMState currState;
     private float currSpeed;
-    public float flyTimer;
+    private float flyTimer;
     private float AttackTimer;
     private Transform player;
     private bool firstFly, secondFly;
     private bool playerInBox;
+    private LayerMask terrainLayer;
+    private LayerMask obstacleLayer;
     private WaitForSeconds waitForAttack;
     private WaitForSeconds waitClawAttack1;
     private WaitForSeconds waitClawAttack2;
@@ -56,11 +60,13 @@ public class Dragon : Monster
         health = totalHealth;
         rb = GetComponent<Rigidbody>();
 
-        currState = FSMState.Chase;
+        currState = FSMState.Idle;
         dustParticle.Stop();
         fireParticle.Stop();
         var playerObject = GameObject.FindGameObjectWithTag(Tags.Player);
         player = playerObject.transform;
+        terrainLayer = 1 << LayerMask.NameToLayer("Terrain");
+        obstacleLayer = ~(terrainLayer | (1 << LayerMask.NameToLayer("Player")));
 
         waitForAttack = new WaitForSeconds(0.32f);
         waitClawAttack1 = new WaitForSeconds(0.5f);
@@ -76,6 +82,9 @@ public class Dragon : Monster
 
         switch (currState)
         {
+            case FSMState.Idle:
+                UpdateIdle();
+                break;
             case FSMState.Chase:
                 UpdateChase();
                 break;
@@ -97,6 +106,7 @@ public class Dragon : Monster
             default:
                 break;
         }
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -115,6 +125,17 @@ public class Dragon : Monster
         }
     }
 
+    private void UpdateIdle()
+    {
+        if (Vector3.Distance(player.position, transform.position) < chaseDistance)
+        {
+            currState = FSMState.Chase;
+            return;
+        }
+
+
+    }
+
     private void UpdateChase()
     {
         var random = Random.value;
@@ -122,7 +143,8 @@ public class Dragon : Monster
         var pos = new Vector2(transform.position.x, transform.position.z);
         var playerPos = new Vector2(player.position.x, player.position.z);
         var distance = Vector2.Distance(pos, playerPos);
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), playerPos - pos);
+        var vector = playerPos - pos;
+        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
 
         if (distance < attackRange && angle < 20)
         {
@@ -145,6 +167,7 @@ public class Dragon : Monster
         {
             currState = FSMState.Attack;
             anim.SetTrigger(Hashes.FlameAttackTrigger);
+            return;
         }
 
         float desiredSpeed = 0;
@@ -157,7 +180,15 @@ public class Dragon : Monster
             desiredSpeed = runSpeed;
         }
 
-        MoveAndRotate(pos, playerPos, angle, desiredSpeed);
+        MoveAndRotate(vector, angle, desiredSpeed);
+
+        //RaycastHit hit;
+        //if (Physics.Raycast(transform.position + transform .up, -transform.up, out hit, 3, terrainLayer))
+        //{
+        //    //transform.up = hit.normal;
+        //    var rotation = transform.rotation * Quaternion.FromToRotation(transform.up, hit.normal);
+        //    rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, 0.5f));
+        //}
     }
 
     private void UpdateFlyChase()
@@ -165,7 +196,8 @@ public class Dragon : Monster
         var pos = new Vector2(transform.position.x, transform.position.z);
         var playerPos = new Vector2(player.position.x, player.position.z);
         var distance = Vector2.Distance(pos, playerPos);
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), playerPos - pos);
+        var vector = playerPos - pos;
+        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
 
         if (distance < flyAttackRange && angle < 45)
         {
@@ -195,23 +227,28 @@ public class Dragon : Monster
             desiredSpeed = flySpeed;
         }
 
-        MoveAndRotate(pos, playerPos, angle, desiredSpeed);
+        MoveAndRotate(vector, angle, desiredSpeed);
         flyTimer += Time.deltaTime;
     }
 
-    private void MoveAndRotate(Vector2 pos, Vector2 playerPos, float angle, float desiredSpeed)
+    private void MoveAndRotate(Vector2 vector, float angle, float desiredSpeed)
     {
+        var rotation = Quaternion.LookRotation(new Vector3(vector.x, 0, vector.y));
+
+        RaycastHit hit;
+        if (Physics.SphereCast(transform.position + Vector3.up * 3, 3, transform.forward, out hit, 7, obstacleLayer))
+        {
+            rotation = transform.rotation * Quaternion.Euler(0, 90, 0); Debug.Log(hit.collider.gameObject.layer);
+        }
+
+        rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime));
+
         desiredSpeed *= Mathf.Cos(angle * Mathf.Deg2Rad);
         desiredSpeed = Mathf.Max(0, desiredSpeed);
 
         currSpeed = Mathf.Lerp(currSpeed, desiredSpeed, 0.1f);
 
         rb.MovePosition(transform.position + transform.forward * currSpeed * Time.deltaTime);
-
-        var vector = playerPos - pos;
-        var rotation = Quaternion.LookRotation(new Vector3(vector.x, 0, vector.y));
-
-        rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime));
 
         anim.SetFloat(Hashes.SpeedFloat, currSpeed);
     }
@@ -270,15 +307,13 @@ public class Dragon : Monster
 
 
         RaycastHit hit;
-        if (Physics.Raycast(flamePos.position, flamePos.forward, out hit, 20))
+        if (Physics.Raycast(flamePos.position, flamePos.forward, out hit, 20, terrainLayer))
         {
-            if (hit.collider.tag == Tags.Terrain)
-            {
-                fireParticle.transform.position = new Vector3(hit.point.x, 1, hit.point.z);
-            }
+            fireParticle.transform.position = hit.point;//new Vector3(hit.point.x, 1, hit.point.z);
+
             if (AttackTimer > 1.7f)  //after this, the flame attack on the ground and spreaded
             {
-                if (Vector3.Distance(hit.point, player.position) < 7)  
+                if (Vector3.Distance(hit.point, player.position) < 7)
                 {
                     playerHealth.Value -= attackDamage;
                 }
@@ -374,7 +409,11 @@ public class Dragon : Monster
         }
 
         base.TakeDamage(damage);
-        healthSlider.value = health;
+
+        if (healthSlider != null)
+        {
+            healthSlider.value = health;
+        }
 
         if ((health < 700 && !firstFly) || (health < 400 && !secondFly))
         {

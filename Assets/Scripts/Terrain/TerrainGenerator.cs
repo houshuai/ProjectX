@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class TerrainGenerator : MonoBehaviour
 {
     public Material material;
     public Material waterMat;
     public GameObject[] trees;
+    public GameObject[] bushes;
+    public GameObject dragon;
     public float xLength = 100;
     public float yLength = 50;
     public int xCount = 20;
@@ -26,6 +27,7 @@ public class TerrainGenerator : MonoBehaviour
     public float thirdHeight = 10;
     public float tree1Random = 0.98f;
     public float tree2Random = 0.93f;
+    public float bushRandom = 0.92f;
 
     private SimplexNoise noise;
     private float[,] heights;                 //0 1 2
@@ -62,6 +64,7 @@ public class TerrainGenerator : MonoBehaviour
         {
             GenerateTerrain(rect);
         }
+
 
     }
 
@@ -172,22 +175,43 @@ public class TerrainGenerator : MonoBehaviour
         renderer.material.SetTexture("_Mask", texture);
         terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
+        terrainObject.layer = LayerMask.NameToLayer("Terrain");
 
         var waterObject = GenerateWater(mesh);
         waterObject.transform.position = new Vector3(rect.x, thirdHeight, rect.y);
+        waterObject.transform.SetParent(terrainObject.transform);
 
-        var treeObjects = SetTree(rect, texture);
+        var treeObjects = SetTreeAndBush(rect, texture, terrainObject.transform);
+
+        BuildNavMesh(terrainObject, rect, range);
+
+        SetDragon(rect);
 
         var terrain = new Terrain()
         {
             rect = rect,
             terrainObject = terrainObject,
-            waterObject = waterObject,
-            treeObjects = treeObjects,
         };
         allTerrain.Add(terrain);
 
         return terrain;
+    }
+
+    private void BuildNavMesh(GameObject terrainObject, Rect rect, float range)
+    {
+        var agentID = NavMesh.GetSettingsByIndex(1).agentTypeID;    //dragon
+        var link = terrainObject.AddComponent<NavMeshLink>();
+        link.agentTypeID = agentID;
+        link.width = yLength;
+        var x = xTick * (xCount - 2);                          //local positionn
+        var y = yTick * (yCount / 2);
+        link.startPoint = new Vector3(x, heights[xCount - 2, yCount / 2], y);
+        link.endPoint = new Vector3(x + 2 * xTick, noise.Get2DPow(rect.x + x + 2 * xTick, rect.y + y) * range, y); //noise need world position
+        var surface = terrainObject.AddComponent<NavMeshSurface>();
+        surface.agentTypeID = agentID;
+        surface.collectObjects = CollectObjects.Children;
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        surface.BuildNavMesh();
     }
 
     //private void EdgeJoint(float[,] heightMap, Rect rect, float range)
@@ -350,11 +374,6 @@ public class TerrainGenerator : MonoBehaviour
             {
                 var terrain = allTerrain[i];
                 Destroy(terrain.terrainObject);
-                Destroy(terrain.waterObject);
-                for (int j = terrain.treeObjects.Count - 1; j >= 0; j--)
-                {
-                    Destroy(terrain.treeObjects[j]);
-                }
 
                 allTerrain.RemoveAt(i);
             }
@@ -405,13 +424,14 @@ public class TerrainGenerator : MonoBehaviour
         var waterObject = new GameObject("Water");
         waterObject.AddComponent<MeshFilter>().mesh = mesh;
         waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
+        waterObject.layer = LayerMask.NameToLayer("Water");
 
         return waterObject;
     }
 
-    private List<GameObject> SetTree(Rect rect, Texture2D texture)
+    private List<GameObject> SetTreeAndBush(Rect rect, Texture2D texture, Transform terrainTransform)
     {
-        var treeList = new List<GameObject>();
+        var treeAndBushList = new List<GameObject>();
         var red = new Color32(255, 0, 0, 0);
         var green = new Color32(0, 255, 0, 0);
         var blue = new Color32(0, 0, 255, 0);
@@ -424,24 +444,51 @@ public class TerrainGenerator : MonoBehaviour
                 var height = heights[i, j];
                 var random = height - Mathf.Floor(height);
                 var color = texture.GetPixel(i, j);
-                GameObject tree = null;
-                if (color == blue && random > tree1Random)
+                GameObject treeOrBush = null;
+                if (color == blue)
                 {
-                    tree = Instantiate(trees[0]);
+                    if (random > tree1Random)
+                    {
+                        treeOrBush = Instantiate(trees[0]);
+                    }
+                    else if (random > bushRandom)
+                    {   //the range of random is (bushRandom, tree1Random)  
+                        treeOrBush = Instantiate(bushes[(int)((random - bushRandom) / (tree1Random - bushRandom) * bushes.Length)]);
+                    }
                 }
-                else if (color == green && random > tree2Random)
+                else if (color == green)
                 {
-                    tree = Instantiate(trees[1]);
+                    if (random > tree2Random)
+                    {
+                        treeOrBush = Instantiate(trees[1]);
+                    }
+                    else if (random > bushRandom)
+                    {
+                        treeOrBush = Instantiate(bushes[(int)((random - bushRandom) / (tree1Random - bushRandom) * bushes.Length)]);
+                    }
                 }
 
-                if (tree != null)
+                if (treeOrBush != null)
                 {
-                    tree.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-                    treeList.Add(tree);
+                    treeOrBush.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+                    treeOrBush.transform.SetParent(terrainTransform);
+                    treeAndBushList.Add(treeOrBush);
                 }
             }
         }
-        return treeList;
+        return treeAndBushList;
+    }
+
+    private GameObject SetDragon(Rect rect)
+    {
+        var sourcePosition = new Vector3(rect.x + xLength / 2, heights[xCount / 2, yCount / 2], rect.y + yLength / 2); ;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(sourcePosition, out hit, xLength, 1))
+        {
+            return Instantiate(dragon, hit.position, Quaternion.identity);
+        }
+
+        return null;
     }
 }
 
@@ -449,8 +496,6 @@ class Terrain
 {
     public Rect rect;
     public GameObject terrainObject;
-    public GameObject waterObject;
-    public List<GameObject> treeObjects;
 }
 
 internal struct Point2Int

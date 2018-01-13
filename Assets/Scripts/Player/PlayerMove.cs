@@ -156,7 +156,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Translate(Vector3 vector)
     {
-        if (CheckTerrainNormal())
+        if (CheckGroundNormal())
         {
             rb.velocity = vector;
         }
@@ -199,13 +199,13 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    private bool CheckTerrainNormal()
+    private bool CheckGroundNormal()
     {
         var result = true;
         RaycastHit hit;
         if (Physics.Raycast(transform.position + new Vector3(0, 0.3f, 0), transform.forward, out hit, 0.6f))
         {
-            if (hit.collider.CompareTag("Terrain") && Vector3.Dot(hit.normal, Vector3.up) < 0.7)
+            if (Vector3.Dot(hit.normal, Vector3.up) < 0.7)
             {
                 result = false;
             }
