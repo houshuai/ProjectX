@@ -196,11 +196,8 @@ public class NavDragon : Monster
 
     private void UpdateFlyChase()
     {
-        var pos = new Vector2(transform.position.x, transform.position.z);
-        var playerPos = new Vector2(player.position.x, player.position.z);
-        var distance = Vector2.Distance(pos, playerPos);
-        var vector = playerPos - pos;
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
+        var distance = Vector3.Distance(player.position, transform.position);
+        var angle = Vector3.Angle(transform.forward, player.position - transform.position);
 
         if (distance < flyAttackRange && angle < 45)
         {
@@ -219,41 +216,22 @@ public class NavDragon : Monster
             rb.useGravity = true;
             return;
         }
-
-        float desiredSpeed = 0;
+        
         if (distance < nearby)
         {
-            desiredSpeed = glideSpeed;
+            nav.speed = glideSpeed;
         }
         else
         {
-            desiredSpeed = flySpeed;
+            nav.speed = flySpeed;
         }
 
-        MoveAndRotate(vector, angle, desiredSpeed);
-        flyTimer += Time.deltaTime;
-    }
-
-    private void MoveAndRotate(Vector2 vector, float angle, float desiredSpeed)
-    {
-        var rotation = Quaternion.LookRotation(new Vector3(vector.x, 0, vector.y));
-
-        RaycastHit hit;
-        if (Physics.SphereCast(transform.position + Vector3.up * 3, 3, transform.forward, out hit, 7, obstacleLayer))
+        if (!nav.pathPending)
         {
-            rotation = transform.rotation * Quaternion.Euler(0, 90, 0); Debug.Log(hit.collider.gameObject.layer);
+            nav.destination = player.position;
         }
 
-        rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime));
-
-        desiredSpeed *= Mathf.Cos(angle * Mathf.Deg2Rad);
-        desiredSpeed = Mathf.Max(0, desiredSpeed);
-
-        currSpeed = Mathf.Lerp(currSpeed, desiredSpeed, 0.1f);
-
-        rb.MovePosition(transform.position + transform.forward * currSpeed * Time.deltaTime);
-
-        anim.SetFloat(Hashes.SpeedFloat, currSpeed);
+        flyTimer += Time.deltaTime;
     }
 
     private void UpdateAttack()
@@ -338,7 +316,6 @@ public class NavDragon : Monster
         var nameHash = anim.GetCurrentAnimatorStateInfo(0).shortNameHash;
         if (nameHash == Hashes.TakeOffState)
         {
-            rb.MovePosition(rb.position + transform.up * Time.deltaTime);
             if (audioSource.clip != takeOffClip)
             {
                 audioSource.clip = takeOffClip;

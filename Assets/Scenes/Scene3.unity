@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
-  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientSkyColor: {r: 1, g: 1, b: 1, a: 1}
+  m_AmbientEquatorColor: {r: 0.5376298, g: 0.60098344, b: 0.64705884, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 71f14a2d79f732f4d9893ef1b911f4ff, type: 2}
   m_HaloStrength: 0.5
@@ -51,8 +51,8 @@ LightmapSettings:
     m_AlbedoBoost: 1
     m_TemporalCoherenceThreshold: 1
     m_EnvironmentLightingMode: 0
-    m_EnableBakedLightmaps: 1
-    m_EnableRealtimeLightmaps: 1
+    m_EnableBakedLightmaps: 0
+    m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
     serializedVersion: 9
     m_Resolution: 0.5
@@ -368,24 +368,30 @@ MonoBehaviour:
   - {fileID: 100000, guid: e26c36c102d821c4581a911b1e80588f, type: 2}
   - {fileID: 100000, guid: 532066205bc320d4aa4647332e9d2ffa, type: 2}
   - {fileID: 100000, guid: ebc45ba3ff076884e92c0f152cc3b98e, type: 2}
-  dragon: {fileID: 101568, guid: 59c100dd669d88f46b60555886d4dae7, type: 2}
+  dragon: {fileID: 101568, guid: 5e82fa60d0b0710499c784acbfa26818, type: 2}
   xLength: 100
   yLength: 100
   xCount: 20
   yCount: 20
-  minHeight: 0
-  maxHeight: 10
-  seed: 1415
-  scale: 100
-  persistence: 0.476
-  octave: 5
-  pow: 3
+  seed: 51772
+  frequencys:
+  - 0.005
+  - 0.02
+  - 0.1
+  - 0.5
+  - 1
+  amplitudes:
+  - 30
+  - 10
+  - 5
+  - 2
+  - 1
   dis: 10
   firstHeight: 20
   secondHeight: 10
   thirdHeight: 1
+  tree0Random: 0.98
   tree1Random: 0.99
-  tree2Random: 0.98
   bushRandom: 0.95
 --- !u!4 &581292310
 Transform:

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SimplexNoise
 {
@@ -9,30 +6,26 @@ public class SimplexNoise
     private SimplexNoiseOctave octave;
     private float[] frequencys;
     private float[] amplitudes;
-    private float scale;
-    private float pow;
+    private float firstFreq;
 
-    public SimplexNoise(float scale, float persistence, int octaveCount, float pow, int seed)
+    public SimplexNoise(int seed, float[] frequencys, float[] amplitudes)
     {
-        octaves = new SimplexNoiseOctave[octaveCount];
-        frequencys = new float[octaveCount];
-        amplitudes = new float[octaveCount];
-
         var random = new System.Random(seed);
 
-        for (int i = 0; i < octaveCount; i++)
+        octaves = new SimplexNoiseOctave[frequencys.Length];
+        for (int i = 0; i < octaves.Length; i++)
         {
             octaves[i] = new SimplexNoiseOctave(random.Next());
-            frequencys[i] = Mathf.Pow(2, i) / scale;
-            amplitudes[i] = Mathf.Pow(persistence, i);
         }
-
+        
         octave = new SimplexNoiseOctave(random.Next());
-        this.scale = scale;
-        this.pow = pow;
+
+        this.frequencys = frequencys;
+        this.amplitudes = amplitudes;
+        firstFreq = frequencys[0];
     }
 
-    public float Get2DPow(float x, float y)
+    public float GetOctave(float x, float y)
     {
         float result = 0;
 
@@ -40,20 +33,12 @@ public class SimplexNoise
         {
             result += octaves[i].Noise(x * frequencys[i], y * frequencys[i]) * amplitudes[i];
         }
-        //result += octaves[2].Noise(x / frequencys[2], y / frequencys[2]) * amplitudes[2];
-        return Mathf.Pow(result, pow);
+        return result;
     }
 
-    public float Get2D(float x,float y)
+    public float GetSingle(float x,float y)
     {
-        //float result = 0;
-
-        //for (int i = 0; i < octaves.Length; i++)
-        //{
-        //    result += octaves[i].Noise(x * frequencys[i], y * frequencys[i]) * amplitudes[i];
-        //}
-        return octave.Noise(x / scale, y / scale);
-        //return result;
+        return octave.Noise(x *firstFreq, y / firstFreq);
     }
 }
 

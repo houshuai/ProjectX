@@ -13,69 +13,102 @@ public class TerrainGenerator : MonoBehaviour
     public float yLength = 50;
     public int xCount = 20;
     public int yCount = 10;
-    public float minHeight = -5;
-    public float maxHeight = 5;
     public int seed = 152411;
-    public float scale = 40;
-    [Range(0, 1)]
-    public float persistence = 0.5f;
-    public int octave = 4;
-    public float pow = 1.6f;
+    public float[] frequencys;
+    public float[] amplitudes;
     public float dis = 10;
     public float firstHeight = 30;
     public float secondHeight = 20;
     public float thirdHeight = 10;
-    public float tree1Random = 0.98f;
-    public float tree2Random = 0.93f;
+    public float tree0Random = 0.98f;
+    public float tree1Random = 0.93f;
     public float bushRandom = 0.92f;
 
     private SimplexNoise noise;
-    private float[,] heights;                 //0 1 2
-    private float[,] moisture;                //3 4 5
-    private Transform player;                 //6 7 8
-    private Rect[] rects = new Rect[9];       //0-8 is leftTop top rightTop left center right leftBottom bottom rightBottom
+    private float[,] heights;
+    private float[,] moisture;
+    private Transform player;
+    private Rect[] rects;
     private List<Terrain> allTerrain;
-
-    private float xTick;
-    private float yTick;
+    private List<GameObject> tree0Pool;
+    private List<GameObject> tree1Pool;
+    private List<GameObject>[] bushPool;
 
     private void Start()
     {
-        xTick = xLength / (xCount - 1);
-        yTick = yLength / (yCount - 1);
-        noise = new SimplexNoise(scale, persistence, octave, pow, seed);
+        noise = new SimplexNoise(seed, frequencys, amplitudes);
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
         player = GameObject.FindGameObjectWithTag(Tags.Player).transform;
         player.position = new Vector3(player.position.x,
-            noise.Get2DPow(player.position.x, player.position.z) * (maxHeight - minHeight), player.position.z);
+            noise.GetOctave(player.position.x, player.position.z), player.position.z);
 
+        InitialPool();
+
+        InitialRects();
         allTerrain = new List<Terrain>();
-        rects[0] = new Rect(-xLength, yLength, xLength, yLength);
-        rects[1] = new Rect(0, yLength, xLength, yLength);
-        rects[2] = new Rect(xLength, yLength, xLength, yLength);
-        rects[3] = new Rect(-xLength, 0, xLength, yLength);
-        rects[4] = new Rect(0, 0, xLength, yLength);
-        rects[5] = new Rect(xLength, 0, xLength, yLength);
-        rects[6] = new Rect(-xLength, -yLength, xLength, yLength);
-        rects[7] = new Rect(0, -yLength, xLength, yLength);
-        rects[8] = new Rect(xLength, -yLength, xLength, yLength);
         foreach (var rect in rects)
         {
-            GenerateTerrain(rect);
+            allTerrain.Add(GenerateTerrain(rect));
         }
 
+    }
 
+    private void InitialRects()
+    {
+        //  
+        //  5*yLen ------------ ------------------------------------------
+        //         |                |                  |                 |
+        //         |                |                  |                 |
+        //         |        0       |         1        |        2        |
+        //         |                |                  |                 |
+        //         |                |                  |                 |
+        //  2*yLen -------------------------------------------------------
+        //         |                | 8   |  9   |  10 |                 |
+        //         |           yLen |---- -------------|                 |
+        //         |      3         | 11  |  12  |  13 |        4        |
+        //         |             0  |------------------|                 |
+        //         |                | 14  |  15  |  16 |                 |
+        //  -yLen  -------------------------------------------------------
+        //         |                |     0    xLen    |                 |
+        //         |                |                  |                 |
+        //         |        5       |         6        |        7        |
+        //         |                |                  |                 |
+        //         |                |                                    |
+        // -4*yLen -------------------------------------------------------
+        //       -4*xLen         -xLen              2*xLen             5*xLength
+        //      leftBottom of 12 is position (0,0)
+
+        rects = new Rect[17];
+
+        rects[0] = new Rect(-4 * xLength, 2 * yLength, 3 * xLength, 3 * yLength);
+        rects[1] = new Rect(-xLength, 2 * yLength, 3 * xLength, 3 * yLength);
+        rects[2] = new Rect(2 * xLength, 2 * yLength, 3 * xLength, 3 * yLength);
+        rects[3] = new Rect(-4 * xLength, -yLength, 3 * xLength, 3 * yLength);
+        rects[4] = new Rect(2 * xLength, -yLength, 3 * xLength, 3 * yLength);
+        rects[5] = new Rect(-4 * xLength, -4 * yLength, 3 * xLength, 3 * yLength);
+        rects[6] = new Rect(-xLength, -4 * yLength, 3 * xLength, 3 * yLength);
+        rects[7] = new Rect(2 * xLength, -4 * yLength, 3 * xLength, 3 * yLength);
+
+        rects[8] = new Rect(-xLength, yLength, xLength, yLength);
+        rects[9] = new Rect(0, yLength, xLength, yLength);
+        rects[10] = new Rect(xLength, yLength, xLength, yLength);
+        rects[11] = new Rect(-xLength, 0, xLength, yLength);
+        rects[12] = new Rect(0, 0, xLength, yLength);
+        rects[13] = new Rect(xLength, 0, xLength, yLength);
+        rects[14] = new Rect(-xLength, -yLength, xLength, yLength);
+        rects[15] = new Rect(0, -yLength, xLength, yLength);
+        rects[16] = new Rect(xLength, -yLength, xLength, yLength);
     }
 
     private void Update()
     {
         var pos = player.position;
-        var center = rects[4];
+        var center = rects[12];
 
         if (pos.x < center.xMin)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 17; i++)
             {
                 rects[i].x -= xLength;
                 FindTerrain(rects[i]);
@@ -84,7 +117,7 @@ public class TerrainGenerator : MonoBehaviour
         }
         else if (pos.z < center.yMin)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 17; i++)
             {
                 rects[i].y -= yLength;
                 FindTerrain(rects[i]);
@@ -93,7 +126,7 @@ public class TerrainGenerator : MonoBehaviour
         }
         else if (pos.x > center.xMax)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 17; i++)
             {
                 rects[i].x += xLength;
                 FindTerrain(rects[i]);
@@ -102,7 +135,7 @@ public class TerrainGenerator : MonoBehaviour
         }
         else if (pos.z > center.yMax)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 17; i++)
             {
                 rects[i].y += yLength;
                 FindTerrain(rects[i]);
@@ -119,6 +152,8 @@ public class TerrainGenerator : MonoBehaviour
     private Terrain GenerateTerrain(Rect rect)
     {
         int vertexCount = xCount * yCount;
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
         float u = 1.0f / (xCount - 1);
         float v = 1.0f / (yCount - 1);
         var uvs = new Vector2[vertexCount];
@@ -126,16 +161,15 @@ public class TerrainGenerator : MonoBehaviour
 
         index = 0;
         var vertices = new Vector3[vertexCount];
-        float range = maxHeight - minHeight;
         for (int j = 0; j < yCount; j++)
         {
             for (int i = 0; i < xCount; i++)
             {
                 var x = i * xTick;
                 var y = j * yTick;
-                var height = noise.Get2DPow(rect.x + x, rect.y + y) * range;
+                var height = noise.GetOctave(rect.x + x, rect.y + y);
                 heights[i, j] = height;
-                moisture[i, j] = noise.Get2D(rect.x + x, rect.y + y);
+                moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
                 vertices[index] = new Vector3(x, height, y);
                 uvs[index] = new Vector2(i * u, j * v);
                 index++;
@@ -177,38 +211,58 @@ public class TerrainGenerator : MonoBehaviour
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
         terrainObject.layer = LayerMask.NameToLayer("Terrain");
 
-        var waterObject = GenerateWater(mesh);
+        var waterObject = SetWater(mesh);
         waterObject.transform.position = new Vector3(rect.x, thirdHeight, rect.y);
         waterObject.transform.SetParent(terrainObject.transform);
 
-        var treeObjects = SetTreeAndBush(rect, texture, terrainObject.transform);
-
-        BuildNavMesh(terrainObject, rect, range);
-
-        SetDragon(rect);
+        var plantObjects = SetTreeAndBush(rect, texture, terrainObject.transform);
+        BuildNavMesh(terrainObject, rect);
 
         var terrain = new Terrain()
         {
             rect = rect,
             terrainObject = terrainObject,
+            plantObjects = plantObjects,
+            dragonObject = SetDragon(rect),
         };
-        allTerrain.Add(terrain);
 
         return terrain;
     }
 
-    private void BuildNavMesh(GameObject terrainObject, Rect rect, float range)
+    private void BuildNavMesh(GameObject terrainObject, Rect rect)
     {
-        var agentID = NavMesh.GetSettingsByIndex(1).agentTypeID;    //dragon
-        var link = terrainObject.AddComponent<NavMeshLink>();
-        link.agentTypeID = agentID;
-        link.width = yLength;
-        var x = xTick * (xCount - 2);                          //local positionn
-        var y = yTick * (yCount / 2);
-        link.startPoint = new Vector3(x, heights[xCount - 2, yCount / 2], y);
-        link.endPoint = new Vector3(x + 2 * xTick, noise.Get2DPow(rect.x + x + 2 * xTick, rect.y + y) * range, y); //noise need world position
+        if (rect.width > 2 * xLength)   //not need  build in boundary and there will not have dragon
+        {
+            return;
+        }
+        var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
+
+        for (int i = 0; i < xCount - 1; i++)
+        {
+            var link = terrainObject.AddComponent<NavMeshLink>();
+            link.agentTypeID = dragonID;
+            link.width = xTick;
+            var x = xTick * (i + 0.5f);                          //local position
+            var y = yTick * (yCount - 2);
+            link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
+            link.endPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + 2 * yTick + y), y + 2 * yTick);
+        }
+
+        for (int i = 0; i < yCount - 1; i++)
+        {
+            var link = terrainObject.AddComponent<NavMeshLink>();
+            link.agentTypeID = dragonID;
+            link.width = yTick;
+            var x = xTick * (xCount - 2);                          //local position
+            var y = yTick * (i + 0.5f);
+            link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
+            link.endPoint = new Vector3(x + 2 * xTick, noise.GetOctave(rect.x + x + 2 * xTick, rect.y + y), y);
+        }
+
         var surface = terrainObject.AddComponent<NavMeshSurface>();
-        surface.agentTypeID = agentID;
+        surface.agentTypeID = dragonID;
         surface.collectObjects = CollectObjects.Children;
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.BuildNavMesh();
@@ -344,17 +398,17 @@ public class TerrainGenerator : MonoBehaviour
         return texture;
     }
 
-    private Terrain FindTerrain(Rect rect)
+    private void FindTerrain(Rect rect)
     {
         foreach (var terrain in allTerrain)
         {
             if (terrain.rect == rect)
             {
-                return terrain;
+                return;
             }
         }
 
-        return GenerateTerrain(rect);
+        allTerrain.Add(GenerateTerrain(rect));
     }
 
     private void DeleteTerrain()
@@ -373,15 +427,21 @@ public class TerrainGenerator : MonoBehaviour
             if (!exist)
             {
                 var terrain = allTerrain[i];
+                var plants = terrain.plantObjects;
+                for (int j = terrain.plantObjects.Count - 1; j >= 0; j--)
+                {
+                    plants[j].transform.SetParent(transform, false);
+                    plants[j].SetActive(false);
+                }
                 Destroy(terrain.terrainObject);
-
+                Destroy(terrain.dragonObject);
                 allTerrain.RemoveAt(i);
             }
 
         }
     }
 
-    private GameObject GenerateWater(Mesh terrainMesh)
+    private GameObject SetWater(Mesh terrainMesh)
     {
         var terrainVertices = terrainMesh.vertices;
         var terrainIndices = terrainMesh.triangles;
@@ -436,6 +496,8 @@ public class TerrainGenerator : MonoBehaviour
         var green = new Color32(0, 255, 0, 0);
         var blue = new Color32(0, 0, 255, 0);
         var alpha = new Color32(0, 0, 0, 255);
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
 
         for (int j = 0; j < yCount; j++)
         {
@@ -447,24 +509,24 @@ public class TerrainGenerator : MonoBehaviour
                 GameObject treeOrBush = null;
                 if (color == blue)
                 {
-                    if (random > tree1Random)
+                    if (random > tree0Random)
                     {
-                        treeOrBush = Instantiate(trees[0]);
+                        treeOrBush = GetTree(0);
                     }
                     else if (random > bushRandom)
-                    {   //the range of random is (bushRandom, tree1Random)  
-                        treeOrBush = Instantiate(bushes[(int)((random - bushRandom) / (tree1Random - bushRandom) * bushes.Length)]);
+                    {   //the range of random is (bushRandom, tree0Random)  
+                        treeOrBush = GetBush((int)((random - bushRandom) / (tree0Random - bushRandom) * bushes.Length));
                     }
                 }
                 else if (color == green)
                 {
-                    if (random > tree2Random)
+                    if (random > tree1Random)
                     {
-                        treeOrBush = Instantiate(trees[1]);
+                        treeOrBush = GetTree(1);
                     }
                     else if (random > bushRandom)
                     {
-                        treeOrBush = Instantiate(bushes[(int)((random - bushRandom) / (tree1Random - bushRandom) * bushes.Length)]);
+                        treeOrBush = GetBush((int)((random - bushRandom) / (tree1Random - bushRandom) * bushes.Length));
                     }
                 }
 
@@ -490,12 +552,108 @@ public class TerrainGenerator : MonoBehaviour
 
         return null;
     }
+
+    private void InitialPool()
+    {
+        tree0Pool = new List<GameObject>();
+        for (int i = 0; i < 120; i++)
+        {
+            var tree = Instantiate(trees[0]);
+            tree.transform.SetParent(transform, false);
+            tree.SetActive(false);
+            tree0Pool.Add(tree);
+        }
+
+        tree1Pool = new List<GameObject>();
+        for (int i = 0; i < 120; i++)
+        {
+            var tree = Instantiate(trees[1]);
+            tree.transform.SetParent(transform, false);
+            tree.SetActive(false);
+            tree1Pool.Add(tree);
+        }
+
+        bushPool = new List<GameObject>[bushes.Length];
+        for (int i = 0; i < bushes.Length; i++)
+        {
+            bushPool[i] = new List<GameObject>();
+            for (int j = 0; j < 120; j++)
+            {
+                var bush = Instantiate(bushes[i]);
+                bush.transform.SetParent(transform, false);
+                bush.SetActive(false);
+                bushPool[i].Add(bush);
+            }
+        }
+    }
+
+    private GameObject GetTree(int index)
+    {
+        List<GameObject> treePool = null;
+        if (index == 0)
+        {
+            treePool = tree0Pool;
+        }
+        else if (index == 1)
+        {
+            treePool = tree1Pool;
+        }
+        else
+        {
+            throw new KeyNotFoundException("not found tree index");
+        }
+
+        GameObject result = null;
+        foreach (var tree in treePool)
+        {
+            if (!tree.activeSelf)
+            {
+                result = tree;
+                result.SetActive(true);
+                break;
+            }
+        }
+
+        if (result == null)
+        {
+            result = Instantiate(trees[index]);
+            treePool.Add(result);
+        }
+
+        return result;
+    }
+
+    private GameObject GetBush(int index)
+    {
+        var bushPoolIndex = bushPool[index];
+
+        GameObject result = null;
+        foreach (var bush in bushPoolIndex)
+        {
+            if (!bush.activeSelf)
+            {
+                result = bush;
+                result.SetActive(true);
+                break;
+            }
+        }
+
+        if (result == null)
+        {
+            result = Instantiate(bushes[index]);
+            bushPoolIndex.Add(result);
+        }
+
+        return result;
+    }
 }
 
 class Terrain
 {
     public Rect rect;
     public GameObject terrainObject;
+    public List<GameObject> plantObjects;
+    public GameObject dragonObject;
 }
 
 internal struct Point2Int
