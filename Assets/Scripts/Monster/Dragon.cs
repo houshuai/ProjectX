@@ -48,7 +48,6 @@ public class Dragon : Monster
     private bool firstFly, secondFly;
     private bool playerInBox;
     private LayerMask terrainLayer;
-    private LayerMask obstacleLayer;
     private WaitForSeconds waitForAttack;
     private WaitForSeconds waitClawAttack1;
     private WaitForSeconds waitClawAttack2;
@@ -66,7 +65,6 @@ public class Dragon : Monster
         var playerObject = GameObject.FindGameObjectWithTag(Tags.Player);
         player = playerObject.transform;
         terrainLayer = 1 << LayerMask.NameToLayer("Terrain");
-        obstacleLayer = ~(terrainLayer | (1 << LayerMask.NameToLayer("Player")));
 
         waitForAttack = new WaitForSeconds(0.32f);
         waitClawAttack1 = new WaitForSeconds(0.5f);
@@ -234,12 +232,6 @@ public class Dragon : Monster
     private void MoveAndRotate(Vector2 vector, float angle, float desiredSpeed)
     {
         var rotation = Quaternion.LookRotation(new Vector3(vector.x, 0, vector.y));
-
-        RaycastHit hit;
-        if (Physics.SphereCast(transform.position + Vector3.up * 3, 3, transform.forward, out hit, 7, obstacleLayer))
-        {
-            rotation = transform.rotation * Quaternion.Euler(0, 90, 0); Debug.Log(hit.collider.gameObject.layer);
-        }
 
         rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime));
 

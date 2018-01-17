@@ -38,7 +38,7 @@ public class SimplexNoise
 
     public float GetSingle(float x,float y)
     {
-        return octave.Noise(x *firstFreq, y / firstFreq);
+        return octave.Noise(x *firstFreq, y * firstFreq);
     }
 }
 

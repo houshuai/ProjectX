@@ -208,7 +208,6 @@ GameObject:
   - component: {fileID: 114209001213052080}
   - component: {fileID: 114762458424947496}
   - component: {fileID: 82060778030480822}
-  - component: {fileID: 114637851012966550}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -2798,15 +2797,15 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1095166236532776}
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 40.81, y: 0, z: 32.78}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 25, y: 100, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4508925895899750}
   - {fileID: 4508079431140306}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4464404973681430
 Transform:
   m_ObjectHideFlags: 1
@@ -4122,18 +4121,6 @@ MonoBehaviour:
   attackClip: {fileID: 8300000, guid: f6c55b892be48964a84b76a6f23036d1, type: 3}
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
   anim: {fileID: 0}
---- !u!114 &114637851012966550
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1095166236532776}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68a15e599100bc94fb853c05d365c869, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 7f23c67f81597cf46a8315cbf7db581e, type: 2}
 --- !u!114 &114762458424947496
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4171,6 +4158,7 @@ SkinnedMeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -4189,6 +4177,7 @@ SkinnedMeshRenderer:
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5

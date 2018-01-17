@@ -338,6 +338,8 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 581292310}
+  - component: {fileID: 581292311}
+  - component: {fileID: 581292312}
   - component: {fileID: 581292309}
   m_Layer: 0
   m_Name: TerrainController
@@ -357,42 +359,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6457f3ed1fd42614aa2ccf2c3c30eef0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: f77effa03ec98224088fd2e2ea5bafb6, type: 2}
-  waterMat: {fileID: 2100000, guid: 8ff6c6b3c8da622488e6c0113ebcf0c2, type: 2}
-  trees:
-  - {fileID: 1909967738298678, guid: 9c674130ebf970343acaa79f5a4a85e7, type: 2}
-  - {fileID: 1779679628074594, guid: 93403baea18186449b04a0297bf159a8, type: 2}
-  bushes:
-  - {fileID: 100000, guid: 53414ab72ac45614684af7a6985b2c85, type: 2}
-  - {fileID: 100000, guid: 35483354210b51844a7110a01c7b4f3a, type: 2}
-  - {fileID: 100000, guid: e26c36c102d821c4581a911b1e80588f, type: 2}
-  - {fileID: 100000, guid: 532066205bc320d4aa4647332e9d2ffa, type: 2}
-  - {fileID: 100000, guid: ebc45ba3ff076884e92c0f152cc3b98e, type: 2}
-  dragon: {fileID: 101568, guid: 5e82fa60d0b0710499c784acbfa26818, type: 2}
-  xLength: 100
-  yLength: 100
-  xCount: 20
-  yCount: 20
-  seed: 51772
-  frequencys:
-  - 0.005
-  - 0.02
-  - 0.1
-  - 0.5
-  - 1
-  amplitudes:
-  - 30
-  - 10
-  - 5
-  - 2
-  - 1
-  dis: 10
-  firstHeight: 20
-  secondHeight: 10
-  thirdHeight: 1
-  tree0Random: 0.98
-  tree1Random: 0.99
-  bushRandom: 0.95
+  xLength: 200
+  yLength: 200
+  xCount: 33
+  yCount: 33
+  lodCount: 2
 --- !u!4 &581292310
 Transform:
   m_ObjectHideFlags: 0
@@ -406,6 +377,61 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &581292311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 581292308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ff5ceec8b873e047ae7a8d85bd7ab72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trees:
+  - {fileID: 1909967738298678, guid: 9c674130ebf970343acaa79f5a4a85e7, type: 2}
+  - {fileID: 1779679628074594, guid: 93403baea18186449b04a0297bf159a8, type: 2}
+  bushes:
+  - {fileID: 100000, guid: 53414ab72ac45614684af7a6985b2c85, type: 2}
+  - {fileID: 100000, guid: 35483354210b51844a7110a01c7b4f3a, type: 2}
+  - {fileID: 100000, guid: e26c36c102d821c4581a911b1e80588f, type: 2}
+  - {fileID: 100000, guid: 532066205bc320d4aa4647332e9d2ffa, type: 2}
+  - {fileID: 100000, guid: ebc45ba3ff076884e92c0f152cc3b98e, type: 2}
+  initialSize: 200
+  tree0Pool: []
+  tree1Pool: []
+--- !u!114 &581292312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 581292308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8757c30a8ee1d840a7ca25b85805c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: f77effa03ec98224088fd2e2ea5bafb6, type: 2}
+  waterMat: {fileID: 2100000, guid: 8ff6c6b3c8da622488e6c0113ebcf0c2, type: 2}
+  dragon: {fileID: 101568, guid: 5e82fa60d0b0710499c784acbfa26818, type: 2}
+  seed: 15241
+  frequencys:
+  - 0.0001
+  - 0.005
+  - 0.05
+  - 0.5
+  amplitudes:
+  - 100
+  - 50
+  - 5
+  - 1
+  firstHeight: 120
+  secondHeight: 75
+  thirdHeight: 30
+  plantScale: 2
+  tree0Random: 0.95
+  tree1Random: 0.9
+  bushRandom: 0.8
 --- !u!1001 &796074043
 Prefab:
   m_ObjectHideFlags: 0
@@ -419,7 +445,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4459203699165252, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4459203699165252, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
       propertyPath: m_LocalPosition.z
@@ -445,31 +471,7 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 114546765596148048, guid: 351ebe4b80b7e3940adfd634eed39f98,
-        type: 2}
-      propertyPath: runSpeed
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 114546765596148048, guid: 351ebe4b80b7e3940adfd634eed39f98,
-        type: 2}
-      propertyPath: jumpSpeed
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 114637851012966550, guid: 351ebe4b80b7e3940adfd634eed39f98,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1095166236532776, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4459203699165252, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 114637851012966550, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
+    m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
   m_IsPrefabParent: 0
 --- !u!4 &1210311299 stripped
