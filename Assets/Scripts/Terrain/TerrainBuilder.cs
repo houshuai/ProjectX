@@ -17,24 +17,20 @@ public class TerrainBuilder : MonoBehaviour
     public float tree0Random = 0.95f;
     public float tree1Random = 0.9f;
     public float bushRandom = 0.8f;
+    public float dragonRandom = 0.9f;
 
     [HideInInspector]
     public int[][][] lodIndices;
 
-    private float xLength = 100;
-    private float yLength = 100;
-    private int xCount = 33;
-    private int yCount = 33;
+    private int xCount, yCount;
     private int xGap, yGap;
     private SimplexNoise noise;
     private float[,] heights;
     private float[,] moisture;
     private PlantPool plantPool;
 
-    public void Initial(float xLen, float yLen, int xCount, int yCount, int lodCount)
+    public void Initial(int xCount, int yCount, int lodCount)
     {
-        xLength = xLen;
-        yLength = yLen;
         this.xCount = xCount;
         this.yCount = yCount;
         xGap = xCount - 1;
@@ -93,31 +89,61 @@ public class TerrainBuilder : MonoBehaviour
         renderer.material = material;
         var texture = GetMaskTexture();
         renderer.material.SetTexture("_Mask", texture);
-        terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
+
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
         terrainObject.layer = LayerMask.NameToLayer("Terrain");
 
         SetWater(mesh, terrainObject.transform);
         terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform);
-        //BuildNavMesh(terrainObject, rect);
+        
+        if (terrain.lod == 0)
+        {
+            terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
+            BuildNavMesh(terrainObject, rect);
+            terrain.dragonObject = SetDragon(rect);
+        }
 
         terrain.mesh = mesh;
         terrain.terrainObject = terrainObject;
-        terrain.dragonObject = SetDragon(rect);
     }
 
     public void UpdateMesh(Terrain terrain)
     {
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
+
+        var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
+        if (terrain.lod == 0)
+        {
+            if (meshCollider == null)
+            {
+                terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
+                BuildNavMesh(terrain.terrainObject, terrain.rect);
+                terrain.dragonObject = SetDragon(terrain.rect);
+            }
+        }
+        else if (meshCollider != null)
+        {
+            Destroy(meshCollider);
+        }
+    }
+
+    public void Delete(Terrain terrain)
+    {
+        if (terrain.dragonObject!=null)
+        {
+            Destroy(terrain.dragonObject);
+        }
+        for (int i = 0; i < terrain.plantObjects.Count; i++)
+        {
+            terrain.plantObjects[i].transform.SetParent(transform);
+            terrain.plantObjects[i].SetActive(false);
+        }
+        Destroy(terrain.terrainObject);
     }
 
     private void BuildNavMesh(GameObject terrainObject, Rect rect)
     {
-        if (rect.width > 2 * xLength)   //not need  build in boundary and there will not have dragon
-        {
-            return;
-        }
         var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
         float xTick = rect.width / (xCount - 1);
         float yTick = rect.height / (yCount - 1);
@@ -306,13 +332,21 @@ public class TerrainBuilder : MonoBehaviour
 
     private GameObject SetDragon(Rect rect)
     {
-        var sourcePosition = new Vector3(rect.x + xLength / 2, heights[xCount / 2, yCount / 2], rect.y + yLength / 2); ;
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(sourcePosition, out hit, xLength, 1))
+        int i = xCount / 2;
+        int j = yCount / 2;
+        var height = heights[i, j];
+        if (height - Mathf.Floor(height) > dragonRandom)
         {
-            return Instantiate(dragon, hit.position, Quaternion.identity);
+            var xTick = rect.width / (xCount - 1);
+            var yTick = rect.height / (yCount - 1);
+            var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
+            {
+                return Instantiate(dragon, hit.position, Quaternion.identity);
+            }
         }
-
+        
         return null;
     }
 

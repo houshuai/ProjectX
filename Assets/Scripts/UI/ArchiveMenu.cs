@@ -1,17 +1,31 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 public class ArchiveMenu : Menu<ArchiveMenu>
 {
-    public Archive[] archives;
-
-    private SelectArchive[] selectArchives;
-
     protected override void Awake()
     {
         base.Awake();
 
-        selectArchives = GetComponentsInChildren<SelectArchive>();
+        Archive[] archives = null;
+        var fileName = Application.persistentDataPath + "/saves.arc";
+        if (File.Exists(fileName))
+        {
+            var bf = new BinaryFormatter();
+            using (var file = File.Open(fileName, FileMode.Open))
+            {
+                archives = (Archive[])bf.Deserialize(file);
+            }
+        }
+        else
+        {
+            archives = new Archive[] { new Archive(), new Archive(), new Archive() };
+        }
+        GameController.Instance.archives = archives;
+
+        var selectArchives = GetComponentsInChildren<SelectArchive>();
         for (int i = 0; i < archives.Length; i++)
         {
             selectArchives[i].archive = archives[i];
@@ -29,16 +43,16 @@ public class ArchiveMenu : Menu<ArchiveMenu>
         }
     }
 
-    public void OnArchive(Archive archive)
+    public void OnArchive()
     {
-        if (archive.isNew)
+        if (Archive.current.isNew)
         {
-            NewArchiveMenu.Open(archive);
+            NewArchiveMenu.Open();
         }
         else
         {
             MenuController.Instance.CloseAll();
-            GameController.Instance.LoadGame(archive);
+            GameController.Instance.LoadGame();
         }
     }
 }

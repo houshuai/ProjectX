@@ -8,6 +8,7 @@ public class SelectArchive : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        ArchiveMenu.Instance.OnArchive(archive);
+        Archive.current = archive;
+        ArchiveMenu.Instance.OnArchive();
     }
 }

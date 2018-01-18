@@ -6,7 +6,7 @@ public class PlayerInventory : MonoBehaviour
     public int size = 12;
     public Inventory inventory;
     [HideInInspector]
-    public List<string> ItemList { get; private set; }
+    public List<string> ItemList { get { return inventory.itemList; } }
 
     private PlayerMove playerMove;
     private PlayerHealth playerHealth;
@@ -15,8 +15,7 @@ public class PlayerInventory : MonoBehaviour
 
     private void Awake()
     {
-        inventory = GameController.Instance.currArchive.inventory;
-        ItemList = new List<string>();
+        inventory = Archive.current.inventory;
         playerMove = GetComponent<PlayerMove>();
         playerHealth = GetComponent<PlayerHealth>();
         playerAttack = GetComponent<PlayerAttack>();
@@ -25,12 +24,12 @@ public class PlayerInventory : MonoBehaviour
 
     public void AddItem(string name)
     {
-        if (ItemList.Count>12)
+        if (inventory.itemList.Count > 12)
         {
             return;
         }
 
-        ItemList.Add(name);
+        inventory.itemList.Add(name);
     }
 
     private void OnEnable()
@@ -46,7 +45,7 @@ public class PlayerInventory : MonoBehaviour
     private void OnDisable()
     {
         var instance = Scene.Instance;
-        if (instance!=null)
+        if (instance != null)
         {
             instance.BeforeUnload -= Save;
             instance.AfterLoaded -= Load;
@@ -55,24 +54,20 @@ public class PlayerInventory : MonoBehaviour
 
     private void Save()
     {
-        inventory.itemList.Clear();
-        inventory.itemList.AddRange(ItemList);
         inventory.current = currItem.name;
     }
 
     private void Load()
     {
-        ItemList.Clear();
-        ItemList.AddRange(inventory.itemList);
         string currName = inventory.current;
-        if (currName != "")
+        if (currName != null)
         {
             var prefab = Resources.Load<GameObject>(currName);
             var newModel = Instantiate(prefab);
             newModel.name = currName;
             ShiftModel(newModel.transform);
         }
-        
+
     }
 
     public void ShiftModel(Transform newModel)
@@ -87,5 +82,6 @@ public class PlayerInventory : MonoBehaviour
         playerHealth.anim = playerMove.anim;
         playerAttack.anim = anim;
         currItem = newModel.gameObject;
+        inventory.current = currItem.name;
     }
 }

@@ -622,7 +622,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
-  currArchive: {fileID: 0}
+  archives: []
 --- !u!4 &1961678343
 Transform:
   m_ObjectHideFlags: 0

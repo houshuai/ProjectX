@@ -34,6 +34,7 @@ public class InventoryMenu : Menu<InventoryMenu>
         {
             playerInventory.ShiftModel(currModel.transform);
         }
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void InitialGrid()

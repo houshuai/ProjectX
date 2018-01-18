@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,34 +26,38 @@ public class GameController : MonoBehaviour
     public FloatVariable health;
 
     [HideInInspector]
-    public Archive currArchive;
+    public Archive[] archives;
 
     private void OnEnable()
     {
-        Scene.Instance.AfterLoaded += SaveCurrScene;
+        Scene.Instance.BeforeUnload += SaveCurrScene;
     }
 
     private void OnDisable()
     {
-        Scene.Instance.AfterLoaded -= SaveCurrScene;
+        Scene.Instance.BeforeUnload -= SaveCurrScene;
     }
 
     private void SaveCurrScene()
     {
-        currArchive.currScene = SceneManager.GetActiveScene().name;
+        Archive.current.currScene = SceneManager.GetActiveScene().name;
+        var fileName = Application.persistentDataPath + "/saves.arc";
+        var bf = new BinaryFormatter();
+        using (var file = File.Create(fileName))
+        {
+            bf.Serialize(file, archives);
+        }
     }
-    
-    public void LoadGame(Archive archive)
-    {
-        currArchive = archive;
 
-        StartCoroutine(Scene.Instance.LoadScene(currArchive.currScene));
+    public void LoadGame()
+    {
+        StartCoroutine(Scene.Instance.LoadScene(Archive.current.currScene));
     }
 
     public void Restart()
     {
         PauseMenu.Close();
-        Scene.Instance.SwitchScene(currArchive.currScene);
+        Scene.Instance.SwitchScene(Archive.current.currScene);
         health.Value = 100;
     }
 

@@ -361,9 +361,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xLength: 200
   yLength: 200
-  xCount: 33
-  yCount: 33
-  lodCount: 2
+  xCount: 65
+  yCount: 65
+  lodCount: 3
 --- !u!4 &581292310
 Transform:
   m_ObjectHideFlags: 0
@@ -428,7 +428,7 @@ MonoBehaviour:
   firstHeight: 120
   secondHeight: 75
   thirdHeight: 30
-  plantScale: 2
+  plantScale: 4
   tree0Random: 0.95
   tree1Random: 0.9
   bushRandom: 0.8
