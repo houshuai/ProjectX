@@ -7,6 +7,7 @@ public class TerrainBuilder : MonoBehaviour
     public Material material;
     public Material waterMat;
     public GameObject dragon;
+    public GameObject skeleton;
     public int seed = 152411;
     public float[] frequencys = new float[] { 0.0001f, 0.005f, 0.05f, 0.5f };
     public float[] amplitudes = new float[] { 100, 50, 5, 1 };
@@ -18,6 +19,8 @@ public class TerrainBuilder : MonoBehaviour
     public float tree1Random = 0.9f;
     public float bushRandom = 0.8f;
     public float dragonRandom = 0.9f;
+    public int skeletonScale = 10;
+    public float skeletonRandom = 0.5f;
 
     [HideInInspector]
     public int[][][] lodIndices;
@@ -95,12 +98,15 @@ public class TerrainBuilder : MonoBehaviour
 
         SetWater(mesh, terrainObject.transform);
         terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform);
-        
+
         if (terrain.lod == 0)
         {
             terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
-            BuildNavMesh(terrainObject, rect);
-            terrain.dragonObject = SetDragon(rect);
+            var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
+            BuildNavMesh(terrainObject, rect, dragonID);
+            var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
+            BuildNavMesh(terrainObject, rect, skeletonID);
+            terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
         }
 
         terrain.mesh = mesh;
@@ -115,11 +121,17 @@ public class TerrainBuilder : MonoBehaviour
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
+            if (terrain.terrainObject.GetComponent<NavMeshSurface>() == null)
+            {
+                var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
+                BuildNavMesh(terrain.terrainObject, terrain.rect, dragonID);
+                var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
+                BuildNavMesh(terrain.terrainObject, terrain.rect, skeletonID);
+            }
             if (meshCollider == null)
             {
                 terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
-                BuildNavMesh(terrain.terrainObject, terrain.rect);
-                terrain.dragonObject = SetDragon(terrain.rect);
+                terrain.enemyObjects = SetEnemy(terrain.rect, terrain.terrainObject.transform);
             }
         }
         else if (meshCollider != null)
@@ -130,28 +142,30 @@ public class TerrainBuilder : MonoBehaviour
 
     public void Delete(Terrain terrain)
     {
-        if (terrain.dragonObject!=null)
-        {
-            Destroy(terrain.dragonObject);
-        }
         for (int i = 0; i < terrain.plantObjects.Count; i++)
         {
             terrain.plantObjects[i].transform.SetParent(transform);
             terrain.plantObjects[i].SetActive(false);
         }
+        if (terrain.enemyObjects != null)
+        {
+            for (int i = 0; i < terrain.enemyObjects.Count; i++)
+            {
+                Destroy(terrain.enemyObjects[i]);
+            }
+        }
         Destroy(terrain.terrainObject);
     }
 
-    private void BuildNavMesh(GameObject terrainObject, Rect rect)
+    private void BuildNavMesh(GameObject terrainObject, Rect rect,int agentID)
     {
-        var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
         float xTick = rect.width / (xCount - 1);
         float yTick = rect.height / (yCount - 1);
 
-        for (int i = 0; i < xCount - 1; i++)
+        for (int i = 0; i < xCount - 1; i+=2)
         {
             var link = terrainObject.AddComponent<NavMeshLink>();
-            link.agentTypeID = dragonID;
+            link.agentTypeID = agentID;
             link.width = xTick;
             var x = xTick * (i + 0.5f);                          //local position
             var y = yTick * (yCount - 2);
@@ -159,10 +173,10 @@ public class TerrainBuilder : MonoBehaviour
             link.endPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + 2 * yTick + y), y + 2 * yTick);
         }
 
-        for (int i = 0; i < yCount - 1; i++)
+        for (int i = 0; i < yCount - 1; i+=2)
         {
             var link = terrainObject.AddComponent<NavMeshLink>();
-            link.agentTypeID = dragonID;
+            link.agentTypeID = agentID;
             link.width = yTick;
             var x = xTick * (xCount - 2);                          //local position
             var y = yTick * (i + 0.5f);
@@ -171,7 +185,7 @@ public class TerrainBuilder : MonoBehaviour
         }
 
         var surface = terrainObject.AddComponent<NavMeshSurface>();
-        surface.agentTypeID = dragonID;
+        surface.agentTypeID = agentID;
         surface.collectObjects = CollectObjects.Children;
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.BuildNavMesh();
@@ -282,7 +296,7 @@ public class TerrainBuilder : MonoBehaviour
 
     private List<GameObject> SetPlant(Rect rect, Texture2D texture, Transform terrainTransform)
     {
-        var treeAndBushList = new List<GameObject>();
+        var plantList = new List<GameObject>();
         var green = new Color32(0, 255, 0, 0);
         var blue = new Color32(0, 0, 255, 0);
         float xTick = rect.width / (xCount - 1);
@@ -323,31 +337,62 @@ public class TerrainBuilder : MonoBehaviour
                 {
                     treeOrBush.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
                     treeOrBush.transform.SetParent(terrainTransform);
-                    treeAndBushList.Add(treeOrBush);
+                    plantList.Add(treeOrBush);
                 }
             }
         }
-        return treeAndBushList;
+        return plantList;
     }
 
-    private GameObject SetDragon(Rect rect)
+    private List<GameObject> SetEnemy(Rect rect, Transform terrainTransform)
     {
+        var enemyList = new List<GameObject>();
         int i = xCount / 2;
         int j = yCount / 2;
+        var xTick = rect.width / (xCount - 1);
+        var yTick = rect.height / (yCount - 1);
         var height = heights[i, j];
         if (height - Mathf.Floor(height) > dragonRandom)
         {
-            var xTick = rect.width / (xCount - 1);
-            var yTick = rect.height / (yCount - 1);
             var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
             NavMeshHit hit;
             if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
             {
-                return Instantiate(dragon, hit.position, Quaternion.identity);
+                enemyList.Add(Instantiate(dragon, hit.position, Quaternion.identity));
             }
         }
-        
-        return null;
+        var ss = skeletonScale / 2;
+        for (i = ss; i < xCount - ss; i += skeletonScale)
+        {
+            for (j = ss; j < yCount - ss; j += skeletonScale)
+            {
+                height = heights[i, j];
+                if (height - Mathf.Floor(height) < skeletonRandom)
+                {
+                    var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
+                    {
+                        var skObj = Instantiate(skeleton, hit.position, Quaternion.identity);
+                        enemyList.Add(skObj);
+
+                        var pos = new GameObject[4] { new GameObject(), new GameObject(), new GameObject(), new GameObject(), };
+                        for (int i0 = 0; i0 < 4; i0++)
+                        {
+                            pos[i0].transform.SetParent(terrainTransform);
+                        }
+                        pos[0].transform.position = new Vector3(rect.x + (i - ss) * xTick, heights[i - ss, j - ss], rect.y + (j - ss) * yTick);
+                        pos[1].transform.position = new Vector3(rect.x + (i + ss) * xTick, heights[i + ss, j - ss], rect.y + (j - ss) * yTick);
+                        pos[2].transform.position = new Vector3(rect.x + (i + ss) * xTick, heights[i + ss, j + ss], rect.y + (j + ss) * yTick);
+                        pos[3].transform.position = new Vector3(rect.x + (i - ss) * xTick, heights[i - ss, j + ss], rect.y + (j + ss) * yTick);
+                        var sk = skObj.GetComponent<Skeleton>();
+                        sk.patrolPos = new Transform[] { pos[0].transform, pos[1].transform, pos[2].transform, pos[3].transform };
+                    }
+                }
+            }
+        }
+
+        return enemyList;
     }
 
     private int[][] InitialIndices(int lod)
@@ -642,7 +687,7 @@ public class Terrain
     public Mesh mesh;
     public GameObject terrainObject;
     public List<GameObject> plantObjects;
-    public GameObject dragonObject;
+    public List<GameObject> enemyObjects;
 
     public Terrain(int lod, MeshType type)
     {

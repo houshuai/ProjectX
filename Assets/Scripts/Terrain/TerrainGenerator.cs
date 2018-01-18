@@ -37,7 +37,8 @@ public class TerrainGenerator : MonoBehaviour
             var row = allTerrain[i];
             for (int j = 0; j < allTerrain[i].Length; j++)
             {
-                row[j].rect = new Rect(-2 * xLength + j * xLength, 2 * yLength - i * yLength, xLength, yLength);
+                row[j].rect = new Rect(-allTerrain[0].Length / 2 * xLength + j * xLength, 
+                    allTerrain.Length / 2 * yLength - i * yLength, xLength, yLength);
                 builder.Build(row[j]);
             }
         }
@@ -49,7 +50,7 @@ public class TerrainGenerator : MonoBehaviour
         var pos = player.position;
         int xTileCount = allTerrain.Length;
         int yTileCount = allTerrain[0].Length;
-        var center = allTerrain[3][3].rect;
+        var center = allTerrain[allTerrain.Length / 2][allTerrain[0].Length / 2].rect;
 
         if (pos.x < center.xMin)
         {
@@ -63,7 +64,7 @@ public class TerrainGenerator : MonoBehaviour
                     row[j].mesh = row[j - 1].mesh;
                     row[j].terrainObject = row[j - 1].terrainObject;
                     row[j].plantObjects = row[j - 1].plantObjects;
-                    row[j].dragonObject = row[j - 1].dragonObject;
+                    row[j].enemyObjects = row[j - 1].enemyObjects;
                     builder.UpdateMesh(row[j]);
                 }
                 row[0].rect.x -= xLength;
@@ -75,13 +76,13 @@ public class TerrainGenerator : MonoBehaviour
             for (int j = 0; j < yTileCount; j++)
             {
                 builder.Delete(allTerrain[0][j]);
-                for (int i = 0; i < xTileCount; i++)
+                for (int i = 0; i < xTileCount - 1; i++)
                 {
                     allTerrain[i][j].rect = allTerrain[i + 1][j].rect;
                     allTerrain[i][j].mesh = allTerrain[i + 1][j].mesh;
                     allTerrain[i][j].terrainObject = allTerrain[i + 1][j].terrainObject;
                     allTerrain[i][j].plantObjects = allTerrain[i + 1][j].plantObjects;
-                    allTerrain[i][j].dragonObject = allTerrain[i + 1][j].dragonObject;
+                    allTerrain[i][j].enemyObjects = allTerrain[i + 1][j].enemyObjects;
                     builder.UpdateMesh(allTerrain[i][j]);
                 }
                 allTerrain[xTileCount - 1][j].rect.y -= yLength;
@@ -94,13 +95,13 @@ public class TerrainGenerator : MonoBehaviour
             {
                 var row = allTerrain[i];
                 builder.Delete(row[0]);
-                for (int j = 0; j < yTileCount; j++)
+                for (int j = 0; j < yTileCount - 1; j++)
                 {
                     row[j].rect = row[j + 1].rect;
                     row[j].mesh = row[j + 1].mesh;
                     row[j].terrainObject = row[j + 1].terrainObject;
                     row[j].plantObjects = row[j + 1].plantObjects;
-                    row[j].dragonObject = row[j + 1].dragonObject;
+                    row[j].enemyObjects = row[j + 1].enemyObjects;
                     builder.UpdateMesh(row[j]);
                 }
                 row[yTileCount - 1].rect.x += xLength;
@@ -118,7 +119,7 @@ public class TerrainGenerator : MonoBehaviour
                     allTerrain[i][j].mesh = allTerrain[i - 1][j].mesh;
                     allTerrain[i][j].terrainObject = allTerrain[i - 1][j].terrainObject;
                     allTerrain[i][j].plantObjects = allTerrain[i - 1][j].plantObjects;
-                    allTerrain[i][j].dragonObject = allTerrain[i - 1][j].dragonObject;
+                    allTerrain[i][j].enemyObjects = allTerrain[i - 1][j].enemyObjects;
                     builder.UpdateMesh(allTerrain[i][j]);
                 }
                 allTerrain[0][j].rect.y += yLength;

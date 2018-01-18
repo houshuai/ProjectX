@@ -6,7 +6,7 @@ public class SimplexNoise
     private SimplexNoiseOctave octave;
     private float[] frequencys;
     private float[] amplitudes;
-    private float firstFreq;
+    private float frequency;
 
     public SimplexNoise(int seed, float[] frequencys, float[] amplitudes)
     {
@@ -17,12 +17,12 @@ public class SimplexNoise
         {
             octaves[i] = new SimplexNoiseOctave(random.Next());
         }
-        
+
         octave = new SimplexNoiseOctave(random.Next());
 
         this.frequencys = frequencys;
         this.amplitudes = amplitudes;
-        firstFreq = frequencys[0];
+        frequency = frequencys[0] * 5;
     }
 
     public float GetOctave(float x, float y)
@@ -36,9 +36,9 @@ public class SimplexNoise
         return result;
     }
 
-    public float GetSingle(float x,float y)
+    public float GetSingle(float x, float y)
     {
-        return octave.Noise(x *firstFreq, y * firstFreq);
+        return octave.Noise(x * frequency, y * frequency);
     }
 }
 
