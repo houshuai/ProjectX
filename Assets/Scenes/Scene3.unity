@@ -414,8 +414,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: f77effa03ec98224088fd2e2ea5bafb6, type: 2}
   waterMat: {fileID: 2100000, guid: 8ff6c6b3c8da622488e6c0113ebcf0c2, type: 2}
   dragon: {fileID: 101568, guid: 5e82fa60d0b0710499c784acbfa26818, type: 2}
-  skeleton: {fileID: 1986909078851782, guid: 3ece224aa017d3b44b891164ba614a0b, type: 2}
-  seed: 2558
+  skeleton: {fileID: 1986909078851782, guid: e600a3d0c85452346ad091965a231618, type: 2}
+  seed: 7245
   frequencys:
   - 0.0002
   - 0.005

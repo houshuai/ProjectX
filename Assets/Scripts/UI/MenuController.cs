@@ -45,21 +45,32 @@ public class MenuController : MonoBehaviour
         if (health.Value <= 0)
         {
             PauseMenu.Open();
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
         }
     }
 
     private void Update()
     {
-        if (Input.GetButtonDown("Cancel") && menuStack.Count == 0)
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            PauseMenu.Open();
-            Cursor.lockState = CursorLockMode.None;
+            if (menuStack.Count == 0)
+            {
+                PauseMenu.Open();
+                //Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+            }
+            else if (!(menuStack.Peek() as MainMenu))
+            {
+                CloseMenu();
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.I) && menuStack.Count == 0)
         {
             InventoryMenu.Open();
-            Cursor.lockState = CursorLockMode.None;
+            //Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
         }
     }
 
@@ -105,7 +116,7 @@ public class MenuController : MonoBehaviour
         {
             return pauseMenu as T;
         }
-        else if (typeof(T)==typeof(InventoryMenu))
+        else if (typeof(T) == typeof(InventoryMenu))
         {
             return inventoryMenu as T;
         }
@@ -126,7 +137,8 @@ public class MenuController : MonoBehaviour
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
     }
 
@@ -136,5 +148,7 @@ public class MenuController : MonoBehaviour
         {
             Destroy(menuStack.Pop().gameObject);
         }
+        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 }

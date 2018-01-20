@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TerrainGenerator : MonoBehaviour
+public class TerrainController : MonoBehaviour
 {
     [Header("must be 2^n + 1")]
     public int xCount = 33;
@@ -45,7 +45,7 @@ public class TerrainGenerator : MonoBehaviour
 
     }
 
-    private void Update()
+    private void xxUpdate()
     {
         var pos = player.position;
         int xTileCount = allTerrain.Length;

@@ -34,7 +34,6 @@ public class Taichi : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
         cam = Camera.main.transform;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();

@@ -4,7 +4,8 @@ public class MainMenu : Menu<MainMenu>
 {
     private void OnEnable()
     {
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
     }
 
     public void OnStart()

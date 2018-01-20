@@ -22,8 +22,7 @@ public class TerrainBuilder : MonoBehaviour
     public int skeletonScale = 10;
     public float skeletonRandom = 0.5f;
 
-    [HideInInspector]
-    public int[][][] lodIndices;
+    private int[][][] lodIndices;
 
     private int xCount, yCount;
     private int xGap, yGap;
@@ -31,6 +30,7 @@ public class TerrainBuilder : MonoBehaviour
     private float[,] heights;
     private float[,] moisture;
     private PlantPool plantPool;
+    private ChaseMesh chaseMesh;
 
     public void Initial(int xCount, int yCount, int lodCount)
     {
@@ -49,6 +49,7 @@ public class TerrainBuilder : MonoBehaviour
         moisture = new float[xCount, yCount];
         plantPool = GetComponent<PlantPool>();
         plantPool.InitialPool();
+        chaseMesh = new ChaseMesh(xCount, yCount);
     }
 
     public void Build(Terrain terrain)
@@ -59,10 +60,12 @@ public class TerrainBuilder : MonoBehaviour
         float yTick = rect.height / (yCount - 1);
         float u = 1.0f / (xCount - 1);
         float v = 1.0f / (yCount - 1);
-        var uvs = new Vector2[vertexCount];
+
+        var nodes = new Node[xCount, yCount];
 
         int index = 0;
         var vertices = new Vector3[vertexCount];
+        var uvs = new Vector2[vertexCount];
         for (int j = 0; j < yCount; j++)
         {
             for (int i = 0; i < xCount; i++)
@@ -73,6 +76,7 @@ public class TerrainBuilder : MonoBehaviour
                 heights[i, j] = height;
                 moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
                 vertices[index] = new Vector3(x, height, y);
+                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), true, xTick, yTick);
                 uvs[index] = new Vector2(i * u, j * v);
                 index++;
             }
@@ -97,15 +101,17 @@ public class TerrainBuilder : MonoBehaviour
         terrainObject.layer = LayerMask.NameToLayer("Terrain");
 
         SetWater(mesh, terrainObject.transform);
-        terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform);
+        terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform, nodes);
 
         if (terrain.lod == 0)
         {
             terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
-            var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
-            BuildNavMesh(terrainObject, rect, dragonID);
-            var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
-            BuildNavMesh(terrainObject, rect, skeletonID);
+            //var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
+            //BuildNavMesh(terrainObject, rect, dragonID);
+            //var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
+            //BuildNavMesh(terrainObject, rect, skeletonID);
+            //terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
+            chaseMesh.AddData(rect, nodes);
             terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
         }
 
@@ -121,13 +127,13 @@ public class TerrainBuilder : MonoBehaviour
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
-            if (terrain.terrainObject.GetComponent<NavMeshSurface>() == null)
-            {
-                var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
-                BuildNavMesh(terrain.terrainObject, terrain.rect, dragonID);
-                var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
-                BuildNavMesh(terrain.terrainObject, terrain.rect, skeletonID);
-            }
+            //if (terrain.terrainObject.GetComponent<NavMeshSurface>() == null)
+            //{
+            //    var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
+            //    BuildNavMesh(terrain.terrainObject, terrain.rect, dragonID);
+            //    var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
+            //    BuildNavMesh(terrain.terrainObject, terrain.rect, skeletonID);
+            //}
             if (meshCollider == null)
             {
                 terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
@@ -157,39 +163,39 @@ public class TerrainBuilder : MonoBehaviour
         Destroy(terrain.terrainObject);
     }
 
-    private void BuildNavMesh(GameObject terrainObject, Rect rect,int agentID)
-    {
-        float xTick = rect.width / (xCount - 1);
-        float yTick = rect.height / (yCount - 1);
+    //private void BuildNavMesh(GameObject terrainObject, Rect rect,int agentID)
+    //{
+    //    float xTick = rect.width / (xCount - 1);
+    //    float yTick = rect.height / (yCount - 1);
 
-        for (int i = 0; i < xCount - 1; i+=2)
-        {
-            var link = terrainObject.AddComponent<NavMeshLink>();
-            link.agentTypeID = agentID;
-            link.width = xTick;
-            var x = xTick * (i + 0.5f);                          //local position
-            var y = yTick * (yCount - 2);
-            link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
-            link.endPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + 2 * yTick + y), y + 2 * yTick);
-        }
+    //    for (int i = 0; i < xCount - 1; i+=2)
+    //    {
+    //        var link = terrainObject.AddComponent<NavMeshLink>();
+    //        link.agentTypeID = agentID;
+    //        link.width = xTick;
+    //        var x = xTick * (i + 0.5f);                          //local position
+    //        var y = yTick * (yCount - 2);
+    //        link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
+    //        link.endPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + 2 * yTick + y), y + 2 * yTick);
+    //    }
 
-        for (int i = 0; i < yCount - 1; i+=2)
-        {
-            var link = terrainObject.AddComponent<NavMeshLink>();
-            link.agentTypeID = agentID;
-            link.width = yTick;
-            var x = xTick * (xCount - 2);                          //local position
-            var y = yTick * (i + 0.5f);
-            link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
-            link.endPoint = new Vector3(x + 2 * xTick, noise.GetOctave(rect.x + x + 2 * xTick, rect.y + y), y);
-        }
+    //    for (int i = 0; i < yCount - 1; i+=2)
+    //    {
+    //        var link = terrainObject.AddComponent<NavMeshLink>();
+    //        link.agentTypeID = agentID;
+    //        link.width = yTick;
+    //        var x = xTick * (xCount - 2);                          //local position
+    //        var y = yTick * (i + 0.5f);
+    //        link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
+    //        link.endPoint = new Vector3(x + 2 * xTick, noise.GetOctave(rect.x + x + 2 * xTick, rect.y + y), y);
+    //    }
 
-        var surface = terrainObject.AddComponent<NavMeshSurface>();
-        surface.agentTypeID = agentID;
-        surface.collectObjects = CollectObjects.Children;
-        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        surface.BuildNavMesh();
-    }
+    //    var surface = terrainObject.AddComponent<NavMeshSurface>();
+    //    surface.agentTypeID = agentID;
+    //    surface.collectObjects = CollectObjects.Children;
+    //    surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+    //    surface.BuildNavMesh();
+    //}
 
     private Texture2D GetMaskTexture()
     {
@@ -294,7 +300,7 @@ public class TerrainBuilder : MonoBehaviour
         return waterObject;
     }
 
-    private List<GameObject> SetPlant(Rect rect, Texture2D texture, Transform terrainTransform)
+    private List<GameObject> SetPlant(Rect rect, Texture2D texture, Transform terrainTransform, Node[,] nodes)
     {
         var plantList = new List<GameObject>();
         var green = new Color32(0, 255, 0, 0);
@@ -302,42 +308,47 @@ public class TerrainBuilder : MonoBehaviour
         float xTick = rect.width / (xCount - 1);
         float yTick = rect.height / (yCount - 1);
 
-        for (int j = 0; j < yCount; j += plantScale)
+        for (int j = 1; j < yCount - 1; j += plantScale)//不在边界上种树，node的walkablebu方便设置
         {
-            for (int i = 0; i < xCount; i += plantScale)
+            for (int i = 1; i < xCount - 1; i += plantScale)
             {
                 var height = heights[i, j];
                 var random = height - Mathf.Floor(height);
                 var color = texture.GetPixel(i, j);
-                GameObject treeOrBush = null;
+                GameObject plant = null;
                 if (color == blue)
                 {
                     if (random > tree0Random)
                     {
-                        treeOrBush = plantPool.GetTree(0);
+                        plant = plantPool.GetTree(0);
                     }
                     else if (random > bushRandom)
                     {   //the range of random is (bushRandom, tree0Random)  
-                        treeOrBush = plantPool.GetBush((random - bushRandom) / (tree0Random - bushRandom));
+                        plant = plantPool.GetBush((random - bushRandom) / (tree0Random - bushRandom));
                     }
                 }
                 else if (color == green)
                 {
                     if (random > tree1Random)
                     {
-                        treeOrBush = plantPool.GetTree(1);
+                        plant = plantPool.GetTree(1);
                     }
                     else if (random > bushRandom)
                     {
-                        treeOrBush = plantPool.GetBush((random - bushRandom) / (tree1Random - bushRandom));
+                        plant = plantPool.GetBush((random - bushRandom) / (tree1Random - bushRandom));
                     }
                 }
 
-                if (treeOrBush != null)
+                if (plant != null)
                 {
-                    treeOrBush.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-                    treeOrBush.transform.SetParent(terrainTransform);
-                    plantList.Add(treeOrBush);
+                    plant.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+                    plant.transform.SetParent(terrainTransform);
+                    plantList.Add(plant);
+                    nodes[i, j].isWalkable = false;
+                    nodes[i - 1, j].isWalkable = false;
+                    nodes[i + 1, j].isWalkable = false;
+                    nodes[i, j - 1].isWalkable = false;
+                    nodes[i, j + 1].isWalkable = false;
                 }
             }
         }
@@ -354,12 +365,12 @@ public class TerrainBuilder : MonoBehaviour
         var height = heights[i, j];
         if (height - Mathf.Floor(height) > dragonRandom)
         {
-            var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
-            {
-                enemyList.Add(Instantiate(dragon, hit.position, Quaternion.identity));
-            }
+            //var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+            //NavMeshHit hit;
+            //if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
+            //{
+            //    enemyList.Add(Instantiate(dragon, hit.position, Quaternion.identity));
+            //}
         }
         var ss = skeletonScale / 2;
         for (i = ss; i < xCount - ss; i += skeletonScale)
@@ -370,31 +381,23 @@ public class TerrainBuilder : MonoBehaviour
                 if (height - Mathf.Floor(height) < skeletonRandom)
                 {
                     var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-                    NavMeshHit hit;
-                    if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
-                    {
-                        var skObj = Instantiate(skeleton, hit.position, Quaternion.identity);
-                        enemyList.Add(skObj);
-
-                        var pos = new GameObject[4] { new GameObject(), new GameObject(), new GameObject(), new GameObject(), };
-                        for (int i0 = 0; i0 < 4; i0++)
-                        {
-                            pos[i0].transform.SetParent(terrainTransform);
-                        }
-                        pos[0].transform.position = new Vector3(rect.x + (i - ss) * xTick, heights[i - ss, j - ss], rect.y + (j - ss) * yTick);
-                        pos[1].transform.position = new Vector3(rect.x + (i + ss) * xTick, heights[i + ss, j - ss], rect.y + (j - ss) * yTick);
-                        pos[2].transform.position = new Vector3(rect.x + (i + ss) * xTick, heights[i + ss, j + ss], rect.y + (j + ss) * yTick);
-                        pos[3].transform.position = new Vector3(rect.x + (i - ss) * xTick, heights[i - ss, j + ss], rect.y + (j + ss) * yTick);
-                        var sk = skObj.GetComponent<Skeleton>();
-                        sk.patrolPos = new Transform[] { pos[0].transform, pos[1].transform, pos[2].transform, pos[3].transform };
-                    }
+                    //NavMeshHit hit;
+                    //if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
+                    //{
+                    //    var skObj = Instantiate(skeleton, hit.position, Quaternion.identity);
+                    //    enemyList.Add(skObj);
+                    var skObj = Instantiate(skeleton, sourcePosition, Quaternion.identity);
+                    enemyList.Add(skObj);
+                    //}
+                    
                 }
             }
         }
 
         return enemyList;
     }
-
+    
+    #region set lod indices
     private int[][] InitialIndices(int lod)
     {
         int scale = 1 << lod;
@@ -662,6 +665,7 @@ public class TerrainBuilder : MonoBehaviour
         indices[startIndex++] = nextNext + 2 * offset;
         return startIndex;
     }
+    #endregion
 }
 
 public enum MeshType

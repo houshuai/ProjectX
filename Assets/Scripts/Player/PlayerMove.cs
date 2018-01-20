@@ -38,7 +38,6 @@ public class PlayerMove : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
         cam = Camera.main.transform;
         rb = GetComponent<Rigidbody>();
         if (anim == null) anim = GetComponentInChildren<Animator>();

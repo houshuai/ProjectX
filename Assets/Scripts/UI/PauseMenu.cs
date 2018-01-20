@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 
 public class PauseMenu : Menu<PauseMenu>
 {
@@ -14,11 +13,6 @@ public class PauseMenu : Menu<PauseMenu>
         {
             resumeButton.interactable = false;
         }
-    }
-
-    private void Destroy()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void Restart()
