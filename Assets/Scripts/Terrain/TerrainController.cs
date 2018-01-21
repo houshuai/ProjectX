@@ -45,7 +45,7 @@ public class TerrainController : MonoBehaviour
 
     }
 
-    private void xxUpdate()
+    private void Update()
     {
         var pos = player.position;
         int xTileCount = allTerrain.Length;

@@ -24,7 +24,7 @@ public class ChaseMesh
             {
                 foreach (var node in allNodes[i])
                 {
-                    if (Vector3.Distance(node.position, position) < 1.0f)
+                    if (Vector3.Distance(node.center, position) < 1.0f)
                     {
                         result = node;
                     }
@@ -32,6 +32,42 @@ public class ChaseMesh
             }
         }
         return result;
+    }
+
+    public Node[,] BuildMesh(Rect rect, GameObject terrainObject, List<GameObject> plantList)
+    {
+        if (allRect.Contains(rect))
+        {
+            return null;
+        }
+
+        var vertices = terrainObject.GetComponent<MeshFilter>().mesh.vertices;
+        var xTick = rect.width / (xCountOfTile - 1);
+        var yTick = rect.height / (yCountOfTile - 1);
+        var pos = terrainObject.transform.position;
+
+        var nodes = new Node[xCountOfTile, yCountOfTile];
+        int index = 0;
+        for (int j = 0; j < yCountOfTile; j++)
+        {
+            for (int i = 0; i < xCountOfTile; i++)
+            {
+                var v = vertices[index++];
+                nodes[i, j] = new Node(new Vector3(pos.x + v.x, pos.y + v.y, pos.z + v.z), xTick, yTick, true);
+            }
+        }
+
+        foreach (var plant in plantList)
+        {
+            var p = plant.transform.localPosition;
+            int x = (int)(p.x / xTick);
+            int y = (int)(p.z / yTick);
+            nodes[x, y].isWalkable = false;
+        }
+
+        AddData(rect, nodes);
+
+        return nodes;
     }
 
     public void AddData(Rect rect, Node[,] nodes)
@@ -123,17 +159,18 @@ public class ChaseMesh
 public class Node
 {
     public List<Node> neighbors;
-    public Vector3 position;
+    public Vector3 center;
+    public float xMin, yMin, xMax, yMax;
     public bool isWalkable;
 
-    private float xHalfLen, yHalfLen;
-
-    public Node(Vector3 position, bool isWalkable, float xLen, float yLen)
+    public Node(Vector3 center, float xLen, float yLen, bool isWalkable)
     {
-        this.position = position;
+        this.center = center;
+        xMin = center.x - xLen / 2;
+        yMin = center.z - yLen / 2;
+        xMax = center.x + xLen / 2;
+        yMax = center.z + yLen / 2;
         this.isWalkable = isWalkable;
-        xHalfLen = xLen / 2;
-        yHalfLen = yLen / 2;
         neighbors = new List<Node>();
     }
 
@@ -148,9 +185,6 @@ public class Node
 
     public bool Contains(Vector3 point)
     {
-        bool test = point.x < position.x - xHalfLen || point.x > position.x + xHalfLen ||
-            point.y < position.y - yHalfLen || point.y > position.y + yHalfLen;
-
-        return !test;
+        return point.x > xMin && point.x < xMax && point.z > yMin && point.z < yMax;
     }
 }

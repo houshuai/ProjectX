@@ -6,21 +6,24 @@ public class ChaseAgent : MonoBehaviour
     public float turnSpeed;
     [HideInInspector]
     public float actualSpeed;
-    public float Remaining { get { return Vector3.Distance(transform.position, target); } }
-
-    private Rigidbody rb;
+    public float Remaining
+    {
+        get
+        {
+            return Vector3.Distance(transform.position, target);
+        }
+    }
+    
     private Node currNode;
     private Vector3 target;
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody>();
         currNode = ChaseMesh.GetNode(transform.position);
         if (currNode == null)
         {
             Debug.LogWarning("chase agent not get node");
         }
-        target = transform.position;
     }
 
     public void Chase(Vector3 target)
@@ -36,15 +39,14 @@ public class ChaseAgent : MonoBehaviour
             float distance = float.MaxValue;
             foreach (var neighbor in currNode.neighbors)
             {
-                var temp = Vector3.Distance(neighbor.position, target);
+                var temp = Vector3.Distance(neighbor.center, target);
                 if (distance > temp)
                 {
                     distance = temp;
                     next = neighbor;
                 }
             }
-
-            MoveAndRotate(next.position);
+            MoveAndRotate(next.center);
 
             if (next.Contains(transform.position))
             {
@@ -55,15 +57,17 @@ public class ChaseAgent : MonoBehaviour
 
     private void MoveAndRotate(Vector3 moveTo)
     {
-        var vector = new Vector2(moveTo.x - currNode.position.x, moveTo.z - currNode.position.z);
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
+        var vector = moveTo - transform.position;
+        var vectorGround = new Vector3(vector.x, 0, vector.z).normalized;
 
-        var rotation = Quaternion.LookRotation(new Vector3(vector.x, 0, vector.y));
-        rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime));
+        var rotation = Quaternion.LookRotation(vectorGround);
+        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, turnSpeed * Time.deltaTime);
 
-        var desiredSpeed = speed * Mathf.Cos(angle * Mathf.Deg2Rad);
+        var moveDir = Quaternion.FromToRotation(vectorGround, vector) * transform.forward;
+        var desiredSpeed = speed * Vector3.Dot(vectorGround, transform.forward);
+        desiredSpeed *= Vector3.Dot(transform.forward, moveDir);
         desiredSpeed = Mathf.Max(0, desiredSpeed);
         actualSpeed = Mathf.Lerp(actualSpeed, desiredSpeed, 0.1f);
-        rb.velocity = transform.forward * actualSpeed;
+        transform.position += moveDir * actualSpeed * Time.deltaTime;
     }
 }

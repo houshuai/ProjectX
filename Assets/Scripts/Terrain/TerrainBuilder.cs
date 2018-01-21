@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class TerrainBuilder : MonoBehaviour
 {
@@ -76,7 +75,7 @@ public class TerrainBuilder : MonoBehaviour
                 heights[i, j] = height;
                 moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
                 vertices[index] = new Vector3(x, height, y);
-                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), true, xTick, yTick);
+                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), xTick, yTick, true);
                 uvs[index] = new Vector2(i * u, j * v);
                 index++;
             }
@@ -112,7 +111,7 @@ public class TerrainBuilder : MonoBehaviour
             //BuildNavMesh(terrainObject, rect, skeletonID);
             //terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
             chaseMesh.AddData(rect, nodes);
-            terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
+            terrain.enemyObjects = SetEnemy(rect, nodes);
         }
 
         terrain.mesh = mesh;
@@ -137,12 +136,9 @@ public class TerrainBuilder : MonoBehaviour
             if (meshCollider == null)
             {
                 terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
-                terrain.enemyObjects = SetEnemy(terrain.rect, terrain.terrainObject.transform);
+                var nodes = chaseMesh.BuildMesh(terrain.rect, terrain.terrainObject, terrain.plantObjects);
+                terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
-        }
-        else if (meshCollider != null)
-        {
-            Destroy(meshCollider);
         }
     }
 
@@ -150,8 +146,7 @@ public class TerrainBuilder : MonoBehaviour
     {
         for (int i = 0; i < terrain.plantObjects.Count; i++)
         {
-            terrain.plantObjects[i].transform.SetParent(transform);
-            terrain.plantObjects[i].SetActive(false);
+            plantPool.Reuse(terrain.plantObjects[i]);
         }
         if (terrain.enemyObjects != null)
         {
@@ -308,7 +303,7 @@ public class TerrainBuilder : MonoBehaviour
         float xTick = rect.width / (xCount - 1);
         float yTick = rect.height / (yCount - 1);
 
-        for (int j = 1; j < yCount - 1; j += plantScale)//不在边界上种树，node的walkablebu方便设置
+        for (int j = 1; j < yCount - 1; j += plantScale)//不在边界上种树，node的walkable不方便设置
         {
             for (int i = 1; i < xCount - 1; i += plantScale)
             {
@@ -355,29 +350,30 @@ public class TerrainBuilder : MonoBehaviour
         return plantList;
     }
 
-    private List<GameObject> SetEnemy(Rect rect, Transform terrainTransform)
+    private List<GameObject> SetEnemy(Rect rect, Node[,] nodes)
     {
         var enemyList = new List<GameObject>();
         int i = xCount / 2;
         int j = yCount / 2;
         var xTick = rect.width / (xCount - 1);
         var yTick = rect.height / (yCount - 1);
-        var height = heights[i, j];
+        var height = nodes[i, j].center.y;
         if (height - Mathf.Floor(height) > dragonRandom)
         {
-            //var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+            var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
             //NavMeshHit hit;
             //if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
             //{
             //    enemyList.Add(Instantiate(dragon, hit.position, Quaternion.identity));
             //}
+            enemyList.Add(Instantiate(dragon, sourcePosition, Quaternion.identity));
         }
         var ss = skeletonScale / 2;
         for (i = ss; i < xCount - ss; i += skeletonScale)
         {
             for (j = ss; j < yCount - ss; j += skeletonScale)
             {
-                height = heights[i, j];
+                height = nodes[i, j].center.y;
                 if (height - Mathf.Floor(height) < skeletonRandom)
                 {
                     var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
@@ -386,17 +382,15 @@ public class TerrainBuilder : MonoBehaviour
                     //{
                     //    var skObj = Instantiate(skeleton, hit.position, Quaternion.identity);
                     //    enemyList.Add(skObj);
-                    var skObj = Instantiate(skeleton, sourcePosition, Quaternion.identity);
-                    enemyList.Add(skObj);
                     //}
-                    
+                    enemyList.Add(Instantiate(skeleton, sourcePosition, Quaternion.identity));
                 }
             }
         }
 
         return enemyList;
     }
-    
+
     #region set lod indices
     private int[][] InitialIndices(int lod)
     {

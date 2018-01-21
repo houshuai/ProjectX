@@ -1267,7 +1267,7 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
@@ -1382,7 +1382,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   totalHealth: 100
   deadClip: {fileID: 8300000, guid: 4debf191f6d7c2b42805b83d91d9b3fb, type: 3}
-  sightRange: 10
+  sightRange: 20
   sightAngle: 60
   patrolSpeed: 1
   chaseSpeed: 2
@@ -1390,7 +1390,6 @@ MonoBehaviour:
   attackDamage: 24
   attackClip: {fileID: 8300000, guid: 068fc62a002dc6c469a65aaaba39bc39, type: 3}
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
-  patrolPos: []
 --- !u!114 &114793166500046940
 MonoBehaviour:
   m_ObjectHideFlags: 1

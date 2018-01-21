@@ -1,9 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.UI;
 
-public class NavDragon : Monster
+public class ChaseDragon : Monster
 {
     public enum FSMState
     {
@@ -37,10 +35,8 @@ public class NavDragon : Monster
     public AudioClip damageClip;
     public Transform flamePos;
     public FloatVariable playerHealth;
-    public Slider healthSlider;
-
-    private Rigidbody rb;
-    private NavMeshAgent nav;
+    
+    private ChaseAgent chaseAgent;
 
     private FSMState currState;
     private float currSpeed;
@@ -50,7 +46,6 @@ public class NavDragon : Monster
     private bool firstFly, secondFly;
     private bool playerInBox;
     private LayerMask terrainLayer;
-    private LayerMask obstacleLayer;
     private WaitForSeconds waitForAttack;
     private WaitForSeconds waitClawAttack1;
     private WaitForSeconds waitClawAttack2;
@@ -60,8 +55,7 @@ public class NavDragon : Monster
         anim = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
         health = totalHealth;
-        rb = GetComponent<Rigidbody>();
-        nav = GetComponent<NavMeshAgent>();
+        chaseAgent = GetComponent<ChaseAgent>();
 
         currState = FSMState.Idle;
         dustParticle.Stop();
@@ -69,7 +63,6 @@ public class NavDragon : Monster
         var playerObject = GameObject.FindGameObjectWithTag(Tags.Player);
         player = playerObject.transform;
         terrainLayer = 1 << LayerMask.NameToLayer("Terrain");
-        obstacleLayer = ~(terrainLayer | (1 << LayerMask.NameToLayer("Player")));
 
         waitForAttack = new WaitForSeconds(0.32f);
         waitClawAttack1 = new WaitForSeconds(0.5f);
@@ -172,26 +165,16 @@ public class NavDragon : Monster
         
         if (distance < nearby)
         {
-            nav.speed = walkSpeed;
+            chaseAgent.speed = walkSpeed;
         }
         else
         {
-            nav.speed = runSpeed;
+            chaseAgent.speed = runSpeed;
         }
+        
+        chaseAgent.Chase(player.position);
 
-        if (!nav.pathPending)
-        {
-            nav.destination = player.position;
-        }
-
-        anim.SetFloat(Hashes.SpeedFloat, nav.velocity.magnitude);
-        //RaycastHit hit;
-        //if (Physics.Raycast(transform.position + transform .up, -transform.up, out hit, 3, terrainLayer))
-        //{
-        //    //transform.up = hit.normal;
-        //    var rotation = transform.rotation * Quaternion.FromToRotation(transform.up, hit.normal);
-        //    rb.MoveRotation(Quaternion.Lerp(transform.rotation, rotation, 0.5f));
-        //}
+        anim.SetFloat(Hashes.SpeedFloat, chaseAgent.actualSpeed);
     }
 
     private void UpdateFlyChase()
@@ -213,23 +196,19 @@ public class NavDragon : Monster
             flyTimer = 0;
             currState = FSMState.Land;
             anim.SetBool(Hashes.FlyBool, false);
-            rb.useGravity = true;
             return;
         }
         
         if (distance < nearby)
         {
-            nav.speed = glideSpeed;
+            chaseAgent.speed = glideSpeed;
         }
         else
         {
-            nav.speed = flySpeed;
+            chaseAgent.speed = flySpeed;
         }
-
-        if (!nav.pathPending)
-        {
-            nav.destination = player.position;
-        }
+        
+        chaseAgent.Chase(player.position);
 
         flyTimer += Time.deltaTime;
     }
@@ -390,11 +369,6 @@ public class NavDragon : Monster
 
         base.TakeDamage(damage);
 
-        if (healthSlider != null)
-        {
-            healthSlider.value = health;
-        }
-
         if ((health < 700 && !firstFly) || (health < 400 && !secondFly))
         {
             audioSource.clip = damageClip;
@@ -403,7 +377,6 @@ public class NavDragon : Monster
 
             currState = FSMState.TakeOff;
             anim.SetBool(Hashes.FlyBool, true);
-            rb.useGravity = false;
             if (!firstFly)
             {
                 firstFly = true;
