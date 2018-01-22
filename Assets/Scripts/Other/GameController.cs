@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -41,12 +39,7 @@ public class GameController : MonoBehaviour
     private void SaveCurrScene()
     {
         Archive.current.currScene = SceneManager.GetActiveScene().name;
-        var fileName = Application.persistentDataPath + "/saves.arc";
-        var bf = new BinaryFormatter();
-        using (var file = File.Create(fileName))
-        {
-            bf.Serialize(file, archives);
-        }
+        Archive.Save(archives);
     }
 
     public void LoadGame()

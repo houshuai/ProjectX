@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ChaseMesh
@@ -34,7 +35,7 @@ public class ChaseMesh
         return result;
     }
 
-    public Node[,] BuildMesh(Rect rect, GameObject terrainObject, List<GameObject> plantList)
+    public Task<Node[,]> BuildMeshAsync(Rect rect, GameObject terrainObject, List<GameObject> plantList)
     {
         if (allRect.Contains(rect))
         {
@@ -42,9 +43,20 @@ public class ChaseMesh
         }
 
         var vertices = terrainObject.GetComponent<MeshFilter>().mesh.vertices;
+        var positions = new List<Vector3>();
+        foreach (var plant in plantList)
+        {
+            positions.Add(plant.transform.localPosition);
+        }
+
+        return Task.Run(() => BuildMesh(rect, vertices, positions));
+    }
+
+    private Node[,] BuildMesh(Rect rect, Vector3[] vertices, List<Vector3> positions)
+    {
         var xTick = rect.width / (xCountOfTile - 1);
         var yTick = rect.height / (yCountOfTile - 1);
-        var pos = terrainObject.transform.position;
+        var pos = new Vector3(rect.x, 0, rect.y);
 
         var nodes = new Node[xCountOfTile, yCountOfTile];
         int index = 0;
@@ -57,9 +69,8 @@ public class ChaseMesh
             }
         }
 
-        foreach (var plant in plantList)
+        foreach (var p in positions)
         {
-            var p = plant.transform.localPosition;
             int x = (int)(p.x / xTick);
             int y = (int)(p.z / yTick);
             nodes[x, y].isWalkable = false;
@@ -70,7 +81,12 @@ public class ChaseMesh
         return nodes;
     }
 
-    public void AddData(Rect rect, Node[,] nodes)
+    public Task AddDataAsync(Rect rect, Node[,] nodes)
+    {
+        return Task.Run(() => AddData(rect, nodes));
+    }
+
+    private void AddData(Rect rect, Node[,] nodes)
     {
         for (int i = 0; i < xCountOfTile - 1; i++)
         {

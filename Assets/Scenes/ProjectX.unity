@@ -310,7 +310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainMenu: {fileID: 114740161647899814, guid: 962d5fa0cc095874cb0adaac3ebe7d84, type: 2}
-  archiveMenu: {fileID: 114949583153665570, guid: 30e8950e61ee5754d85cf3f1ff419013,
+  archiveMenu: {fileID: 114480071134363280, guid: 30e8950e61ee5754d85cf3f1ff419013,
     type: 2}
   newArchiveMenu: {fileID: 114650338575590316, guid: 4dee8bbac502d8d4492ec867c25db637,
     type: 2}

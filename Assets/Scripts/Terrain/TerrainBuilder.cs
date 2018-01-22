@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class TerrainBuilder : MonoBehaviour
@@ -51,41 +52,19 @@ public class TerrainBuilder : MonoBehaviour
         chaseMesh = new ChaseMesh(xCount, yCount);
     }
 
-    public void Build(Terrain terrain)
+    public async void Build(Terrain terrain)
     {
         var rect = terrain.rect;
-        int vertexCount = xCount * yCount;
-        float xTick = rect.width / (xCount - 1);
-        float yTick = rect.height / (yCount - 1);
-        float u = 1.0f / (xCount - 1);
-        float v = 1.0f / (yCount - 1);
-
-        var nodes = new Node[xCount, yCount];
-
-        int index = 0;
-        var vertices = new Vector3[vertexCount];
-        var uvs = new Vector2[vertexCount];
-        for (int j = 0; j < yCount; j++)
-        {
-            for (int i = 0; i < xCount; i++)
-            {
-                var x = i * xTick;
-                var y = j * yTick;
-                var height = noise.GetOctave(rect.x + x, rect.y + y);
-                heights[i, j] = height;
-                moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
-                vertices[index] = new Vector3(x, height, y);
-                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), xTick, yTick, true);
-                uvs[index] = new Vector2(i * u, j * v);
-                index++;
-            }
-        }
+        var computing = await ComputeAsync(rect);
+        var nodes = computing.nodes;
+        heights = computing.heights;
+        moisture = computing.moisture;
 
         var mesh = new Mesh()
         {
-            vertices = vertices,
+            vertices = computing.vertices,
             triangles = lodIndices[terrain.lod][(int)terrain.type],
-            uv = uvs
+            uv = computing.uvs,
         };
         mesh.RecalculateNormals();
 
@@ -102,23 +81,24 @@ public class TerrainBuilder : MonoBehaviour
         SetWater(mesh, terrainObject.transform);
         terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform, nodes);
 
+        terrain.mesh = mesh;
+        terrain.terrainObject = terrainObject;
+
         if (terrain.lod == 0)
         {
             terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
-            //var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
-            //BuildNavMesh(terrainObject, rect, dragonID);
-            //var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
-            //BuildNavMesh(terrainObject, rect, skeletonID);
-            //terrain.enemyObjects = SetEnemy(rect, terrainObject.transform);
-            chaseMesh.AddData(rect, nodes);
+            await chaseMesh.AddDataAsync(rect, nodes);
             terrain.enemyObjects = SetEnemy(rect, nodes);
         }
-
-        terrain.mesh = mesh;
-        terrain.terrainObject = terrainObject;
     }
 
-    public void UpdateMesh(Terrain terrain)
+    private Task<AsyncComputing> ComputeAsync(Rect rect)
+    {
+        var asyncComputing = new AsyncComputing(rect, xCount, yCount, noise);
+        return Task.Run(new System.Func<AsyncComputing>(asyncComputing.Compute));
+    }
+
+    public async void UpdateTerrain(Terrain terrain)
     {
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
@@ -126,17 +106,10 @@ public class TerrainBuilder : MonoBehaviour
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
-            //if (terrain.terrainObject.GetComponent<NavMeshSurface>() == null)
-            //{
-            //    var dragonID = NavMesh.GetSettingsByIndex(1).agentTypeID;
-            //    BuildNavMesh(terrain.terrainObject, terrain.rect, dragonID);
-            //    var skeletonID = NavMesh.GetSettingsByIndex(0).agentTypeID;
-            //    BuildNavMesh(terrain.terrainObject, terrain.rect, skeletonID);
-            //}
             if (meshCollider == null)
             {
                 terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
-                var nodes = chaseMesh.BuildMesh(terrain.rect, terrain.terrainObject, terrain.plantObjects);
+                var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.terrainObject, terrain.plantObjects);
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
         }
@@ -146,51 +119,14 @@ public class TerrainBuilder : MonoBehaviour
     {
         for (int i = 0; i < terrain.plantObjects.Count; i++)
         {
-            plantPool.Reuse(terrain.plantObjects[i]);
+            plantPool.ReuseInCache(terrain.plantObjects[i]);
         }
-        if (terrain.enemyObjects != null)
+        for (int i = 0; i < terrain.enemyObjects.Count; i++)
         {
-            for (int i = 0; i < terrain.enemyObjects.Count; i++)
-            {
-                Destroy(terrain.enemyObjects[i]);
-            }
+            Destroy(terrain.enemyObjects[i]);
         }
         Destroy(terrain.terrainObject);
     }
-
-    //private void BuildNavMesh(GameObject terrainObject, Rect rect,int agentID)
-    //{
-    //    float xTick = rect.width / (xCount - 1);
-    //    float yTick = rect.height / (yCount - 1);
-
-    //    for (int i = 0; i < xCount - 1; i+=2)
-    //    {
-    //        var link = terrainObject.AddComponent<NavMeshLink>();
-    //        link.agentTypeID = agentID;
-    //        link.width = xTick;
-    //        var x = xTick * (i + 0.5f);                          //local position
-    //        var y = yTick * (yCount - 2);
-    //        link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
-    //        link.endPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + 2 * yTick + y), y + 2 * yTick);
-    //    }
-
-    //    for (int i = 0; i < yCount - 1; i+=2)
-    //    {
-    //        var link = terrainObject.AddComponent<NavMeshLink>();
-    //        link.agentTypeID = agentID;
-    //        link.width = yTick;
-    //        var x = xTick * (xCount - 2);                          //local position
-    //        var y = yTick * (i + 0.5f);
-    //        link.startPoint = new Vector3(x, noise.GetOctave(rect.x + x, rect.y + y), y); //noise need world position
-    //        link.endPoint = new Vector3(x + 2 * xTick, noise.GetOctave(rect.x + x + 2 * xTick, rect.y + y), y);
-    //    }
-
-    //    var surface = terrainObject.AddComponent<NavMeshSurface>();
-    //    surface.agentTypeID = agentID;
-    //    surface.collectObjects = CollectObjects.Children;
-    //    surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-    //    surface.BuildNavMesh();
-    //}
 
     private Texture2D GetMaskTexture()
     {
@@ -361,11 +297,6 @@ public class TerrainBuilder : MonoBehaviour
         if (height - Mathf.Floor(height) > dragonRandom)
         {
             var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-            //NavMeshHit hit;
-            //if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
-            //{
-            //    enemyList.Add(Instantiate(dragon, hit.position, Quaternion.identity));
-            //}
             enemyList.Add(Instantiate(dragon, sourcePosition, Quaternion.identity));
         }
         var ss = skeletonScale / 2;
@@ -377,12 +308,6 @@ public class TerrainBuilder : MonoBehaviour
                 if (height - Mathf.Floor(height) < skeletonRandom)
                 {
                     var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-                    //NavMeshHit hit;
-                    //if (NavMesh.SamplePosition(sourcePosition, out hit, 10, 1))
-                    //{
-                    //    var skObj = Instantiate(skeleton, hit.position, Quaternion.identity);
-                    //    enemyList.Add(skObj);
-                    //}
                     enemyList.Add(Instantiate(skeleton, sourcePosition, Quaternion.identity));
                 }
             }
@@ -691,5 +616,62 @@ public class Terrain
     {
         this.lod = lod;
         this.type = type;
+        plantObjects = new List<GameObject>();
+        enemyObjects = new List<GameObject>();
+    }
+}
+
+public class AsyncComputing
+{
+    public Vector3[] vertices;
+    public Vector2[] uvs;
+    public Node[,] nodes;
+    public float[,] heights;
+    public float[,] moisture;
+
+    private Rect rect;
+    private int xCount, yCount;
+    private SimplexNoise noise;
+
+    public AsyncComputing(Rect rect, int xCount, int yCount, SimplexNoise noise)
+    {
+        this.rect = rect;
+        this.xCount = xCount;
+        this.yCount = yCount;
+        this.noise = noise;
+    }
+
+    public AsyncComputing Compute()
+    {
+        int vertexCount = xCount * yCount;
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
+        float u = 1.0f / (xCount - 1);
+        float v = 1.0f / (yCount - 1);
+
+        nodes = new Node[xCount, yCount];
+        heights = new float[xCount, yCount];
+        moisture = new float[xCount, yCount];
+
+        int index = 0;
+        vertices = new Vector3[vertexCount];
+        uvs = new Vector2[vertexCount];
+        for (int j = 0; j < yCount; j++)
+        {
+            for (int i = 0; i < xCount; i++)
+            {
+                var x = i * xTick;
+                var y = j * yTick;
+                var height = noise.GetOctave(rect.x + x, rect.y + y);
+                heights[i, j] = height;
+                moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
+                vertices[index] = new Vector3(x, height, y);
+                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), xTick, yTick, true);
+                uvs[index] = new Vector2(i * u, j * v);
+                index++;
+            }
+        }
+
+        return this;
     }
 }

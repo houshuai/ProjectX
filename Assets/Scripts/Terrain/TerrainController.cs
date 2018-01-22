@@ -65,7 +65,7 @@ public class TerrainController : MonoBehaviour
                     row[j].terrainObject = row[j - 1].terrainObject;
                     row[j].plantObjects = row[j - 1].plantObjects;
                     row[j].enemyObjects = row[j - 1].enemyObjects;
-                    builder.UpdateMesh(row[j]);
+                    builder.UpdateTerrain(row[j]);
                 }
                 row[0].rect.x -= xLength;
                 builder.Build(row[0]);
@@ -83,7 +83,7 @@ public class TerrainController : MonoBehaviour
                     allTerrain[i][j].terrainObject = allTerrain[i + 1][j].terrainObject;
                     allTerrain[i][j].plantObjects = allTerrain[i + 1][j].plantObjects;
                     allTerrain[i][j].enemyObjects = allTerrain[i + 1][j].enemyObjects;
-                    builder.UpdateMesh(allTerrain[i][j]);
+                    builder.UpdateTerrain(allTerrain[i][j]);
                 }
                 allTerrain[xTileCount - 1][j].rect.y -= yLength;
                 builder.Build(allTerrain[xTileCount - 1][j]);
@@ -102,7 +102,7 @@ public class TerrainController : MonoBehaviour
                     row[j].terrainObject = row[j + 1].terrainObject;
                     row[j].plantObjects = row[j + 1].plantObjects;
                     row[j].enemyObjects = row[j + 1].enemyObjects;
-                    builder.UpdateMesh(row[j]);
+                    builder.UpdateTerrain(row[j]);
                 }
                 row[yTileCount - 1].rect.x += xLength;
                 builder.Build(row[yTileCount - 1]);
@@ -120,7 +120,7 @@ public class TerrainController : MonoBehaviour
                     allTerrain[i][j].terrainObject = allTerrain[i - 1][j].terrainObject;
                     allTerrain[i][j].plantObjects = allTerrain[i - 1][j].plantObjects;
                     allTerrain[i][j].enemyObjects = allTerrain[i - 1][j].enemyObjects;
-                    builder.UpdateMesh(allTerrain[i][j]);
+                    builder.UpdateTerrain(allTerrain[i][j]);
                 }
                 allTerrain[0][j].rect.y += yLength;
                 builder.Build(allTerrain[0][j]);
