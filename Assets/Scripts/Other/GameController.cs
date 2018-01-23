@@ -25,21 +25,36 @@ public class GameController : MonoBehaviour
 
     [HideInInspector]
     public Archive[] archives;
+    [HideInInspector]
+    public Transform player;
+
+    private bool isRestart;
 
     private void OnEnable()
     {
-        Scene.Instance.BeforeUnload += SaveCurrScene;
+        Scene.Instance.BeforeUnload += SceneBeforeUnload;
+        Scene.Instance.AfterLoaded += SceneAfterLoaded;
     }
 
     private void OnDisable()
     {
-        Scene.Instance.BeforeUnload -= SaveCurrScene;
+        Scene.Instance.BeforeUnload -= SceneBeforeUnload;
+        Scene.Instance.AfterLoaded -= SceneAfterLoaded;
     }
 
-    private void SaveCurrScene()
+    private void SceneBeforeUnload()
+    {
+        if (!isRestart)
+        {
+            Archive.current.SetCurrentPosition(player.position+new Vector3(0,0,1));
+            Archive.Save(archives);
+        }
+    }
+
+    private void SceneAfterLoaded()
     {
         Archive.current.currScene = SceneManager.GetActiveScene().name;
-        Archive.Save(archives);
+        player.position = Archive.current.GetCurrentPosition();
     }
 
     public void LoadGame()

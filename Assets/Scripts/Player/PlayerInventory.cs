@@ -20,6 +20,7 @@ public class PlayerInventory : MonoBehaviour
         playerHealth = GetComponent<PlayerHealth>();
         playerAttack = GetComponent<PlayerAttack>();
         currItem = GetComponentInChildren<PlayAnimationEvent>().gameObject;
+        GameController.Instance.player = transform;
     }
 
     public void AddItem(string name)
@@ -37,7 +38,6 @@ public class PlayerInventory : MonoBehaviour
         var instance = Scene.Instance;
         if (instance != null)
         {
-            instance.BeforeUnload += Save;
             instance.AfterLoaded += Load;
         }
     }
@@ -47,14 +47,8 @@ public class PlayerInventory : MonoBehaviour
         var instance = Scene.Instance;
         if (instance != null)
         {
-            instance.BeforeUnload -= Save;
             instance.AfterLoaded -= Load;
         }
-    }
-
-    private void Save()
-    {
-        inventory.current = currItem.name;
     }
 
     private void Load()

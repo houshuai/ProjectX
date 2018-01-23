@@ -57,7 +57,7 @@ public class MenuController : MonoBehaviour
             if (menuStack.Count == 0)
             {
                 PauseMenu.Open();
-                //Cursor.lockState = CursorLockMode.Confined;
+                Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
             }
             else if (!(menuStack.Peek() as MainMenu))
@@ -69,7 +69,7 @@ public class MenuController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.I) && menuStack.Count == 0)
         {
             InventoryMenu.Open();
-            //Cursor.lockState = CursorLockMode.Confined;
+            Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
     }
@@ -137,7 +137,7 @@ public class MenuController : MonoBehaviour
         }
         else
         {
-            //Cursor.lockState = CursorLockMode.Locked;
+            Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
     }
@@ -148,7 +148,7 @@ public class MenuController : MonoBehaviour
         {
             Destroy(menuStack.Pop().gameObject);
         }
-        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 }

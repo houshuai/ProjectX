@@ -21,6 +21,10 @@ public class TerrainController : MonoBehaviour
         player = GameObject.FindGameObjectWithTag(Tags.Player).transform;
         builder = GetComponent<TerrainBuilder>();
         builder.Initial(xCount, yCount, lodCount);
+
+        Archive.current.currScene = "Scene3";
+        player.position = Archive.current.GetCurrentPosition();
+
         allTerrain = new Terrain[][]
         {
             new Terrain[]{ new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original)},
@@ -37,8 +41,8 @@ public class TerrainController : MonoBehaviour
             var row = allTerrain[i];
             for (int j = 0; j < allTerrain[i].Length; j++)
             {
-                row[j].rect = new Rect(-allTerrain[0].Length / 2 * xLength + j * xLength, 
-                    allTerrain.Length / 2 * yLength - i * yLength, xLength, yLength);
+                row[j].rect = new Rect(Mathf.Floor(player.position.x / xLength) * xLength - allTerrain[0].Length / 2 * xLength + j * xLength,
+                    Mathf.Floor(player.position.z / yLength) * yLength + allTerrain.Length / 2 * yLength - i * yLength, xLength, yLength);
                 builder.Build(row[j]);
             }
         }

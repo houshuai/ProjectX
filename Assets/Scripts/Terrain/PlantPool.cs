@@ -106,11 +106,13 @@ public class PlantPool : MonoBehaviour
 
     public void ReuseInCache(GameObject plant)
     {
+        plant.transform.SetParent(transform);
         for (int i = 0; i < trees.Length; i++)
         {
             if (plant.name == trees[i].name)
             {
                 treeCache[i].Push(plant);
+                return;
             }
         }
         for (int i = 0; i < bushes.Length; i++)
@@ -118,6 +120,7 @@ public class PlantPool : MonoBehaviour
             if (plant.name == bushes[i].name)
             {
                 bushCache[i].Push(plant);
+                return;
             }
         }
     }
@@ -138,7 +141,6 @@ public class PlantPool : MonoBehaviour
             {
                 var plant = cache.Pop();
                 plant.SetActive(false);
-                plant.transform.SetParent(transform);
                 pool.Push(plant);
             }
         }
@@ -149,6 +151,7 @@ public class PlantPool : MonoBehaviour
         if (timer > 0)
         {
             timer -= Time.deltaTime;
+            isCleared = false;
         }
         else if (!isCleared)
         {
