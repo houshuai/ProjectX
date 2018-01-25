@@ -73,6 +73,7 @@ public class TerrainBuilder : MonoBehaviour
 
         var terrainObject = new GameObject("Terrain");
         terrainObject.AddComponent<MeshFilter>().mesh = mesh;
+        terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
         var renderer = terrainObject.AddComponent<MeshRenderer>();
         renderer.material = material;
         var texture = GetMaskTexture();
@@ -90,9 +91,9 @@ public class TerrainBuilder : MonoBehaviour
 
         if (terrain.lod == 0)
         {
-            terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
             await chaseMesh.AddDataAsync(rect, nodes);
             terrain.enemyObjects = SetEnemy(rect, nodes);
+            terrain.haveChaseMesh = true;
         }
         else
         {
@@ -102,15 +103,15 @@ public class TerrainBuilder : MonoBehaviour
 
     public async void UpdateTerrain(Terrain terrain)
     {
+        //when the terrainObject have not meshCollider, can not upper(lod from 0 to 1) the lod of mesh...
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
 
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
-            if (meshCollider == null)
+            if (!terrain.haveChaseMesh)
             {
-                terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
                 var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.terrainObject, terrain.plantObjects);
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
@@ -614,14 +615,15 @@ public enum MeshType
 
 public class Terrain
 {
-    public readonly int lod;
-    public readonly MeshType type;
+    public  int lod;
+    public  MeshType type;
     public Rect rect;
     public Mesh mesh;
     public Shader shader;
     public GameObject terrainObject;
     public List<GameObject> plantObjects;
     public List<GameObject> enemyObjects;
+    public bool haveChaseMesh;
 
     public Terrain(int lod, MeshType type)
     {
