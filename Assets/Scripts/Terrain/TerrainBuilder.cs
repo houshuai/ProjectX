@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -48,25 +49,27 @@ public class TerrainBuilder : MonoBehaviour
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
         plantPool = GetComponent<PlantPool>();
-        plantPool.InitialPool();
+        plantPool.Initial();
         chaseMesh = new ChaseMesh(xCount, yCount);
     }
 
     public async void Build(Terrain terrain)
     {
         var rect = terrain.rect;
-        var computing = await ComputeAsync(rect);
-        var nodes = computing.nodes;
-        heights = computing.heights;
-        moisture = computing.moisture;
+        var terrainComputing = new TerrainComputing(rect, xCount, yCount, noise);
+        var terrainResult = await Task.Run(new Func<TerrainComputing>(terrainComputing.Compute));
+        var nodes = terrainResult.nodes;
+        heights = terrainResult.heights;
+        moisture = terrainResult.moisture;
 
         var mesh = new Mesh()
         {
-            vertices = computing.vertices,
+            vertices = terrainResult.vertices,
             triangles = lodIndices[terrain.lod][(int)terrain.type],
-            uv = computing.uvs,
+            uv = terrainResult.uvs,
         };
         mesh.RecalculateNormals();
+        terrain.mesh = mesh;
 
         var terrainObject = new GameObject("Terrain");
         terrainObject.AddComponent<MeshFilter>().mesh = mesh;
@@ -74,14 +77,15 @@ public class TerrainBuilder : MonoBehaviour
         renderer.material = material;
         var texture = GetMaskTexture();
         renderer.material.SetTexture("_Mask", texture);
+        terrain.shader = renderer.material.shader;
 
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
         terrainObject.layer = LayerMask.NameToLayer("Terrain");
 
         SetWater(mesh, terrainObject.transform);
         terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform, nodes);
+        terrain.plantObjects.AddRange(SetGrass(rect, texture, terrainObject.transform, mesh, nodes));
 
-        terrain.mesh = mesh;
         terrain.terrainObject = terrainObject;
 
         if (terrain.lod == 0)
@@ -90,12 +94,10 @@ public class TerrainBuilder : MonoBehaviour
             await chaseMesh.AddDataAsync(rect, nodes);
             terrain.enemyObjects = SetEnemy(rect, nodes);
         }
-    }
-
-    private Task<AsyncComputing> ComputeAsync(Rect rect)
-    {
-        var asyncComputing = new AsyncComputing(rect, xCount, yCount, noise);
-        return Task.Run(new System.Func<AsyncComputing>(asyncComputing.Compute));
+        else
+        {
+            terrain.shader.maximumLOD = 110;
+        }
     }
 
     public async void UpdateTerrain(Terrain terrain)
@@ -112,6 +114,11 @@ public class TerrainBuilder : MonoBehaviour
                 var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.terrainObject, terrain.plantObjects);
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
+            terrain.shader.maximumLOD = 220;
+        }
+        else
+        {
+            terrain.shader.maximumLOD = 110;
         }
     }
 
@@ -177,48 +184,23 @@ public class TerrainBuilder : MonoBehaviour
         return texture;
     }
 
-    private GameObject SetWater(Mesh terrainMesh, Transform terrainTransform)
+    private async void SetWater(Mesh terrainMesh, Transform terrainTransform)
     {
         var terrainVertices = terrainMesh.vertices;
         var terrainIndices = terrainMesh.triangles;
 
-        var vertexList = new List<Vector3>();
-        var indexList = new List<int>();
+        var waterComputing = new WaterComputing(terrainVertices, terrainIndices, thirdHeight);
+        var water = await Task.Run(new Func<WaterComputing>(waterComputing.Compute));
 
-        int index = 0;
-        for (int i = 0; i < terrainIndices.Length; i += 3)
+        if (water == null)
         {
-            int index1 = terrainIndices[i];
-            int index2 = terrainIndices[i + 1];
-            int index3 = terrainIndices[i + 2];
-            var vertex1 = terrainVertices[index1];
-            var vertex2 = terrainVertices[index2];
-            var vertex3 = terrainVertices[index3];
-            if (vertex1.y < thirdHeight ||
-                vertex2.y < thirdHeight ||
-                vertex3.y < thirdHeight)
-            {
-                vertexList.Add(new Vector3(vertex1.x, 0, vertex1.z));
-                vertexList.Add(new Vector3(vertex2.x, 0, vertex2.z));
-                vertexList.Add(new Vector3(vertex3.x, 0, vertex3.z));
-                indexList.Add(index++);
-                indexList.Add(index++);
-                indexList.Add(index++);
-            }
+            return;
         }
-
-        if (vertexList.Count == 0)
-        {
-            return null;
-        }
-
-        var vertices = vertexList.ToArray();
-        var indices = indexList.ToArray();
 
         var mesh = new Mesh()
         {
-            vertices = vertices,
-            triangles = indices,
+            vertices = water.vertices,
+            triangles = water.indices,
         };
 
         var waterObject = new GameObject("Water");
@@ -228,7 +210,6 @@ public class TerrainBuilder : MonoBehaviour
         waterObject.transform.position = new Vector3(0, thirdHeight, 0);
         waterObject.transform.SetParent(terrainTransform, false);
 
-        return waterObject;
     }
 
     private List<GameObject> SetPlant(Rect rect, Texture2D texture, Transform terrainTransform, Node[,] nodes)
@@ -247,7 +228,7 @@ public class TerrainBuilder : MonoBehaviour
                 var random = height - Mathf.Floor(height);
                 var color = texture.GetPixel(i, j);
                 GameObject plant = null;
-                if (color == blue)
+                if (color == green)
                 {
                     if (random > tree0Random)
                     {
@@ -258,7 +239,7 @@ public class TerrainBuilder : MonoBehaviour
                         plant = plantPool.GetBush((random - bushRandom) / (tree0Random - bushRandom));
                     }
                 }
-                else if (color == green)
+                else if (color == blue)
                 {
                     if (random > tree1Random)
                     {
@@ -280,6 +261,35 @@ public class TerrainBuilder : MonoBehaviour
                     nodes[i + 1, j].isWalkable = false;
                     nodes[i, j - 1].isWalkable = false;
                     nodes[i, j + 1].isWalkable = false;
+                }
+            }
+        }
+        return plantList;
+    }
+
+    private List<GameObject> SetGrass(Rect rect, Texture2D texture, Transform terrainTransform, Mesh mesh, Node[,] nodes)
+    {
+        var plantList = new List<GameObject>();
+        var blue = new Color32(0, 0, 255, 0);
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
+        var normals = mesh.normals;
+
+        int index = 0;
+        for (int j = 0; j < yCount; j++)
+        {
+            for (int i = 0; i < xCount; i++)
+            {
+                if (nodes[i, j].isWalkable && texture.GetPixel(i, j) == blue)
+                {
+                    var height = heights[i, j];
+                    var normal = normals[index++];
+                    var plant = plantPool.GetGrass();
+                    plant.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
+                    var rotation = Quaternion.FromToRotation(Vector3.up, normal);
+                    plant.transform.rotation *= rotation;
+                    plant.transform.SetParent(terrainTransform);
+                    plantList.Add(plant);
                 }
             }
         }
@@ -608,6 +618,7 @@ public class Terrain
     public readonly MeshType type;
     public Rect rect;
     public Mesh mesh;
+    public Shader shader;
     public GameObject terrainObject;
     public List<GameObject> plantObjects;
     public List<GameObject> enemyObjects;
@@ -621,7 +632,7 @@ public class Terrain
     }
 }
 
-public class AsyncComputing
+public class TerrainComputing
 {
     public Vector3[] vertices;
     public Vector2[] uvs;
@@ -633,7 +644,7 @@ public class AsyncComputing
     private int xCount, yCount;
     private SimplexNoise noise;
 
-    public AsyncComputing(Rect rect, int xCount, int yCount, SimplexNoise noise)
+    public TerrainComputing(Rect rect, int xCount, int yCount, SimplexNoise noise)
     {
         this.rect = rect;
         this.xCount = xCount;
@@ -641,7 +652,7 @@ public class AsyncComputing
         this.noise = noise;
     }
 
-    public AsyncComputing Compute()
+    public TerrainComputing Compute()
     {
         int vertexCount = xCount * yCount;
         float xTick = rect.width / (xCount - 1);
@@ -671,6 +682,61 @@ public class AsyncComputing
                 index++;
             }
         }
+
+        return this;
+    }
+}
+
+public class WaterComputing
+{
+    public Vector3[] vertices;
+    public int[] indices;
+
+    private Vector3[] terrainVertices;
+    private int[] terrainIndices;
+    private float height;
+
+    public WaterComputing(Vector3[] terrainVertices, int[] terrainIndices, float waterHeight)
+    {
+        this.terrainVertices = terrainVertices;
+        this.terrainIndices = terrainIndices;
+        height = waterHeight;
+    }
+
+    public WaterComputing Compute()
+    {
+        var vertexList = new List<Vector3>();
+        var indexList = new List<int>();
+
+        int index = 0;
+        for (int i = 0; i < terrainIndices.Length; i += 3)
+        {
+            int index1 = terrainIndices[i];
+            int index2 = terrainIndices[i + 1];
+            int index3 = terrainIndices[i + 2];
+            var vertex1 = terrainVertices[index1];
+            var vertex2 = terrainVertices[index2];
+            var vertex3 = terrainVertices[index3];
+            if (vertex1.y < height ||
+                vertex2.y < height ||
+                vertex3.y < height)
+            {
+                vertexList.Add(new Vector3(vertex1.x, 0, vertex1.z));
+                vertexList.Add(new Vector3(vertex2.x, 0, vertex2.z));
+                vertexList.Add(new Vector3(vertex3.x, 0, vertex3.z));
+                indexList.Add(index++);
+                indexList.Add(index++);
+                indexList.Add(index++);
+            }
+        }
+
+        if (vertexList.Count == 0)
+        {
+            return null;
+        }
+
+        vertices = vertexList.ToArray();
+        indices = indexList.ToArray();
 
         return this;
     }

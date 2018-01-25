@@ -16,12 +16,12 @@
 	}
 	SubShader 
 	{
-		Tags { "RenderType"="Transparent" }
+		Tags { "RenderType"="Transparent" "Queue" = "Transparent"}
 		LOD 200
 		
 		CGPROGRAM
-		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard vertex:vert tessellate:tess
+		// Physically based Standard lighting model
+		#pragma surface surf Standard vertex:vert 
 
 		// Use shader model 5.0 target, to get nicer looking lighting
 		#pragma target 5.0           
@@ -41,11 +41,6 @@
 		sampler2D _MainTex;
 		half _Glossiness;
 		half _Metallic;
-
-		float4 tess(appdata_full v0, appdata_full v1, appdata_full v2)
-		{
-			return UnityDistanceBasedTess(v0.vertex, v1.vertex, v2.vertex, 10, 50, _Tess);
-		}
 
 		void vert (inout appdata_full v) 
 		{

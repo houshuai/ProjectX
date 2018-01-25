@@ -46,7 +46,7 @@ public class GameController : MonoBehaviour
     {
         if (!isRestart)
         {
-            Archive.current.SetCurrentPosition(player.position+new Vector3(0,0,1));
+            Archive.current.SetPlayerPosition(player.position+new Vector3(0,0,1));
             Archive.Save(archives);
         }
     }
@@ -54,7 +54,11 @@ public class GameController : MonoBehaviour
     private void SceneAfterLoaded()
     {
         Archive.current.currScene = SceneManager.GetActiveScene().name;
-        player.position = Archive.current.GetCurrentPosition();
+        Vector3 pos;
+        if (Archive.current.GetPlayerPosition(out pos))
+        {
+            player.position = pos;
+        }
     }
 
     public void LoadGame()
@@ -64,9 +68,11 @@ public class GameController : MonoBehaviour
 
     public void Restart()
     {
+        isRestart = true;
         PauseMenu.Close();
         Scene.Instance.SwitchScene(Archive.current.currScene);
         health.Value = 100;
+        isRestart = false;
     }
 
     public void ExitToMainMenu()

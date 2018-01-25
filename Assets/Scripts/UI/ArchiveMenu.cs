@@ -60,7 +60,7 @@ public class ArchiveMenu : Menu<ArchiveMenu>
 
     public void OnDelete()
     {
-        Archive.current.isNew = true;
+        Archive.current.Initial();
         var selectArchives = GetComponentsInChildren<SelectArchive>();
         for (int i = 0; i < selectArchives.Length; i++)
         {

@@ -22,8 +22,15 @@ public class TerrainController : MonoBehaviour
         builder = GetComponent<TerrainBuilder>();
         builder.Initial(xCount, yCount, lodCount);
 
-        Archive.current.currScene = "Scene3";
-        player.position = Archive.current.GetCurrentPosition();
+        if (Archive.current!=null)
+        {
+            Archive.current.currScene = "Scene3";
+            Vector3 pos;
+            if (Archive.current.GetPlayerPosition(out pos))
+            {
+                player.position = pos + new Vector3(0, 1, 0);
+            }
+        }
 
         allTerrain = new Terrain[][]
         {
@@ -61,14 +68,10 @@ public class TerrainController : MonoBehaviour
             for (int i = 0; i < xTileCount; i++)
             {
                 var row = allTerrain[i];
-                builder.Delete(row[xTileCount - 1]);
-                for (int j = xTileCount - 1; j >= 1; j--)
+                builder.Delete(row[yTileCount - 1]);
+                for (int j = yTileCount - 1; j >= 1; j--)
                 {
-                    row[j].rect = row[j - 1].rect;
-                    row[j].mesh = row[j - 1].mesh;
-                    row[j].terrainObject = row[j - 1].terrainObject;
-                    row[j].plantObjects = row[j - 1].plantObjects;
-                    row[j].enemyObjects = row[j - 1].enemyObjects;
+                    MoveTerrain(row[j - 1], row[j]);
                     builder.UpdateTerrain(row[j]);
                 }
                 row[0].rect.x -= xLength;
@@ -82,11 +85,7 @@ public class TerrainController : MonoBehaviour
                 builder.Delete(allTerrain[0][j]);
                 for (int i = 0; i < xTileCount - 1; i++)
                 {
-                    allTerrain[i][j].rect = allTerrain[i + 1][j].rect;
-                    allTerrain[i][j].mesh = allTerrain[i + 1][j].mesh;
-                    allTerrain[i][j].terrainObject = allTerrain[i + 1][j].terrainObject;
-                    allTerrain[i][j].plantObjects = allTerrain[i + 1][j].plantObjects;
-                    allTerrain[i][j].enemyObjects = allTerrain[i + 1][j].enemyObjects;
+                    MoveTerrain(allTerrain[i + 1][j], allTerrain[i][j]);
                     builder.UpdateTerrain(allTerrain[i][j]);
                 }
                 allTerrain[xTileCount - 1][j].rect.y -= yLength;
@@ -101,11 +100,7 @@ public class TerrainController : MonoBehaviour
                 builder.Delete(row[0]);
                 for (int j = 0; j < yTileCount - 1; j++)
                 {
-                    row[j].rect = row[j + 1].rect;
-                    row[j].mesh = row[j + 1].mesh;
-                    row[j].terrainObject = row[j + 1].terrainObject;
-                    row[j].plantObjects = row[j + 1].plantObjects;
-                    row[j].enemyObjects = row[j + 1].enemyObjects;
+                    MoveTerrain(row[j + 1], row[j]);
                     builder.UpdateTerrain(row[j]);
                 }
                 row[yTileCount - 1].rect.x += xLength;
@@ -119,11 +114,7 @@ public class TerrainController : MonoBehaviour
                 builder.Delete(allTerrain[xTileCount - 1][j]);
                 for (int i = xTileCount - 1; i >= 1; i--)
                 {
-                    allTerrain[i][j].rect = allTerrain[i - 1][j].rect;
-                    allTerrain[i][j].mesh = allTerrain[i - 1][j].mesh;
-                    allTerrain[i][j].terrainObject = allTerrain[i - 1][j].terrainObject;
-                    allTerrain[i][j].plantObjects = allTerrain[i - 1][j].plantObjects;
-                    allTerrain[i][j].enemyObjects = allTerrain[i - 1][j].enemyObjects;
+                    MoveTerrain(allTerrain[i - 1][j], allTerrain[i][j]);
                     builder.UpdateTerrain(allTerrain[i][j]);
                 }
                 allTerrain[0][j].rect.y += yLength;
@@ -132,6 +123,15 @@ public class TerrainController : MonoBehaviour
         }
 
 
+    }
+
+    private void MoveTerrain(Terrain source, Terrain target)
+    {
+        target.rect = source.rect;
+        target.mesh = source.mesh;
+        target.terrainObject = source.terrainObject;
+        target.plantObjects = source.plantObjects;
+        target.enemyObjects = source.enemyObjects;
     }
 
 }

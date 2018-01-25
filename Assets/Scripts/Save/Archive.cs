@@ -12,17 +12,42 @@ public class Archive
     public bool isNew = true;
     public string title;
     public string currScene;
-    public Dictionary<string, Vector3> positions = new Dictionary<string, Vector3>(3);
-    public Inventory inventory = new Inventory();
+    public Dictionary<string, Vector3> positions;
+    public Inventory inventory;
 
-    public void SetCurrentPosition(Vector3 position)
+    public void Initial()
     {
-        positions[currScene] = position;
+        isNew = true;
+        title = null;
+        currScene = null;
+        positions = new Dictionary<string, Vector3>(3);
+        inventory = new Inventory();
     }
 
-    public Vector3 GetCurrentPosition()
+    public void SetPlayerPosition(Vector3 position)
     {
-        return positions[currScene];
+        if (positions.ContainsKey(currScene))
+        {
+            positions[currScene] = position;
+        }
+        else
+        {
+            positions.Add(currScene, position);
+        }
+    }
+
+    public bool GetPlayerPosition(out Vector3 position)
+    {
+        if (positions.ContainsKey(currScene))
+        {
+            position = positions[currScene];
+            return true;
+        }
+        else
+        {
+            position = new Vector3();
+            return false;
+        }
     }
 
     public static void Save(Archive[] archives)
@@ -58,6 +83,10 @@ public class Archive
         else
         {
             archives = new Archive[] { new Archive(), new Archive(), new Archive() };
+            foreach (var archive in archives)
+            {
+                archive.Initial();
+            }
         }
 
         return archives;

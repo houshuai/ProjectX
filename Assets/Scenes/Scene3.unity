@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 1, g: 1, b: 1, a: 1}
+  m_AmbientSkyColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
   m_AmbientEquatorColor: {r: 0.5376298, g: 0.60098344, b: 0.64705884, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 3
+  m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 71f14a2d79f732f4d9893ef1b911f4ff, type: 2}
   m_HaloStrength: 0.5
@@ -359,10 +359,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6457f3ed1fd42614aa2ccf2c3c30eef0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xCount: 65
-  yCount: 65
-  xTick: 2
-  yTick: 2
+  xCount: 33
+  yCount: 33
+  xTick: 4
+  yTick: 4
   lodCount: 3
 --- !u!4 &581292310
 Transform:
@@ -389,14 +389,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trees:
-  - {fileID: 1909967738298678, guid: 9c674130ebf970343acaa79f5a4a85e7, type: 2}
   - {fileID: 1779679628074594, guid: 93403baea18186449b04a0297bf159a8, type: 2}
+  - {fileID: 1909967738298678, guid: 9c674130ebf970343acaa79f5a4a85e7, type: 2}
   bushes:
-  - {fileID: 100000, guid: 53414ab72ac45614684af7a6985b2c85, type: 2}
-  - {fileID: 100000, guid: 35483354210b51844a7110a01c7b4f3a, type: 2}
-  - {fileID: 100000, guid: e26c36c102d821c4581a911b1e80588f, type: 2}
-  - {fileID: 100000, guid: 532066205bc320d4aa4647332e9d2ffa, type: 2}
-  - {fileID: 100000, guid: ebc45ba3ff076884e92c0f152cc3b98e, type: 2}
+  - {fileID: 1767077062698754, guid: d991814dbb2f6c94aab987377ef41b5f, type: 2}
+  - {fileID: 1116627079310768, guid: 801fe61e13e1031439476bdc3f1437dd, type: 2}
+  - {fileID: 1650462759332886, guid: 52695cfa5822d1f4085a84d42af9e1a4, type: 2}
+  - {fileID: 1671379334771696, guid: 62f06e02fd9ca68429ba08578df3e88e, type: 2}
+  - {fileID: 1324349358865572, guid: f0aa811e1e65a994083d3563ba71eaca, type: 2}
+  grasses:
+  - {fileID: 1482138872097520, guid: 5c01b102f5a687d42be6eaaace623560, type: 2}
   initialSize: 150
 --- !u!114 &581292312
 MonoBehaviour:
@@ -415,19 +417,19 @@ MonoBehaviour:
   skeleton: {fileID: 1986909078851782, guid: e600a3d0c85452346ad091965a231618, type: 2}
   seed: 55162
   frequencys:
-  - 0.0002
+  - 0.001
   - 0.005
+  - 0.02
   - 0.05
-  - 0.01
   amplitudes:
   - 100
   - 50
-  - 5
-  - 1
+  - 10
+  - 2
   firstHeight: 120
-  secondHeight: 75
-  thirdHeight: 30
-  plantScale: 5
+  secondHeight: 81
+  thirdHeight: 40
+  plantScale: 3
   tree0Random: 0.95
   tree1Random: 0.9
   bushRandom: 0.8
@@ -472,6 +474,11 @@ Prefab:
     - target: {fileID: 4459203699165252, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}
       propertyPath: m_RootOrder
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114546765596148048, guid: 351ebe4b80b7e3940adfd634eed39f98,
+        type: 2}
+      propertyPath: runSpeed
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 351ebe4b80b7e3940adfd634eed39f98, type: 2}

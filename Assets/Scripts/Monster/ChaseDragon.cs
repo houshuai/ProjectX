@@ -35,7 +35,7 @@ public class ChaseDragon : Monster
     public AudioClip damageClip;
     public Transform flamePos;
     public FloatVariable playerHealth;
-    
+
     private ChaseAgent chaseAgent;
 
     private FSMState currState;
@@ -135,7 +135,7 @@ public class ChaseDragon : Monster
     private void UpdateChase()
     {
         var random = Random.value;
-        
+
         var distance = Vector3.Distance(player.position, transform.position);
         var angle = Vector3.Angle(transform.forward, player.position - transform.position);
 
@@ -156,13 +156,13 @@ public class ChaseDragon : Monster
             return;
         }
 
-        if (distance > attackRange && distance < flameRange && random < 0.01f)
+        if (distance > attackRange && distance < flameRange && angle < 30 && random < 0.01f)
         {
             currState = FSMState.Attack;
             anim.SetTrigger(Hashes.FlameAttackTrigger);
             return;
         }
-        
+
         if (distance < nearby)
         {
             chaseAgent.speed = walkSpeed;
@@ -171,7 +171,7 @@ public class ChaseDragon : Monster
         {
             chaseAgent.speed = runSpeed;
         }
-        
+
         chaseAgent.Chase(player.position);
 
         anim.SetFloat(Hashes.SpeedFloat, chaseAgent.actualSpeed);
@@ -198,7 +198,7 @@ public class ChaseDragon : Monster
             anim.SetBool(Hashes.FlyBool, false);
             return;
         }
-        
+
         if (distance < nearby)
         {
             chaseAgent.speed = glideSpeed;
@@ -207,7 +207,7 @@ public class ChaseDragon : Monster
         {
             chaseAgent.speed = flySpeed;
         }
-        
+
         chaseAgent.Chase(player.position);
 
         flyTimer += Time.deltaTime;

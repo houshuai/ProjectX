@@ -76,10 +76,10 @@ Material:
     - _Dz: 2
     - _EdgeLength: 1
     - _GlossMapScale: 1
-    - _Glossiness: 0.51
+    - _Glossiness: 0.6
     - _GlossyReflections: 1
     - _L: 1
-    - _Metallic: 0
+    - _Metallic: 0.16
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02

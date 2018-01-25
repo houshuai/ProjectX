@@ -14,8 +14,9 @@ Shader "Custom/Terrain" {
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
+
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType" = "Opaque" }
 		LOD 200
 		
 		CGPROGRAM
@@ -67,6 +68,44 @@ Shader "Custom/Terrain" {
 			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
+			o.Alpha = 1;
+		}
+		ENDCG
+	}
+
+	SubShader{
+		Tags{"RenderType" = "Opaque"}
+		LOD 100
+
+		CGPROGRAM
+		#pragma surface surf Lambert
+		#pragma target 4.0
+
+		sampler2D _FirstTex;
+		sampler2D _SecondTex;
+		sampler2D _ThirdTex;
+		sampler2D _FourthTex;
+		sampler2D _Mask;
+
+		struct Input{
+			float2 uv_FirstTex;
+			float2 uv_SecondTex;
+			float2 uv_ThirdTex;
+			float2 uv_FourthTex;
+			float2 uv_Mask;
+		};
+		
+		half _Glossiness;
+		half _Metallic;
+
+		void surf (Input IN, inout SurfaceOutput o){
+			fixed4 c1 = tex2D(_FirstTex, IN.uv_FirstTex);
+			fixed4 c2 = tex2D(_SecondTex, IN.uv_SecondTex);
+			fixed4 c3 = tex2D(_ThirdTex, IN.uv_ThirdTex);
+			fixed4 c4 = tex2D(_FourthTex, IN.uv_FourthTex);
+			fixed4 mask = tex2D(_Mask, IN.uv_Mask);
+
+			o.Albedo = c1.rgb * mask.r + c2.rgb * mask.g + c3.rgb * mask.b + c4.rgb * mask.a;
 			o.Alpha = 1;
 		}
 		ENDCG

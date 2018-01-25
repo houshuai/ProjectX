@@ -14,7 +14,7 @@ public class GrassBox : MonoBehaviour
 
         var boxCollider = gameObject.AddComponent<BoxCollider>();
         boxCollider.isTrigger = true;
-        boxCollider.center = new Vector3(width / 2, 0.5f, height / 2);
+        boxCollider.center = new Vector3(width / 2, 1f, height / 2);
         boxCollider.size = new Vector3(width, 1, height);
     }
     

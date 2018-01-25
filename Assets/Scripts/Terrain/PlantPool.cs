@@ -5,48 +5,48 @@ public class PlantPool : MonoBehaviour
 {
     public GameObject[] trees;
     public GameObject[] bushes;
+    public GameObject[] grasses;
     public int initialSize = 120;
 
     private Stack<GameObject>[] treePool;
     private Stack<GameObject>[] bushPool;
+    private Stack<GameObject>[] grassPool;
     private Stack<GameObject>[] treeCache;
     private Stack<GameObject>[] bushCache;
+    private Stack<GameObject>[] grassCache;
 
     private float timer;
     private bool isCleared;
 
-    public void InitialPool()
+    public void Initial()
     {
         treePool = new Stack<GameObject>[trees.Length];
         bushPool = new Stack<GameObject>[bushes.Length];
+        grassPool = new Stack<GameObject>[grasses.Length];
         treeCache = new Stack<GameObject>[trees.Length];
         bushCache = new Stack<GameObject>[bushes.Length];
+        grassCache = new Stack<GameObject>[grasses.Length];
 
-        for (int i = 0; i < trees.Length; i++)
-        {
-            treePool[i] = new Stack<GameObject>();
-            treeCache[i] = new Stack<GameObject>();
-            for (int j = 0; j < initialSize; j++)
-            {
-                var tree = Instantiate(trees[i]);
-                tree.name = trees[i].name;
-                treeCache[i].Push(tree);
-            }
-        }
-
-        for (int i = 0; i < bushes.Length; i++)
-        {
-            bushPool[i] = new Stack<GameObject>();
-            bushCache[i] = new Stack<GameObject>();
-            for (int j = 0; j < initialSize; j++)
-            {
-                var bush = Instantiate(bushes[i]);
-                bush.name = bushes[i].name;
-                bushCache[i].Push(bush);
-            }
-        }
+        Initial(trees, treePool, treeCache, initialSize);
+        Initial(bushes, bushPool, bushCache, initialSize);
+        Initial(grasses, grassPool, grassCache, initialSize * 50);
 
         timer = 1;
+    }
+
+    private void Initial(GameObject[] plants, Stack<GameObject>[] pool, Stack<GameObject>[] cache, int size)
+    {
+        for (int i = 0; i < plants.Length; i++)
+        {
+            pool[i] = new Stack<GameObject>();
+            cache[i] = new Stack<GameObject>();
+            for (int j = 0; j < size; j++)
+            {
+                var plant = Instantiate(plants[i]);
+                plant.name = plants[i].name;
+                cache[i].Push(plant);
+            }
+        }
     }
 
     public GameObject GetTree(int index)
@@ -104,9 +104,44 @@ public class PlantPool : MonoBehaviour
         return result;
     }
 
+    public GameObject GetGrass()
+    {
+        var cache = grassCache[0];
+
+        GameObject result = null;
+        if (cache.Count > 0)
+        {
+            result = cache.Pop();
+        }
+        else
+        {
+            var pool = grassPool[0];
+            if (pool.Count > 0)
+            {
+                result = pool.Pop();
+                result.SetActive(true);
+            }
+            else
+            {
+                result = Instantiate(grasses[0]);
+                result.name = grasses[0].name;
+            }
+        }
+        timer = 1;
+        return result;
+    }
+
     public void ReuseInCache(GameObject plant)
     {
         plant.transform.SetParent(transform);
+        for (int i = 0; i < grasses.Length; i++)
+        {
+            if (plant.name == grasses[i].name)
+            {
+                grassCache[i].Push(plant);
+                return;
+            }
+        }
         for (int i = 0; i < trees.Length; i++)
         {
             if (plant.name == trees[i].name)
@@ -129,6 +164,7 @@ public class PlantPool : MonoBehaviour
     {
         ClearCache(treeCache, treePool);
         ClearCache(bushCache, bushPool);
+        ClearCache(grassCache, grassPool);
     }
 
     private void ClearCache(Stack<GameObject>[] plantCache, Stack<GameObject>[] plantPool)
@@ -141,6 +177,7 @@ public class PlantPool : MonoBehaviour
             {
                 var plant = cache.Pop();
                 plant.SetActive(false);
+                plant.transform.SetParent(transform);
                 pool.Push(plant);
             }
         }
