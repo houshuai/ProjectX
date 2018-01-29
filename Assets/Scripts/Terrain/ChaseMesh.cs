@@ -132,8 +132,12 @@ public class ChaseMesh
 
         }
 
-        allRect.Add(rect);
-        allNodes.Add(nodes);
+        lock (allRect)
+        {
+            allRect.Add(rect);
+            allNodes.Add(nodes);
+        }
+        
     }
 
     private void LinkHorizontal(Node[,] left, Node[,] right)

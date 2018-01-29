@@ -1,0 +1,13 @@
+seed 155162
+frequencys 0.001 0.005 0.02 0.05
+amplitudes 100 50 10 2
+firstHeight 120
+secondHeight 81
+thirdHeight 40
+plantScale 3
+tree0Random 0.95
+tree1Random 0.9
+bushRandom 0.8
+dragonRandom 0.9
+skeletonScale 20
+skeletonRandom 0.5

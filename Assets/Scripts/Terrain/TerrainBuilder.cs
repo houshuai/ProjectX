@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -9,24 +10,24 @@ public class TerrainBuilder : MonoBehaviour
     public Material waterMat;
     public GameObject dragon;
     public GameObject skeleton;
-    public int seed = 152411;
-    public float[] frequencys = new float[] { 0.0001f, 0.005f, 0.05f, 0.5f };
-    public float[] amplitudes = new float[] { 100, 50, 5, 1 };
-    public float firstHeight = 120;
-    public float secondHeight = 75;
-    public float thirdHeight = 30;
-    public int plantScale = 3;
-    public float tree0Random = 0.95f;
-    public float tree1Random = 0.9f;
-    public float bushRandom = 0.8f;
-    public float dragonRandom = 0.9f;
-    public int skeletonScale = 10;
-    public float skeletonRandom = 0.5f;
 
-    private int[][][] lodIndices;
+    private int seed = 152411;
+    private float[] frequencys;
+    private float[] amplitudes;
+    private float firstHeight = 120;
+    private float secondHeight = 75;
+    private float thirdHeight = 30;
+    private int plantScale = 3;
+    private float tree0Random = 0.95f;
+    private float tree1Random = 0.9f;
+    private float bushRandom = 0.8f;
+    private float dragonRandom = 0.9f;
+    private int skeletonScale = 10;
+    private float skeletonRandom = 0.5f;
 
     private int xCount, yCount;
-    private int xGap, yGap;
+    private Indices indices;
+    private int[][][] lodIndices;
     private SimplexNoise noise;
     private float[,] heights;
     private float[,] moisture;
@@ -37,13 +38,14 @@ public class TerrainBuilder : MonoBehaviour
     {
         this.xCount = xCount;
         this.yCount = yCount;
-        xGap = xCount - 1;
-        yGap = yCount - 1;
         lodIndices = new int[lodCount][][];
+        indices = new Indices(xCount, yCount);
         for (int i = 0; i < lodCount; i++)
         {
-            lodIndices[i] = InitialIndices(i);
+            lodIndices[i] = indices.InitialIndices(i);
         }
+
+        LoadParameter();
 
         noise = new SimplexNoise(seed, frequencys, amplitudes);
         heights = new float[xCount, yCount];
@@ -53,11 +55,43 @@ public class TerrainBuilder : MonoBehaviour
         chaseMesh = new ChaseMesh(xCount, yCount);
     }
 
+    private void LoadParameter()
+    {
+        using (var fs = File.OpenRead(Application.streamingAssetsPath + "/terrainBuilder.txt"))
+        {
+            char c = ' ';
+            var sr = new StreamReader(fs);
+            seed = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
+            var str = sr.ReadLine().Split(c);
+            frequencys = new float[str.Length - 1];
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                frequencys[i] = Convert.ToSingle(str[i + 1]);
+            }
+            str = sr.ReadLine().Split(c);
+            amplitudes = new float[str.Length - 1];
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                amplitudes[i] = Convert.ToSingle(str[i + 1]);
+            }
+            firstHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            secondHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            thirdHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            plantScale = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
+            tree0Random = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            tree1Random = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            bushRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            dragonRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            skeletonScale = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
+            skeletonRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+        }
+    }
+
     public async void Build(Terrain terrain)
     {
         var rect = terrain.rect;
         var terrainComputing = new TerrainComputing(rect, xCount, yCount, noise);
-        var terrainResult = await Task.Run(new Func<TerrainComputing>(terrainComputing.Compute));
+        var terrainResult = await terrainComputing.ComputeAsync();
         var nodes = terrainResult.nodes;
         heights = terrainResult.heights;
         moisture = terrainResult.moisture;
@@ -73,7 +107,6 @@ public class TerrainBuilder : MonoBehaviour
 
         var terrainObject = new GameObject("Terrain");
         terrainObject.AddComponent<MeshFilter>().mesh = mesh;
-        terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
         var renderer = terrainObject.AddComponent<MeshRenderer>();
         renderer.material = material;
         var texture = GetMaskTexture();
@@ -91,9 +124,10 @@ public class TerrainBuilder : MonoBehaviour
 
         if (terrain.lod == 0)
         {
+            terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
             await chaseMesh.AddDataAsync(rect, nodes);
-            terrain.enemyObjects = SetEnemy(rect, nodes);
             terrain.haveChaseMesh = true;
+            terrain.enemyObjects = SetEnemy(rect, nodes);
         }
         else
         {
@@ -103,7 +137,7 @@ public class TerrainBuilder : MonoBehaviour
 
     public async void UpdateTerrain(Terrain terrain)
     {
-        //when the terrainObject have not meshCollider, can not upper(lod from 0 to 1) the lod of mesh...
+        //when the terrainObject have higher resolution of MeshCollider, can not upper(lod from 0 to 1) the lod of mesh...
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
 
@@ -115,10 +149,18 @@ public class TerrainBuilder : MonoBehaviour
                 var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.terrainObject, terrain.plantObjects);
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
+            if (meshCollider == null)
+            {
+                terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
+            }
             terrain.shader.maximumLOD = 220;
         }
         else
         {
+            if (meshCollider != null)
+            {
+                Destroy(meshCollider);
+            }
             terrain.shader.maximumLOD = 110;
         }
     }
@@ -191,7 +233,7 @@ public class TerrainBuilder : MonoBehaviour
         var terrainIndices = terrainMesh.triangles;
 
         var waterComputing = new WaterComputing(terrainVertices, terrainIndices, thirdHeight);
-        var water = await Task.Run(new Func<WaterComputing>(waterComputing.Compute));
+        var water = await waterComputing.ComputeAsync();
 
         if (water == null)
         {
@@ -327,275 +369,6 @@ public class TerrainBuilder : MonoBehaviour
         return enemyList;
     }
 
-    #region set lod indices
-    private int[][] InitialIndices(int lod)
-    {
-        int scale = 1 << lod;
-        int currXGap = xGap / scale;
-        int currYGap = yGap / scale;
-        if (currXGap < 4 || currYGap < 4)
-        {
-            return null;
-        }
-        int totalIndexCount = currXGap * currYGap * 6;
-        int xdecrease = currXGap / 2 * 3;
-        int ydecrease = currYGap / 2 * 3;
-        var original = new int[totalIndexCount];
-        SetCenterIndices(original, 0, 0, xGap, 0, yGap, 1 * scale);
-
-        int index = 0;
-        var leftTop = new int[totalIndexCount - xdecrease - ydecrease];
-        index = SetCenterIndices(leftTop, index, scale, xGap, 0, yGap - scale, scale);
-        index = SetLeftIndices(leftTop, index, 0, yGap - 2 * scale, scale);
-        index = SetTopIndices(leftTop, index, 2 * scale, xGap, scale);
-        index = SetLeftTopIndices(leftTop, index, scale);
-
-        index = 0;
-        var top = new int[totalIndexCount - xdecrease];
-        index = SetCenterIndices(top, index, 0, xGap, 0, yGap - scale, scale);
-        index = SetTopIndices(top, index, 0, xGap, scale);
-
-        index = 0;
-        var rightTop = new int[totalIndexCount - xdecrease - ydecrease];
-        index = SetCenterIndices(rightTop, index, 0, xGap - scale, 0, yGap - scale, scale);
-        index = SetTopIndices(rightTop, index, 0, xGap - 2 * scale, scale);
-        index = SetRightTopIndices(rightTop, index, scale);
-        index = SetRightIndices(rightTop, index, 0, yGap - 2 * scale, scale);
-
-        index = 0;
-        var left = new int[totalIndexCount - ydecrease];
-        index = SetCenterIndices(left, index, scale, xGap, 0, yGap, scale);
-        index = SetLeftIndices(left, index, 0, yGap, scale);
-
-        index = 0;
-        var center = new int[totalIndexCount - (currXGap + currYGap) * 3];
-        index = SetCenterIndices(center, index, scale, xGap - scale, scale, yGap - scale, scale);
-        index = SetLeftIndices(center, index, 2 * scale, yGap - 2 * scale, scale);
-        index = SetTopIndices(center, index, 2 * scale, xGap - 2 * scale, scale);
-        index = SetRightIndices(center, index, 2 * scale, yGap - 2 * scale, scale);
-        index = SetBottomIndices(center, index, 2 * scale, xGap - 2 * scale, scale);
-        index = SetLeftTopIndices(center, index, scale);
-        index = SetRightTopIndices(center, index, scale);
-        index = SetLeftBottomIndices(center, index, scale);
-        index = SetRightBottomIndices(center, index, scale);
-
-        index = 0;
-        var right = new int[totalIndexCount - ydecrease];
-        index = SetCenterIndices(right, index, 0, xGap - scale, 0, yGap, scale);
-        index = SetRightIndices(right, index, 0, yGap, scale);
-
-        index = 0;
-        var leftBottom = new int[totalIndexCount - xdecrease - ydecrease];
-        index = SetCenterIndices(leftBottom, index, scale, xGap, scale, yGap, scale);
-        index = SetLeftIndices(leftBottom, index, 2 * scale, yGap, scale);
-        index = SetLeftBottomIndices(leftBottom, index, scale);
-        index = SetBottomIndices(leftBottom, index, 2 * scale, xGap, scale);
-
-        index = 0;
-        var bottom = new int[totalIndexCount - xdecrease];
-        index = SetCenterIndices(bottom, index, 0, xGap, scale, yGap, scale);
-        index = SetBottomIndices(bottom, index, 0, xGap, scale);
-
-        index = 0;
-        var rightBottom = new int[totalIndexCount - xdecrease - ydecrease];
-        index = SetCenterIndices(rightBottom, index, 0, xGap - scale, scale, yGap, scale);
-        index = SetBottomIndices(rightBottom, index, 0, xGap - 2 * scale, scale);
-        index = SetRightBottomIndices(rightBottom, index, scale);
-        index = SetRightIndices(rightBottom, index, 2 * scale, yGap, scale);
-
-        var allIndices = new int[(int)MeshType.Count][];
-        allIndices[(int)MeshType.Original] = original;
-        allIndices[(int)MeshType.LeftTop] = leftTop;
-        allIndices[(int)MeshType.Top] = top;
-        allIndices[(int)MeshType.RightTop] = rightTop;
-        allIndices[(int)MeshType.Left] = left;
-        allIndices[(int)MeshType.Center] = center;
-        allIndices[(int)MeshType.Right] = right;
-        allIndices[(int)MeshType.LeftBottom] = leftBottom;
-        allIndices[(int)MeshType.Bottom] = bottom;
-        allIndices[(int)MeshType.RightBottom] = rightBottom;
-
-        return allIndices;
-    }
-
-    private int SetCenterIndices(int[] indices, int startIndex, int xStart, int xEnd, int yStart, int yEnd, int offset)
-    {
-        for (int i = xStart; i < xEnd; i += offset)
-        {
-            for (int j = yStart; j < yEnd; j += offset)
-            {
-                int self = i + (j * xCount);
-                int next = i + ((j + offset) * xCount);
-                indices[startIndex++] = self;
-                indices[startIndex++] = next;
-                indices[startIndex++] = self + offset;
-                indices[startIndex++] = self + offset;
-                indices[startIndex++] = next;
-                indices[startIndex++] = next + offset;
-            }
-        }
-        return startIndex;
-    }
-
-    private int SetLeftIndices(int[] indices, int startIndex, int start, int end, int offset)
-    {
-        for (int j = start; j < end; j += offset * 2)
-        {
-            int self = 0 + j * xCount;
-            int next = 0 + (j + offset) * xCount;
-            int nextNext = 0 + (j + 2 * offset) * xCount;
-            indices[startIndex++] = self;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = self;
-            indices[startIndex++] = nextNext;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = nextNext;
-            indices[startIndex++] = nextNext + offset;
-        }
-        return startIndex;
-    }
-
-    private int SetTopIndices(int[] indices, int startIndex, int start, int end, int offset)
-    {
-        for (int i = start; i < end; i += offset * 2)
-        {
-            int self = i + (yGap - offset) * xCount;
-            int next = i + (yGap - offset + offset) * xCount;
-            indices[startIndex++] = self;
-            indices[startIndex++] = next;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = next;
-            indices[startIndex++] = next + 2 * offset;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = next + 2 * offset;
-            indices[startIndex++] = self + 2 * offset;
-        }
-        return startIndex;
-    }
-
-    private int SetRightIndices(int[] indices, int startIndex, int start, int end, int offset)
-    {
-        for (int j = start; j < end; j += offset * 2)
-        {
-            int self = xGap - offset + j * xCount;
-            int next = xGap - offset + (j + offset) * xCount;
-            int nextNext = xGap - offset + (j + 2 * offset) * xCount;
-            indices[startIndex++] = self;
-            indices[startIndex++] = next;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = next;
-            indices[startIndex++] = nextNext + offset;
-            indices[startIndex++] = self + offset;
-            indices[startIndex++] = next;
-            indices[startIndex++] = nextNext;
-            indices[startIndex++] = nextNext + offset;
-        }
-        return startIndex;
-    }
-
-    private int SetBottomIndices(int[] indices, int startIndex, int start, int end, int offset)
-    {
-        for (int i = start; i < end; i += offset * 2)
-        {
-            int self = i + 0 * xCount;
-            int next = i + (0 + offset) * xCount;
-            indices[startIndex++] = self;
-            indices[startIndex++] = next;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = self;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = self + 2 * offset;
-            indices[startIndex++] = self + 2 * offset;
-            indices[startIndex++] = next + offset;
-            indices[startIndex++] = next + 2 * offset;
-        }
-        return startIndex;
-    }
-
-    private int SetLeftTopIndices(int[] indices, int startIndex, int offset)
-    {
-        int self = 0 + (yGap - 2 * offset) * xCount;
-        int next = 0 + (yGap - offset) * xCount;
-        int nextNext = 0 + (yGap) * xCount;
-        indices[startIndex++] = self;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self + offset;
-        indices[startIndex++] = self;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = nextNext + 2 * offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext + 2 * offset;
-        indices[startIndex++] = next + 2 * offset;
-
-        return startIndex;
-    }
-
-    private int SetRightTopIndices(int[] indices, int startIndex, int offset)
-    {
-        int self = xGap - 2 * offset + (yGap - 2 * offset) * xCount;
-        int next = xGap - 2 * offset + (yGap - offset) * xCount;
-        int nextNext = xGap - 2 * offset + (yGap) * xCount;
-        indices[startIndex++] = next;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = nextNext + 2 * offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext + 2 * offset;
-        indices[startIndex++] = self + 2 * offset;
-        indices[startIndex++] = self + offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self + 2 * offset;
-        return startIndex;
-    }
-
-    private int SetLeftBottomIndices(int[] indices, int startIndex, int offset)
-    {
-        int self = 0 + 0 * xCount;
-        int next = 0 + offset * xCount;
-        int nextNext = 0 + 2 * offset * xCount;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = nextNext + offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self;
-        indices[startIndex++] = nextNext;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self + 2 * offset;
-        indices[startIndex++] = self + 2 * offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = next + 2 * offset;
-        return startIndex;
-    }
-
-    private int SetRightBottomIndices(int[] indices, int startIndex, int offset)
-    {
-        int self = xGap - 2 * offset + 0 * xCount;
-        int next = xGap - 2 * offset + offset * xCount;
-        int nextNext = xGap - 2 * offset + 2 * offset * xCount;
-        indices[startIndex++] = self;
-        indices[startIndex++] = next;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = self + 2 * offset;
-        indices[startIndex++] = self + 2 * offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext + 2 * offset;
-        indices[startIndex++] = next + offset;
-        indices[startIndex++] = nextNext + offset;
-        indices[startIndex++] = nextNext + 2 * offset;
-        return startIndex;
-    }
-    #endregion
 }
 
 public enum MeshType
@@ -615,8 +388,8 @@ public enum MeshType
 
 public class Terrain
 {
-    public  int lod;
-    public  MeshType type;
+    public int lod;
+    public MeshType type;
     public Rect rect;
     public Mesh mesh;
     public Shader shader;
@@ -631,115 +404,5 @@ public class Terrain
         this.type = type;
         plantObjects = new List<GameObject>();
         enemyObjects = new List<GameObject>();
-    }
-}
-
-public class TerrainComputing
-{
-    public Vector3[] vertices;
-    public Vector2[] uvs;
-    public Node[,] nodes;
-    public float[,] heights;
-    public float[,] moisture;
-
-    private Rect rect;
-    private int xCount, yCount;
-    private SimplexNoise noise;
-
-    public TerrainComputing(Rect rect, int xCount, int yCount, SimplexNoise noise)
-    {
-        this.rect = rect;
-        this.xCount = xCount;
-        this.yCount = yCount;
-        this.noise = noise;
-    }
-
-    public TerrainComputing Compute()
-    {
-        int vertexCount = xCount * yCount;
-        float xTick = rect.width / (xCount - 1);
-        float yTick = rect.height / (yCount - 1);
-        float u = 1.0f / (xCount - 1);
-        float v = 1.0f / (yCount - 1);
-
-        nodes = new Node[xCount, yCount];
-        heights = new float[xCount, yCount];
-        moisture = new float[xCount, yCount];
-
-        int index = 0;
-        vertices = new Vector3[vertexCount];
-        uvs = new Vector2[vertexCount];
-        for (int j = 0; j < yCount; j++)
-        {
-            for (int i = 0; i < xCount; i++)
-            {
-                var x = i * xTick;
-                var y = j * yTick;
-                var height = noise.GetOctave(rect.x + x, rect.y + y);
-                heights[i, j] = height;
-                moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
-                vertices[index] = new Vector3(x, height, y);
-                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), xTick, yTick, true);
-                uvs[index] = new Vector2(i * u, j * v);
-                index++;
-            }
-        }
-
-        return this;
-    }
-}
-
-public class WaterComputing
-{
-    public Vector3[] vertices;
-    public int[] indices;
-
-    private Vector3[] terrainVertices;
-    private int[] terrainIndices;
-    private float height;
-
-    public WaterComputing(Vector3[] terrainVertices, int[] terrainIndices, float waterHeight)
-    {
-        this.terrainVertices = terrainVertices;
-        this.terrainIndices = terrainIndices;
-        height = waterHeight;
-    }
-
-    public WaterComputing Compute()
-    {
-        var vertexList = new List<Vector3>();
-        var indexList = new List<int>();
-
-        int index = 0;
-        for (int i = 0; i < terrainIndices.Length; i += 3)
-        {
-            int index1 = terrainIndices[i];
-            int index2 = terrainIndices[i + 1];
-            int index3 = terrainIndices[i + 2];
-            var vertex1 = terrainVertices[index1];
-            var vertex2 = terrainVertices[index2];
-            var vertex3 = terrainVertices[index3];
-            if (vertex1.y < height ||
-                vertex2.y < height ||
-                vertex3.y < height)
-            {
-                vertexList.Add(new Vector3(vertex1.x, 0, vertex1.z));
-                vertexList.Add(new Vector3(vertex2.x, 0, vertex2.z));
-                vertexList.Add(new Vector3(vertex3.x, 0, vertex3.z));
-                indexList.Add(index++);
-                indexList.Add(index++);
-                indexList.Add(index++);
-            }
-        }
-
-        if (vertexList.Count == 0)
-        {
-            return null;
-        }
-
-        vertices = vertexList.ToArray();
-        indices = indexList.ToArray();
-
-        return this;
     }
 }
