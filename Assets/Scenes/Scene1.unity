@@ -3653,17 +3653,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1526577689}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08465f2c1f75bf84abb515a102d90382, type: 3}
+  m_Script: {fileID: 11500000, guid: a7eefe33f2468b549ad5a3e382c2df38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainCam: {fileID: 29698843}
-  vertexTick: 0.5
-  xCount: 15
-  zCount: 15
-  waveSpeed: 5
-  viscosity: 5
-  noiseFrequency: 2
+  vertexTick: 1
+  xCount: 10
+  zCount: 10
+  waveSpeed: 4
+  viscosity: 4
+  noiseFrequency: 1
   noiseAmplitude: 0.05
+  interactMult: 0.001
 --- !u!23 &1526577691
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -6,7 +6,7 @@ public class VisualMenu : Menu<VisualMenu>
     private void OnEnable()
     {
         var dropdowns = GetComponentsInChildren<Dropdown>();
-        var toggle = GetComponentInChildren<Toggle>();
+        var toggles = GetComponentsInChildren<Toggle>();
 
         //get resolution setting
         if (Screen.width == 1366)
@@ -37,7 +37,8 @@ public class VisualMenu : Menu<VisualMenu>
         }
 
         //get water setting
-        toggle.isOn = Water.isRef;
+        toggles[0].isOn = Water.isReflect;
+        toggles[1].isOn = Water.isRefract;
     }
 
     public void SetResolution(int index)
@@ -72,8 +73,13 @@ public class VisualMenu : Menu<VisualMenu>
         }
     }
 
-    public void SetWater(bool isOn)
+    public void SetWaterReflection(bool isOn)
     {
-        Water.SetRef(isOn);
+        Water.SetReflection(isOn);
+    }
+
+    public void SetWaterRefraction(bool isOn)
+    {
+        Water.SetRefraction(isOn);
     }
 }

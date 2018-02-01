@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class TerrainBuilder : MonoBehaviour
@@ -249,6 +248,7 @@ public class TerrainBuilder : MonoBehaviour
         var waterObject = new GameObject("Water");
         waterObject.AddComponent<MeshFilter>().mesh = mesh;
         waterObject.AddComponent<MeshRenderer>().sharedMaterial = waterMat;
+        waterObject.AddComponent<Water>();
         waterObject.layer = LayerMask.NameToLayer("Water");
         waterObject.transform.position = new Vector3(0, thirdHeight, 0);
         waterObject.transform.SetParent(terrainTransform, false);
