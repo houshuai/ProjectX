@@ -7,15 +7,7 @@ public class Water : MonoBehaviour
     public static bool isReflect = true;
     public static bool isRefract = true;
 
-    private Reflection reflection;
-    private Refraction refraction;
-
-    private void Start()
-    {
-        Initial();
-    }
-
-    public void Initial()
+    protected virtual void Start()
     {
         var currMat = GetComponent<MeshRenderer>().sharedMaterial;
         if (mat == null || mat != currMat)
@@ -38,22 +30,18 @@ public class Water : MonoBehaviour
                 mat.DisableKeyword("REFRACTION");
             }
         }
-
-        reflection = gameObject.AddComponent<Reflection>();
-        refraction = gameObject.AddComponent<Refraction>();
-
     }
 
     void OnWillRenderObject()
     {
         if (isReflect)
         {
-            mat.SetTexture("_ReflectTex", reflection.Render());
+            mat.SetTexture("_ReflectTex", Reflection.Instance.Render());
         }
 
         if (isRefract)
         {
-            mat.SetTexture("_RefractTex", refraction.Render());
+            mat.SetTexture("_RefractTex", Refraction.Instance.Render());
         }
     }
 

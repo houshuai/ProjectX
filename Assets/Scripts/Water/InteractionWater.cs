@@ -22,9 +22,10 @@ public class InteractionWater : Water
     private float noiseTime;
     private float noiseTimer;
 
-    private void Start()
+    protected override void Start()
     {
-        Initial();
+        base.Start();
+
         GenerateMesh();
         timeTick = Time.fixedDeltaTime;
         f1 = waveSpeed * waveSpeed * timeTick * timeTick / (vertexTick * vertexTick);
@@ -35,6 +36,9 @@ public class InteractionWater : Water
 
         player = GameObject.FindGameObjectWithTag(Tags.Player).GetComponent<Rigidbody>();
         noiseTime = 1.0f / noiseFrequency;
+
+        gameObject.AddComponent<Reflection>().Initial(transform.position.y);
+        gameObject.AddComponent<Refraction>().Initial(transform.position.y);
     }
 
     private void GenerateMesh()

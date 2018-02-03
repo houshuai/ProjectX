@@ -2,21 +2,31 @@
 
 public class Reflection : MonoBehaviour
 {
+    private static Reflection instance;
+
+    public static Reflection Instance
+    {
+        get { return instance; }
+    }
+
     private Camera mainCam;
     private Camera reflectCamera;
     private Matrix4x4 reflectMatrix;
     private Vector4 reflectClipPlane;
+    private RenderTexture targetTexture;
+    private bool isRendered;     
 
-    private void Start()
+    public void Initial(float waterHeight)
     {
         mainCam = Camera.main;
         GenerateReflectCamera();
-        GenerateReflectMatrix();
+        GenerateReflectMatrix(waterHeight);
+        instance = this;
     }
 
     private void GenerateReflectCamera()
     {
-        var texture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24)
+        targetTexture = new RenderTexture(Mathf.FloorToInt(mainCam.pixelWidth), Mathf.FloorToInt(mainCam.pixelHeight), 24)
         {
             wrapMode = TextureWrapMode.Repeat
         };
@@ -28,13 +38,13 @@ public class Reflection : MonoBehaviour
         reflectCamera.clearFlags = CameraClearFlags.SolidColor;
         reflectCamera.backgroundColor = new Color(0, 0, 0, 0);
         reflectCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water"));
-        reflectCamera.targetTexture = texture;
+        reflectCamera.targetTexture = targetTexture;
     }
 
-    private void GenerateReflectMatrix()
+    private void GenerateReflectMatrix(float height)
     {
         var normal = new Vector3(0, 1, 0);
-        float d = -Vector3.Dot(transform.position, normal);            //distance of mirror to origin(0,0,0)
+        float d = -height;
 
         var matrix = new Matrix4x4
         {
@@ -66,6 +76,11 @@ public class Reflection : MonoBehaviour
 
     public RenderTexture Render()
     {
+        if (isRendered)        //ensure only render once per frame
+        {
+            return targetTexture;
+        }
+
         reflectCamera.worldToCameraMatrix = mainCam.worldToCameraMatrix * reflectMatrix;
         var matrix = reflectCamera.projectionMatrix;
 
@@ -88,6 +103,13 @@ public class Reflection : MonoBehaviour
         reflectCamera.Render();
         GL.invertCulling = false;
 
-        return reflectCamera.targetTexture;
+        isRendered = true;
+
+        return targetTexture;
+    }
+
+    private void LateUpdate()
+    {
+        isRendered = false;
     }
 }

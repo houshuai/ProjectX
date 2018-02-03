@@ -52,6 +52,9 @@ public class TerrainBuilder : MonoBehaviour
         plantPool = GetComponent<PlantPool>();
         plantPool.Initial();
         chaseMesh = new ChaseMesh(xCount, yCount);
+
+        gameObject.AddComponent<Reflection>().Initial(thirdHeight);
+        gameObject.AddComponent<Refraction>().Initial(thirdHeight);
     }
 
     private void LoadParameter()

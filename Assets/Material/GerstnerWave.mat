@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: GerstnerWave
   m_Shader: {fileID: 4800000, guid: c8ce725923866a146aa95be127e925e5, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: REFLECTION
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -90,7 +90,7 @@ Material:
     - _Metallic: 0.16
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Para: 0.1
+    - _Para: 0.5
     - _Parallax: 0.02
     - _Q: 0.3
     - _S: 4
