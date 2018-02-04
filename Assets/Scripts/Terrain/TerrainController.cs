@@ -128,6 +128,7 @@ public class TerrainController : MonoBehaviour
         target.terrainObject = source.terrainObject;
         target.plantObjects = source.plantObjects;
         target.enemyObjects = source.enemyObjects;
+        target.vertices = source.vertices;
     }
 
 }

@@ -97,6 +97,7 @@ public class TerrainBuilder : MonoBehaviour
         var nodes = terrainResult.nodes;
         heights = terrainResult.heights;
         moisture = terrainResult.moisture;
+        terrain.vertices = terrainResult.vertices;
 
         var mesh = new Mesh()
         {
@@ -128,7 +129,6 @@ public class TerrainBuilder : MonoBehaviour
         {
             terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
             await chaseMesh.AddDataAsync(rect, nodes);
-            terrain.haveChaseMesh = true;
             terrain.enemyObjects = SetEnemy(rect, nodes);
         }
         else
@@ -137,20 +137,20 @@ public class TerrainBuilder : MonoBehaviour
         }
     }
 
-    public async void UpdateTerrain(Terrain terrain)
+    public void UpdateTerrain(Terrain terrain)
     {
-        //when the terrainObject have higher resolution of MeshCollider, can not upper(lod from 0 to 1) the lod of mesh...
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
 
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
-            if (!terrain.haveChaseMesh)
+            var nodes = chaseMesh.BuildMesh(terrain.rect, terrain.vertices, terrain.plantObjects);
+            if (nodes != null) 
             {
-                var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.terrainObject, terrain.plantObjects);
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
+
             if (meshCollider == null)
             {
                 terrain.terrainObject.AddComponent<MeshCollider>().sharedMesh = terrain.mesh;
@@ -177,6 +177,7 @@ public class TerrainBuilder : MonoBehaviour
         {
             Destroy(terrain.enemyObjects[i]);
         }
+        chaseMesh.RemoveData(terrain.rect);
         Destroy(terrain.terrainObject);
     }
 
@@ -350,7 +351,7 @@ public class TerrainBuilder : MonoBehaviour
         var xTick = rect.width / (xCount - 1);
         var yTick = rect.height / (yCount - 1);
         var height = nodes[i, j].center.y;
-        if (height - Mathf.Floor(height) > dragonRandom)
+        if (height - Mathf.Floor(height) > dragonRandom && nodes[i, j].isWalkable)
         {
             var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
             enemyList.Add(Instantiate(dragon, sourcePosition, Quaternion.identity));
@@ -361,14 +362,14 @@ public class TerrainBuilder : MonoBehaviour
             for (j = ss; j < yCount - ss; j += skeletonScale)
             {
                 height = nodes[i, j].center.y;
-                if (height - Mathf.Floor(height) < skeletonRandom)
+                if (height - Mathf.Floor(height) < skeletonRandom && nodes[i, j].isWalkable)
                 {
                     var sourcePosition = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
                     enemyList.Add(Instantiate(skeleton, sourcePosition, Quaternion.identity));
                 }
             }
         }
-
+        
         return enemyList;
     }
 
@@ -399,7 +400,7 @@ public class Terrain
     public GameObject terrainObject;
     public List<GameObject> plantObjects;
     public List<GameObject> enemyObjects;
-    public bool haveChaseMesh;
+    public Vector3[] vertices;
 
     public Terrain(int lod, MeshType type)
     {

@@ -19,7 +19,6 @@ public class Refraction : MonoBehaviour
     {
         mainCam = Camera.main;
         GenerateRefractCamera();
-        var normal = new Vector3(0, 1, 0);
         refractClipPlane = new Vector4(0, -1, 0, waterHeight);
         instance = this;
     }

@@ -8,6 +8,6 @@ plantScale 3
 tree0Random 0.95
 tree1Random 0.9
 bushRandom 0.8
-dragonRandom 0.9
-skeletonScale 20
+dragonRandom 0.6
+skeletonScale 15
 skeletonRandom 0.5
