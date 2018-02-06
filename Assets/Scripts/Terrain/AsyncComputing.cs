@@ -71,15 +71,18 @@ public class TerrainComputing : AsyncComputing<TerrainComputing>
 public class WaterComputing : AsyncComputing<WaterComputing>
 {
     public Vector3[] vertices;
+    public Vector2[] uv;
     public int[] indices;
 
     private Vector3[] terrainVertices;
+    private Vector2[] terrainUV;
     private int[] terrainIndices;
     private float height;
 
-    public WaterComputing(Vector3[] terrainVertices, int[] terrainIndices, float waterHeight)
+    public WaterComputing(Vector3[] terrainVertices, Vector2[] terrainUV, int[] terrainIndices, float waterHeight)
     {
         this.terrainVertices = terrainVertices;
+        this.terrainUV = terrainUV;
         this.terrainIndices = terrainIndices;
         height = waterHeight;
     }
@@ -87,6 +90,7 @@ public class WaterComputing : AsyncComputing<WaterComputing>
     public override WaterComputing Compute()
     {
         var vertexList = new List<Vector3>();
+        var uvList = new List<Vector2>();
         var indexList = new List<int>();
 
         int index = 0;
@@ -105,6 +109,9 @@ public class WaterComputing : AsyncComputing<WaterComputing>
                 vertexList.Add(new Vector3(vertex1.x, 0, vertex1.z));
                 vertexList.Add(new Vector3(vertex2.x, 0, vertex2.z));
                 vertexList.Add(new Vector3(vertex3.x, 0, vertex3.z));
+                uvList.Add(terrainUV[index1]);
+                uvList.Add(terrainUV[index2]);
+                uvList.Add(terrainUV[index3]);
                 indexList.Add(index++);
                 indexList.Add(index++);
                 indexList.Add(index++);
@@ -117,6 +124,7 @@ public class WaterComputing : AsyncComputing<WaterComputing>
         }
 
         vertices = vertexList.ToArray();
+        uv = uvList.ToArray();
         indices = indexList.ToArray();
 
         return this;

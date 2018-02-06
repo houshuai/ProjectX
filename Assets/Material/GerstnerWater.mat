@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: GerstnerWave
-  m_Shader: {fileID: 4800000, guid: c8ce725923866a146aa95be127e925e5, type: 3}
+  m_Name: GerstnerWater
+  m_Shader: {fileID: 4800000, guid: 9fee540c5c87ba847966cca4808f2454, type: 3}
   m_ShaderKeywords: REFLECTION REFRACTION
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -18,7 +18,19 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AlphaTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Bump:
+        m_Texture: {fileID: 2800000, guid: da380c1d6ab5f334386127704644af7e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap2:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -74,8 +86,13 @@ Material:
         m_Texture: {fileID: 8900000, guid: 1cde0e200e792cb4491204276a656490, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _A: -1
+    - _A: 0.3
+    - _BumpDepth: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -86,6 +103,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.6
     - _GlossyReflections: 1
+    - _Height: 1
     - _L: 1
     - _Metallic: 0.16
     - _Mode: 0
@@ -93,17 +111,23 @@ Material:
     - _Para: 0.5
     - _Parallax: 0.02
     - _Q: 0.3
-    - _S: 4
+    - _S: 2
+    - _Shininess: 3
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _StartX: 0
+    - _Steepness: 0.5
     - _SunPower: 1
     - _Tess: 10
     - _UVSec: 0
+    - _WaterAltitude: -0.1
+    - _Width: 0.1
+    - _WindAmplitude: 2
+    - _WindFrequency: 3
     - _ZWrite: 1
     m_Colors:
-    - _A: {r: 0.02, g: 0, b: 0, a: 0}
+    - _A: {r: 0.5, g: 0, b: 0, a: 0}
     - _C1: {r: 1, g: 1, b: 1, a: 1}
     - _C2: {r: 1, g: 1, b: 1, a: 1}
     - _C3: {r: 1, g: 1, b: 1, a: 1}
@@ -111,11 +135,16 @@ Material:
     - _Dx: {r: 3, g: 1, b: 2, a: 1}
     - _Dz: {r: 1, g: 2, b: 2, a: 3}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _L: {r: 6, g: 3, b: 4, a: 30}
-    - _Q: {r: 1, g: 1.5, b: 2, a: 1}
-    - _S: {r: 2, g: 3, b: 5, a: 10}
+    - _L: {r: 20, g: 3, b: 4, a: 20}
+    - _PlayerPos: {r: 0, g: 0, b: 0, a: 0}
+    - _Q: {r: 0, g: 0, b: 0, a: 0}
+    - _S: {r: 3, g: 10, b: 4, a: 2}
+    - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
     - _SunColor: {r: 1, g: 1, b: 1, a: 1}
     - _SunDir: {r: 0.31, g: 1, b: 1, a: 1}
+    - _WaterAttenuation: {r: 1, g: 2, b: 3, a: 4}
+    - _WaterKD: {r: 1, g: 2, b: 3, a: 4}
+    - _WaterRadiance: {r: 1, g: 2, b: 3, a: 4}
     - _Wave1: {r: 0.22, g: 0.4, b: 0.5, a: 0.1}
     - _Wave2: {r: 0.27, g: 0.27, b: 0.17, a: 0.1}
     - _Wave3: {r: 1, g: 1, b: 0.5, a: 0.1}

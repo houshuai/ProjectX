@@ -3660,9 +3660,9 @@ MonoBehaviour:
   xCount: 10
   zCount: 10
   waveSpeed: 4
-  viscosity: 4
-  noiseFrequency: 1
-  noiseAmplitude: 0.05
+  viscosity: 5
+  noiseFrequency: 2
+  noiseAmplitude: 0.02
   interactMult: 0.001
 --- !u!23 &1526577691
 MeshRenderer:

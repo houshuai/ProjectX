@@ -232,10 +232,7 @@ public class TerrainBuilder : MonoBehaviour
 
     private async void SetWater(Mesh terrainMesh, Transform terrainTransform)
     {
-        var terrainVertices = terrainMesh.vertices;
-        var terrainIndices = terrainMesh.triangles;
-
-        var waterComputing = new WaterComputing(terrainVertices, terrainIndices, thirdHeight);
+        var waterComputing = new WaterComputing(terrainMesh.vertices, terrainMesh.uv, terrainMesh.triangles, thirdHeight);
         var water = await waterComputing.ComputeAsync();
 
         if (water == null)
@@ -246,6 +243,7 @@ public class TerrainBuilder : MonoBehaviour
         var mesh = new Mesh()
         {
             vertices = water.vertices,
+            uv = water.uv,
             triangles = water.indices,
         };
 

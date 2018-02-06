@@ -45,9 +45,12 @@ public class InteractionWater : Water
     {
         var xStart = -vertexTick * xCount / 2;
         var zStart = -vertexTick * zCount / 2;
+        var u = 1.0f / (xCount - 1);
+        var v = 1.0f / (zCount - 1);
 
         prev = new Vector3[xCount * zCount];
         curr = new Vector3[xCount * zCount];
+        var uv = new Vector2[xCount * zCount];
         var indices = new int[(xCount - 1) * (zCount - 1) * 6];
 
         int index = 0;
@@ -57,6 +60,7 @@ public class InteractionWater : Water
             {
                 prev[index] = new Vector3(xStart + i * vertexTick, 0, zStart + j * vertexTick);
                 curr[index] = prev[index];
+                uv[index] = new Vector2(i * u, j * v);
                 index++;
             }
         }
@@ -78,6 +82,7 @@ public class InteractionWater : Water
         mesh = new Mesh
         {
             vertices = curr,
+            uv = uv,
             triangles = indices
         };
         mesh.RecalculateNormals();

@@ -67,7 +67,9 @@ public class Ocean : MonoBehaviour
         water.AddComponent<MeshFilter>().mesh = mesh;
         water.AddComponent<MeshRenderer>().sharedMaterial = material;
         water.AddComponent<MeshCollider>().sharedMesh = mesh;
-        water.AddComponent<Water>();
+        //water.AddComponent<Reflection>().Initial(transform.position.y);
+        //water.AddComponent<Refraction>().Initial(transform.position.y);
+        //water.AddComponent<Water>();
         water.transform.SetParent(transform,false);
     }
 }
