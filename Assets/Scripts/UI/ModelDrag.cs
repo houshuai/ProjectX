@@ -1,32 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ModelDrag : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class ModelDrag : MonoBehaviour, IDragHandler
 {
     [HideInInspector]
     public Transform model;
 
-    private bool isDrag;
-    private float preX;
-
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnDrag(PointerEventData eventData)
     {
-        isDrag = true;
-        preX = Input.mousePosition.x;
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        isDrag = false;
-    }
-
-    private void Update()
-    {
-        if (isDrag && model != null)
-        {
-            var rotation = Quaternion.Euler(0, preX - Input.mousePosition.x, 0);
-            model.rotation = model.rotation * rotation;
-            preX = Input.mousePosition.x;
-        }
+        var rotation = Quaternion.Euler(0, -eventData.delta.x, 0);
+        model.rotation = model.rotation * rotation;
     }
 }

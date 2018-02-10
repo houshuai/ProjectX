@@ -25,19 +25,15 @@ public class LootController : MonoBehaviour
 
     private static LootController instance;
     private List<Loot> allLoot;
-    private string[] lootNames;
 
     private void Start()
     {
         allLoot = new List<Loot>();
-        lootNames = new string[9]
-        { "bathtowel", "blazer", "casualwear", "casualwear1",
-            "jersey", "schoolwear", "schoolwear1", "schoolwear2", "swimwear" };
 
         for (int i = 0; i < initialCount; i++)
         {
             var loot = Instantiate(lootPrefab).GetComponent<Loot>();
-            loot.lootName = lootNames[Random.Range(0, 8)];
+            loot.id = Random.Range(0, GoodsDictionary.Count);
             loot.gameObject.SetActive(false);
             allLoot.Add(loot);
         }
@@ -52,7 +48,7 @@ public class LootController : MonoBehaviour
             {
                 var circle = Random.insideUnitCircle;
                 loot.transform.position = new Vector3(pos.x + circle.x, pos.y, pos.z + circle.y);
-                loot.lootName = lootNames[Random.Range(0, 8)];
+                loot.id = Random.Range(0, GoodsDictionary.Count);
                 loot.gameObject.SetActive(true);
                 currAvailable++;
             }
@@ -68,7 +64,7 @@ public class LootController : MonoBehaviour
             var circle = Random.insideUnitCircle;
             var loot = Instantiate(lootPrefab,
                 new Vector3(pos.x + circle.x, pos.y, pos.z + circle.y), Quaternion.identity).GetComponent<Loot>();
-            loot.lootName = lootNames[Random.Range(0, 8)];
+            loot.id = Random.Range(0, GoodsDictionary.Count);
             allLoot.Add(loot);
         }
     }

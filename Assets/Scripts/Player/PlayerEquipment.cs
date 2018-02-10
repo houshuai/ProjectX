@@ -1,13 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class PlayerInventory : MonoBehaviour
+public class PlayerEquipment : MonoBehaviour
 {
-    public int size = 12;
-    public Inventory inventory;
-    [HideInInspector]
-    public List<string> ItemList { get { return inventory.itemList; } }
-
     private PlayerMove playerMove;
     private PlayerHealth playerHealth;
     private PlayerAttack playerAttack;
@@ -15,22 +9,11 @@ public class PlayerInventory : MonoBehaviour
 
     private void Awake()
     {
-        inventory = Archive.current.inventory;
         playerMove = GetComponent<PlayerMove>();
         playerHealth = GetComponent<PlayerHealth>();
         playerAttack = GetComponent<PlayerAttack>();
         currItem = GetComponentInChildren<PlayAnimationEvent>().gameObject;
         GameController.Instance.player = transform;
-    }
-
-    public void AddItem(string name)
-    {
-        if (inventory.itemList.Count > 12)
-        {
-            return;
-        }
-
-        inventory.itemList.Add(name);
     }
 
     private void OnEnable()
@@ -53,18 +36,18 @@ public class PlayerInventory : MonoBehaviour
 
     private void Load()
     {
-        string currName = inventory.current;
-        if (currName != null)
+        var currGoods = Archive.current.currGoods;
+        if (currGoods != null)
         {
-            var prefab = Resources.Load<GameObject>(currName);
+            var prefab = Resources.Load<GameObject>(currGoods.name);
             var newModel = Instantiate(prefab);
-            newModel.name = currName;
-            ShiftModel(newModel.transform);
+            newModel.name = currGoods.name;
+            ShiftModel(newModel.transform, currGoods);
         }
 
     }
 
-    public void ShiftModel(Transform newModel)
+    public void ShiftModel(Transform newModel, Goods goods)
     {
         Destroy(currItem);
         newModel.position = transform.position;
@@ -76,6 +59,6 @@ public class PlayerInventory : MonoBehaviour
         playerHealth.anim = playerMove.anim;
         playerAttack.anim = anim;
         currItem = newModel.gameObject;
-        inventory.current = currItem.name;
+        Archive.current.currGoods = goods;
     }
 }

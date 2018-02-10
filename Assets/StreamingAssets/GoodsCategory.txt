@@ -1,0 +1,1 @@
+{"array":[{"id":1,"name":"bathtowel"},{"id":2,"name":"blazer"},{"id":3,"name":"casualwear"},{"id":4,"name":"casualwear1"},{"id":5,"name":"jersey"},{"id":6,"name":"schoolwear"},{"id":7,"name":"schoolwear1"},{"id":8,"name":"schoolwear2"},{"id":9,"name":"swimwear"}]}

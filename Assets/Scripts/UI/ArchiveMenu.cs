@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class ArchiveMenu : Menu<ArchiveMenu>
 {
     private Archive[] archives;
-    private Image[] backgrounds;
 
     protected override void Awake()
     {
@@ -28,20 +27,6 @@ public class ArchiveMenu : Menu<ArchiveMenu>
                 texts[0].text = archives[i].title;
                 texts[1].text = archives[i].currScene;
             }
-        }
-
-        backgrounds = new Image[archives.Length];
-        for (int i = 0; i < backgrounds.Length; i++)
-        {
-            backgrounds[i] = selectArchives[i].GetComponent<Image>();
-        }
-    }
-
-    public void OnSelect()
-    {
-        for (int i = 0; i < backgrounds.Length; i++)
-        {
-            backgrounds[i].color = Color.white;
         }
     }
 

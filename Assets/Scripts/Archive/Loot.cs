@@ -3,14 +3,14 @@
 public class Loot : MonoBehaviour
 {
     [HideInInspector]
-    public string lootName;
+    public int id;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag==Tags.Player)
+        if (other.tag == Tags.Player)
         {
             gameObject.SetActive(false);
-            other.gameObject.GetComponent<PlayerInventory>().AddItem(lootName);
+            Archive.current.inventory.In(GoodsDictionary.Get(id));
         }
     }
 }

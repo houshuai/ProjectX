@@ -12,7 +12,8 @@ public class Archive
     public bool isNew = true;
     public string title;
     public string currScene;
-    public Dictionary<string, Vector3> positions;
+    public Dictionary<string, Vector3> positions;    //player position in every scene
+    public Goods currGoods;                          //player current equiped goods
     public Inventory inventory;
 
     public void Initial()
@@ -21,7 +22,8 @@ public class Archive
         title = null;
         currScene = null;
         positions = new Dictionary<string, Vector3>(3);
-        inventory = new Inventory();
+        currGoods = null;
+        inventory = new Inventory(12, 3);
     }
 
     public void SetPlayerPosition(Vector3 position)
@@ -75,7 +77,7 @@ public class Archive
             var ss = new SurrogateSelector();
             ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), v3ss);
             bf.SurrogateSelector = ss;
-            using (var file = File.Open(fileName, FileMode.Open))
+            using (var file = File.OpenRead(fileName))
             {
                 archives = (Archive[])bf.Deserialize(file);
             }
@@ -91,14 +93,6 @@ public class Archive
 
         return archives;
     }
-}
-
-[Serializable]
-public sealed class Inventory
-{
-    public string current;
-    public List<string> itemList = new List<string>();
-
 }
 
 public sealed class Vector3SerializationSurrogate : ISerializationSurrogate

@@ -322,7 +322,7 @@ MonoBehaviour:
     type: 2}
   pauseMenu: {fileID: 114845669078223066, guid: 2d26ffced8e14e5408fd5eea218a4766,
     type: 2}
-  inventoryMenu: {fileID: 114789120557563442, guid: 1dcc9726541360f47bf2b3192fe2feb1,
+  inventoryMenu: {fileID: 114792876107367110, guid: 1dcc9726541360f47bf2b3192fe2feb1,
     type: 2}
   health: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
 --- !u!1 &847289661
