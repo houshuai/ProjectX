@@ -32,6 +32,11 @@ public class ArchiveMenu : Menu<ArchiveMenu>
 
     public void OnOk()
     {
+        if (Archive.current == null)
+        {
+            return;
+        }
+
         if (Archive.current.isNew)
         {
             NewArchiveMenu.Open();
@@ -45,6 +50,11 @@ public class ArchiveMenu : Menu<ArchiveMenu>
 
     public void OnDelete()
     {
+        if (Archive.current == null)
+        {
+            return;
+        }
+
         Archive.current.Initial();
         var selectArchives = GetComponentsInChildren<SelectArchive>();
         for (int i = 0; i < selectArchives.Length; i++)

@@ -39,7 +39,7 @@ public class CameraLook : MonoBehaviour
 
     void LateUpdate()
     {
-        if (rig == null || EventSystem.current.IsPointerOverGameObject())
+        if (rig == null)
         {
             return;
         }
@@ -54,8 +54,8 @@ public class CameraLook : MonoBehaviour
         }
         else
         {
-            x += Input.GetAxis("Mouse X") * xSpeed;
-            y -= Input.GetAxis("Mouse Y") * ySpeed;
+            x += TouchPad.GetAxis("X") * xSpeed; //Input.GetAxis("Mouse X") * xSpeed;
+            y -= TouchPad.GetAxis("Y") * ySpeed; //Input.GetAxis("Mouse Y") * ySpeed;
             z += Input.GetAxis("Mouse ScrollWheel") * zSpeed;
             y = Mathf.Clamp(y, yMin, yMax);
             z = Mathf.Clamp(z, -zMax, -zMin);

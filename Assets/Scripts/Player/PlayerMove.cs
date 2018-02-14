@@ -96,8 +96,8 @@ public class PlayerMove : MonoBehaviour
 
         if (isGround)
         {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            float h = Joystick.GetAxis("Horizontal");
+            float v = Joystick.GetAxis("Vertical");
             var animState = anim.GetCurrentAnimatorStateInfo(0).shortNameHash;
             if (animState == Hashes.LocomotionState || animState == Hashes.CrouchState)
             {
@@ -128,7 +128,7 @@ public class PlayerMove : MonoBehaviour
         Translate(forward);
         Rotate(move);
 
-        if (Input.GetButtonDown("Jump"))
+        if (TouchButton.GetButtonDown("Jump"))
         {
             Jump();
         }

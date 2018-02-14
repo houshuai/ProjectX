@@ -1,4 +1,7 @@
-﻿public class Indices
+﻿/// <summary>
+/// 详情请参考 http://www.cnblogs.com/clayman/archive/2012/12/10/2810702.html
+/// </summary>
+public class Indices
 {
     private int xCount;
     private int xGap, yGap;

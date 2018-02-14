@@ -57,7 +57,7 @@ public class GameController : MonoBehaviour
         Vector3 pos;
         if (Archive.current.GetPlayerPosition(out pos))
         {
-            player.position = pos;
+            player.position = pos + new Vector3(0, 1, 0);
         }
     }
 

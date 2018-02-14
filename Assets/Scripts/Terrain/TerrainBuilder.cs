@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -10,18 +11,18 @@ public class TerrainBuilder : MonoBehaviour
     public GameObject dragon;
     public GameObject skeleton;
 
-    private int seed = 152411;
-    private float[] frequencys;
-    private float[] amplitudes;
+    private int seed = 155162;
+    private float[] frequencys = new float[] { 0.001f, 0.005f, 0.02f, 0.05f, };
+    private float[] amplitudes = new float[] { 100, 50, 10, 2, };
     private float firstHeight = 120;
-    private float secondHeight = 75;
-    private float thirdHeight = 30;
+    private float secondHeight = 81;
+    private float thirdHeight = 40;
     private int plantScale = 3;
-    private float tree0Random = 0.95f;
-    private float tree1Random = 0.9f;
-    private float bushRandom = 0.8f;
-    private float dragonRandom = 0.9f;
-    private int skeletonScale = 10;
+    private float tree0Random = 0.98f;
+    private float tree1Random = 0.94f;
+    private float bushRandom = 0.5f;
+    private float dragonRandom = 0.8f;
+    private int skeletonScale = 30;
     private float skeletonRandom = 0.5f;
 
     private int xCount, yCount;
@@ -33,7 +34,7 @@ public class TerrainBuilder : MonoBehaviour
     private PlantPool plantPool;
     private ChaseMesh chaseMesh;
 
-    public void Initial(int xCount, int yCount, int lodCount)
+    public IEnumerator InitialAsync(int xCount, int yCount, int lodCount)
     {
         this.xCount = xCount;
         this.yCount = yCount;
@@ -43,52 +44,67 @@ public class TerrainBuilder : MonoBehaviour
         {
             lodIndices[i] = indices.InitialIndices(i);
         }
-
-        LoadParameter();
-
-        noise = new SimplexNoise(seed, frequencys, amplitudes);
+        
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
         plantPool = GetComponent<PlantPool>();
         plantPool.Initial();
         chaseMesh = new ChaseMesh(xCount, yCount);
 
+        yield return StartCoroutine(LoadParameter());
+
+        noise = new SimplexNoise(seed, frequencys, amplitudes);
         gameObject.AddComponent<Reflection>().Initial(thirdHeight);
         gameObject.AddComponent<Refraction>().Initial(thirdHeight);
+
+        var player = FindObjectOfType<PlayerMove>().transform;
+        var p = player.position;
+        p.y = noise.GetOctave(p.x, p.z);
+        player.position = p;
     }
 
-    private void LoadParameter()
+    /// <summary>
+    /// 从文件中加载地形参数
+    /// </summary>
+    private IEnumerator LoadParameter()
     {
-        using (var fs = File.OpenRead(Application.streamingAssetsPath + "/terrainBuilder.txt"))
+        var fileName = Application.streamingAssetsPath + "/terrainBuilder.txt";
+        using (var www = new WWW(fileName))
         {
+            yield return www;
+            var lines = www.text.Split("\n"[0]);
+            int index = 0;
             char c = ' ';
-            var sr = new StreamReader(fs);
-            seed = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
-            var str = sr.ReadLine().Split(c);
+            seed = Convert.ToInt32(lines[index++].Split(c)[1]);
+            var str = lines[index++].Split(c);
             frequencys = new float[str.Length - 1];
             for (int i = 0; i < str.Length - 1; i++)
             {
                 frequencys[i] = Convert.ToSingle(str[i + 1]);
             }
-            str = sr.ReadLine().Split(c);
+            str = lines[index++].Split(c);
             amplitudes = new float[str.Length - 1];
             for (int i = 0; i < str.Length - 1; i++)
             {
                 amplitudes[i] = Convert.ToSingle(str[i + 1]);
             }
-            firstHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            secondHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            thirdHeight = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            plantScale = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
-            tree0Random = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            tree1Random = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            bushRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            dragonRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
-            skeletonScale = Convert.ToInt32(sr.ReadLine().Split(c)[1]);
-            skeletonRandom = Convert.ToSingle(sr.ReadLine().Split(c)[1]);
+            firstHeight = Convert.ToSingle(lines[index++].Split(c)[1]);
+            secondHeight = Convert.ToSingle(lines[index++].Split(c)[1]);
+            thirdHeight = Convert.ToSingle(lines[index++].Split(c)[1]);
+            plantScale = Convert.ToInt32(lines[index++].Split(c)[1]);
+            tree0Random = Convert.ToSingle(lines[index++].Split(c)[1]);
+            tree1Random = Convert.ToSingle(lines[index++].Split(c)[1]);
+            bushRandom = Convert.ToSingle(lines[index++].Split(c)[1]);
+            dragonRandom = Convert.ToSingle(lines[index++].Split(c)[1]);
+            skeletonScale = Convert.ToInt32(lines[index++].Split(c)[1]);
+            skeletonRandom = Convert.ToSingle(lines[index++].Split(c)[1]);
         }
     }
 
+    /// <summary>
+    /// 建立一个完整的地形
+    /// </summary>
+    /// <param name="terrain">被建立的地形，需要先初始化lod和type</param>
     public async void Build(Terrain terrain)
     {
         var rect = terrain.rect;
@@ -137,7 +153,11 @@ public class TerrainBuilder : MonoBehaviour
         }
     }
 
-    public void UpdateTerrain(Terrain terrain)
+    /// <summary>
+    /// 更新地形
+    /// </summary>
+    /// <param name="terrain">被跟新的地形，与现在的lod和type不匹配的地方会被更新</param>
+    public async void UpdateTerrain(Terrain terrain)
     {
         terrain.mesh.triangles = lodIndices[terrain.lod][(int)terrain.type];
         terrain.mesh.RecalculateNormals();
@@ -145,8 +165,8 @@ public class TerrainBuilder : MonoBehaviour
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
         if (terrain.lod == 0)
         {
-            var nodes = chaseMesh.BuildMesh(terrain.rect, terrain.vertices, terrain.plantObjects);
-            if (nodes != null) 
+            var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.vertices, terrain.plantObjects);
+            if (nodes != null) //这块新建了nodes，说明之前没有设置enemy
             {
                 terrain.enemyObjects = SetEnemy(terrain.rect, nodes);
             }
@@ -167,6 +187,10 @@ public class TerrainBuilder : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 删除地形
+    /// </summary>
+    /// <param name="terrain"></param>
     public void Delete(Terrain terrain)
     {
         for (int i = 0; i < terrain.plantObjects.Count; i++)
@@ -367,7 +391,7 @@ public class TerrainBuilder : MonoBehaviour
                 }
             }
         }
-        
+
         return enemyList;
     }
 

@@ -15,6 +15,7 @@ public class PlantPool : MonoBehaviour
     private Stack<GameObject>[] bushCache;
     private Stack<GameObject>[] grassCache;
 
+    private float timeToClear = 3;
     private float timer;
     private bool isCleared;
 
@@ -31,7 +32,7 @@ public class PlantPool : MonoBehaviour
         Initial(bushes, bushPool, bushCache, initialSize);
         Initial(grasses, grassPool, grassCache, initialSize * 50);
 
-        timer = 1;
+        timer = timeToClear;
     }
 
     private void Initial(GameObject[] plants, Stack<GameObject>[] pool, Stack<GameObject>[] cache, int size)
@@ -72,7 +73,7 @@ public class PlantPool : MonoBehaviour
                 result.name = trees[index].name;
             }
         }
-        timer = 1;
+        timer = timeToClear;
         return result;
     }
 
@@ -100,7 +101,7 @@ public class PlantPool : MonoBehaviour
                 result.name = bushes[index].name;
             }
         }
-        timer = 1;
+        timer = timeToClear;
         return result;
     }
 
@@ -127,7 +128,7 @@ public class PlantPool : MonoBehaviour
                 result.name = grasses[0].name;
             }
         }
-        timer = 1;
+        timer = timeToClear;
         return result;
     }
 
@@ -169,6 +170,10 @@ public class PlantPool : MonoBehaviour
 
     private void ClearCache(Stack<GameObject>[] plantCache, Stack<GameObject>[] plantPool)
     {
+        if (plantCache == null || plantPool == null)
+        {
+            return;
+        }
         for (int i = 0; i < plantCache.Length; i++)
         {
             var cache = plantCache[i];

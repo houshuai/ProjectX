@@ -24,21 +24,32 @@ public class OverlayGoods
 
 public static class GoodsDictionary
 {
-    private static Goods[] goodsCategory = new Goods[9];
+    private static Goods[] goodsCategory = new Goods[]
+    {
+        new Goods(){id=1,name="bathtowel"},
+        new Goods(){id=2,name="blazer"},
+        new Goods(){id=3,name="casualwear"},
+        new Goods(){id=4,name="casualwear1"},
+        new Goods(){id=5,name="jersey"},
+        new Goods(){id=6,name="schoolwear"},
+        new Goods(){id=7,name="schoolwear1"},
+        new Goods(){id=8,name="schoolwear2"},
+        new Goods(){id=9,name="swimwear"}
+    };
 
     public static int Count { get { return goodsCategory.Length; } }
 
     static GoodsDictionary()
     {
         //Initial();
-        var fileName = Application.streamingAssetsPath + "/GoodsCategory.txt";
-        if (File.Exists(fileName))
-        {
-            using (var sr = new StreamReader(fileName))
-            {
-                goodsCategory = JsonHelper.ArrayFromJson<Goods>(sr.ReadToEnd());
-            }
-        }
+        //var fileName = Application.streamingAssetsPath + "/GoodsCategory.txt";
+        //if (File.Exists(fileName))
+        //{
+        //    using (var sr = new StreamReader(fileName))
+        //    {
+        //        goodsCategory = JsonHelper.ArrayFromJson<Goods>(sr.ReadToEnd());
+        //    }
+        //}
     }
 
     public static Goods Get(int id)
@@ -72,7 +83,7 @@ public static class GoodsDictionary
         string json = JsonHelper.ArrayToJson(array);
 
         var fileName = Application.streamingAssetsPath + "/GoodsCategory.txt";
-        using (var sw= new StreamWriter(fileName))
+        using (var sw = new StreamWriter(fileName))
         {
             sw.WriteLine(json);
         }

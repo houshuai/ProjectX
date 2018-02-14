@@ -44,12 +44,12 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if (playerHealth.Value <= 0 || playerMove.isCrouch || EventSystem.current.IsPointerOverGameObject())
+        if (playerHealth.Value <= 0 || playerMove.isCrouch)
         {
             return;
         }
 
-        if (Input.GetButtonDown("Fire1") && fireInputCount < 3) //记录最多三次攻击输入
+        if (TouchButton.GetButtonDown("Fire") && fireInputCount < 3) //记录最多三次攻击输入
         {
             if (fightTimer > 0)
             {

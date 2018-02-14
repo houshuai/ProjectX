@@ -13,6 +13,7 @@ public class MenuController : MonoBehaviour
     public PauseMenu pauseMenu;
     public InventoryMenu inventoryMenu;
     public FloatVariable health;
+    public GameObject HUB;
 
     private Stack<Menu> menuStack;
 
@@ -33,11 +34,28 @@ public class MenuController : MonoBehaviour
     private void OnEnable()
     {
         health.ValueChanged += HealthChanged;
+        Scene.Instance.BeforeUnload += SceneBeforeUnload;
+        Scene.Instance.AfterLoaded += SceneAfterLoaded;
     }
 
     private void OnDisable()
     {
         health.ValueChanged -= HealthChanged;
+        if (Scene.Instance != null)
+        {
+            Scene.Instance.BeforeUnload -= SceneBeforeUnload;
+            Scene.Instance.AfterLoaded -= SceneAfterLoaded;
+        }
+    }
+
+    private void SceneBeforeUnload()
+    {
+        HUB.SetActive(false);
+    }
+
+    private void SceneAfterLoaded()
+    {
+        HUB.SetActive(true);
     }
 
     private void HealthChanged(object sender, ValueChangedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class TerrainController : MonoBehaviour
 {
@@ -14,24 +15,26 @@ public class TerrainController : MonoBehaviour
     private Terrain[,] allTerrain;
     private float xLength, yLength;
 
-    private void Start()
+    private IEnumerator Start()
     {
         xLength = (xCount - 1) * xTick;
         yLength = (yCount - 1) * yTick;
-        player = GameObject.FindGameObjectWithTag(Tags.Player).transform;
+        player = FindObjectOfType<PlayerMove>().transform;
         builder = GetComponent<TerrainBuilder>();
-        builder.Initial(xCount, yCount, lodCount);
 
-        if (Archive.current != null)
+        allTerrain = new Terrain[1, 1]        //保证下面的异步builder初始化完成之前的update不会出错
         {
-            Archive.current.currScene = "Scene3";
-            Vector3 pos;
-            if (Archive.current.GetPlayerPosition(out pos))
             {
-                player.position = pos + new Vector3(0, 1, 0);
+                new Terrain(0, MeshType.Original)
+                {
+                    rect = new Rect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity)
+                }
             }
-        }
+        };
 
+        yield return StartCoroutine(builder.InitialAsync(xCount, yCount, lodCount));
+
+        //这里在几帧之后才会执行到
         allTerrain = new Terrain[,]
         {
             { new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original)},
@@ -52,7 +55,6 @@ public class TerrainController : MonoBehaviour
                 builder.Build(allTerrain[i, j]);
             }
         }
-
     }
 
     private void Update()

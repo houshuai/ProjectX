@@ -16,6 +16,11 @@ public class ChaseMesh
         allNodes = new List<Node[,]>();
     }
 
+    /// <summary>
+    /// 获取最近的寻路节点
+    /// </summary>
+    /// <param name="position">需要获取最近寻路节点的位置</param>
+    /// <returns></returns>
     public static Node GetNode(Vector3 position)
     {
         Node result = null;
@@ -35,7 +40,14 @@ public class ChaseMesh
         return result;
     }
 
-    public Node[,] BuildMesh(Rect rect, Vector3[] vertices, List<GameObject> plantList)
+    /// <summary>
+    /// 根据一个地形mesh建立一个chaseMesh
+    /// </summary>
+    /// <param name="rect">地形mesh的rect</param>
+    /// <param name="vertices">地形mesh的顶点</param>
+    /// <param name="plantList">地形上的障碍物</param>
+    /// <returns></returns>
+    public async Task<Node[,]> BuildMeshAsync(Rect rect, Vector3[] vertices, List<GameObject> plantList)
     {
         if (allRect.Contains(rect))
         {
@@ -73,16 +85,27 @@ public class ChaseMesh
             nodes[x, y].isWalkable = false;
         }
 
-        AddData(rect, nodes);
+        await AddDataAsync(rect, nodes);
 
         return nodes;
     }
 
+    /// <summary>
+    /// 异步AddData
+    /// </summary>
+    /// <param name="rect"></param>
+    /// <param name="nodes"></param>
+    /// <returns></returns>
     public Task AddDataAsync(Rect rect, Node[,] nodes)
     {
         return Task.Run(() => AddData(rect, nodes));
     }
 
+    /// <summary>
+    /// 把寻路节点添加到chaseMesh中
+    /// </summary>
+    /// <param name="rect">节点所在的rect</param>
+    /// <param name="nodes">寻路节点</param>
     private void AddData(Rect rect, Node[,] nodes)
     {
         for (int i = 0; i < xCountOfTile - 1; i++)
@@ -137,6 +160,11 @@ public class ChaseMesh
         
     }
 
+    /// <summary>
+    /// 把水平相邻的两块寻路节点连接起来
+    /// </summary>
+    /// <param name="left">左边区块的寻路节点</param>
+    /// <param name="right">右边区块的寻路节点</param>
     private void LinkHorizontal(Node[,] left, Node[,] right)
     {
         var node = left[xCountOfTile - 1, 0];
@@ -154,6 +182,11 @@ public class ChaseMesh
         }
     }
 
+    /// <summary>
+    /// 把垂直相邻的两块寻路节点连接起来
+    /// </summary>
+    /// <param name="bottom">下</param>
+    /// <param name="top">上</param>
     private void LinkVertical(Node[,] bottom, Node[,] top)
     {
         var node = bottom[0, yCountOfTile - 1];
@@ -172,6 +205,10 @@ public class ChaseMesh
 
     }
 
+    /// <summary>
+    /// 移除寻路节点
+    /// </summary>
+    /// <param name="rect">需要移除的寻路节点所在的rect</param>
     public void RemoveData(Rect rect)
     {
         if (!allRect.Contains(rect))
@@ -212,6 +249,11 @@ public class ChaseMesh
         }
     }
 
+    /// <summary>
+    /// 断开水平相邻的两块寻路节点的连接
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
     private void UnlinkHorizontal(Node[,] left, Node[,] right)
     {
         var node = left[xCountOfTile - 1, 0];
@@ -229,6 +271,11 @@ public class ChaseMesh
         }
     }
 
+    /// <summary>
+    /// 断开垂直相邻的两块寻路节点的连接
+    /// </summary>
+    /// <param name="bottom"></param>
+    /// <param name="top"></param>
     private void UnlinkVertical(Node[,] bottom, Node[,] top)
     {
         var node = bottom[0, yCountOfTile - 1];

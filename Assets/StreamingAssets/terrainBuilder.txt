@@ -1,13 +1,13 @@
-seed 155162
+seed 155
 frequencys 0.001 0.005 0.02 0.05
 amplitudes 100 50 10 2
 firstHeight 120
 secondHeight 81
 thirdHeight 40
 plantScale 3
-tree0Random 0.95
-tree1Random 0.9
-bushRandom 0.8
+tree0Random 0.98
+tree1Random 0.94
+bushRandom 0.5
 dragonRandom 0.6
-skeletonScale 15
+skeletonScale 30
 skeletonRandom 0.5
