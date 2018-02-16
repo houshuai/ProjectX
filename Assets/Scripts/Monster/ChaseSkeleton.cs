@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ChaseSkeleton : Monster
 {
@@ -28,7 +26,6 @@ public class ChaseSkeleton : Monster
 
     private FSMState currState;
     private Transform playerPos;
-    private PlayerMove playerMove;
 
     private void Start()
     {
@@ -42,7 +39,6 @@ public class ChaseSkeleton : Monster
 
         var playerObj = GameObject.FindGameObjectWithTag(Tags.Player);
         playerPos = playerObj.transform;
-        playerMove = playerObj.GetComponent<PlayerMove>();
         isDead = false;
     }
 
@@ -153,14 +149,12 @@ public class ChaseSkeleton : Monster
     {
         currState = FSMState.Patrol;
         chaseAgent.speed = patrolSpeed;
-        playerMove.RemoveEnemy(this);
     }
 
     private void ChangeToChase()
     {
         currState = FSMState.Chase;
         chaseAgent.speed = chaseSpeed;
-        playerMove.AddEnemy(this);
     }
 
     private void ChangeToAttack()
@@ -178,16 +172,9 @@ public class ChaseSkeleton : Monster
         base.TakeDamage(damage);
         healthBoard.ChangeMaterial(health / totalHealth);
 
-        if (isDead)
+        if (currState == FSMState.Patrol)
         {
-            playerMove.RemoveEnemy(this);
-        }
-        else
-        {
-            if (currState == FSMState.Patrol)
-            {
-                ChangeToChase();
-            }
+            ChangeToChase();
         }
     }
 }

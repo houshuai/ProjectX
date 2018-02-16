@@ -187,7 +187,6 @@ public class Skeleton : Monster
         nav.destination = patrolPos[currPatrolPos].position;
         nav.speed = patrolSpeed;
         nav.isStopped = false;
-        playerMove.RemoveEnemy(this);
     }
 
     private void ChangeToChase()
@@ -196,7 +195,6 @@ public class Skeleton : Monster
         nav.destination = playerPos.position;
         nav.speed = chaseSpeed;
         nav.isStopped = false;
-        playerMove.AddEnemy(this);
     }
 
     private void ChangeToAttack()
@@ -219,7 +217,6 @@ public class Skeleton : Monster
         {
             nav.isStopped = true;
             capsuleCollider.enabled = false;
-            playerMove.RemoveEnemy(this);
         }
         else
         {

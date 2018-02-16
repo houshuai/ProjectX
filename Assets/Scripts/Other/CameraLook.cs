@@ -17,7 +17,7 @@ public class CameraLook : MonoBehaviour
     private float yMax = 80.0f;
     private float zMin = 2f;
     private float zMax = 5f;
-    private PlayerMove player;
+    private PlayerAttack player;
 
 
     void Start()
@@ -27,7 +27,7 @@ public class CameraLook : MonoBehaviour
         y = angles.x;
         z = -distance;
 
-        player = FindObjectOfType<PlayerMove>();
+        player = FindObjectOfType<PlayerAttack>();
 
         if (EventSystem.current == null)
         {
@@ -44,7 +44,7 @@ public class CameraLook : MonoBehaviour
             return;
         }
 
-        if (player.isLock)
+        if (player.isLockEnemy)
         {
             var direction = player.currEnemy.position - rig.position;
             direction.y = -0.2f;
@@ -54,8 +54,13 @@ public class CameraLook : MonoBehaviour
         }
         else
         {
-            x += TouchPad.GetAxis("X") * xSpeed; //Input.GetAxis("Mouse X") * xSpeed;
-            y -= TouchPad.GetAxis("Y") * ySpeed; //Input.GetAxis("Mouse Y") * ySpeed;
+#if UNITY_EDITOR
+            x += Input.GetAxis("Mouse X") * xSpeed;
+            y -= Input.GetAxis("Mouse Y") * ySpeed;
+#else
+            x += TouchPad.GetAxis("X") * xSpeed; 
+            y -= TouchPad.GetAxis("Y") * ySpeed;
+#endif
             z += Input.GetAxis("Mouse ScrollWheel") * zSpeed;
             y = Mathf.Clamp(y, yMin, yMax);
             z = Mathf.Clamp(z, -zMax, -zMin);

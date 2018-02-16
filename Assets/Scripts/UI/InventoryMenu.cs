@@ -72,7 +72,7 @@ public class InventoryMenu : Menu<InventoryMenu>
     {
         var item = new GameObject("item");
         var image = item.AddComponent<Image>();
-        image.sprite = sprites[overlay.goods.id - 1];
+        image.sprite = sprites[overlay.goods.id];
         item.transform.SetParent(grid);
         item.transform.localPosition = Vector3.zero;
         item.AddComponent<GridItem>().overlay = overlay;

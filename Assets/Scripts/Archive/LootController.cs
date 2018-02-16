@@ -24,17 +24,16 @@ public class LootController : MonoBehaviour
     }
 
     private static LootController instance;
-    private List<Loot> allLoot;
+    private List<GameObject> allLoot;
 
     private void Start()
     {
-        allLoot = new List<Loot>();
+        allLoot = new List<GameObject>();
 
         for (int i = 0; i < initialCount; i++)
         {
-            var loot = Instantiate(lootPrefab).GetComponent<Loot>();
-            loot.id = Random.Range(0, GoodsDictionary.Count);
-            loot.gameObject.SetActive(false);
+            var loot = Instantiate(lootPrefab);
+            loot.SetActive(false);
             allLoot.Add(loot);
         }
     }
@@ -48,8 +47,7 @@ public class LootController : MonoBehaviour
             {
                 var circle = Random.insideUnitCircle;
                 loot.transform.position = new Vector3(pos.x + circle.x, pos.y, pos.z + circle.y);
-                loot.id = Random.Range(0, GoodsDictionary.Count);
-                loot.gameObject.SetActive(true);
+                loot.SetActive(true);
                 currAvailable++;
             }
             if (currAvailable == count)
@@ -63,8 +61,7 @@ public class LootController : MonoBehaviour
         {
             var circle = Random.insideUnitCircle;
             var loot = Instantiate(lootPrefab,
-                new Vector3(pos.x + circle.x, pos.y, pos.z + circle.y), Quaternion.identity).GetComponent<Loot>();
-            loot.id = Random.Range(0, GoodsDictionary.Count);
+                new Vector3(pos.x + circle.x, pos.y, pos.z + circle.y), Quaternion.identity);
             allLoot.Add(loot);
         }
     }

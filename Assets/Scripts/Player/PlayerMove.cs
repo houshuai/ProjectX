@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -20,10 +19,6 @@ public class PlayerMove : MonoBehaviour
     [HideInInspector]
     public bool isCrouch;
     [HideInInspector]
-    public bool isLock;
-    [HideInInspector]
-    public Transform currEnemy;
-    [HideInInspector]
     public Animator anim;
 
     private Transform cam;
@@ -34,14 +29,12 @@ public class PlayerMove : MonoBehaviour
     private int currSpeedIndex = 0;
     private float currSpeed;
     private bool isGround;
-    private List<Monster> enemyList;
 
     private void Start()
     {
         cam = Camera.main.transform;
         rb = GetComponent<Rigidbody>();
         if (anim == null) anim = GetComponentInChildren<Animator>();
-        enemyList = new List<Monster>();
 
         speeds = new float[3];
         speeds[0] = runSpeed;
@@ -78,26 +71,17 @@ public class PlayerMove : MonoBehaviour
             anim.SetBool(Hashes.CrouchBool, isCrouch);
         }
 
-        if (Input.GetKeyDown(KeyCode.F) && enemyList.Count > 0)
-        {
-            if (isLock)
-            {
-                isLock = false;
-                currEnemy = null;
-            }
-            else
-            {
-                isLock = true;
-                currEnemy = enemyList[0].transform;
-            }
-        }
-
         CheckIsGround();
 
         if (isGround)
         {
+#if UNITY_EDITOR
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+#else
             float h = Joystick.GetAxis("Horizontal");
             float v = Joystick.GetAxis("Vertical");
+#endif
             var animState = anim.GetCurrentAnimatorStateInfo(0).shortNameHash;
             if (animState == Hashes.LocomotionState || animState == Hashes.CrouchState)
             {
@@ -128,7 +112,11 @@ public class PlayerMove : MonoBehaviour
         Translate(forward);
         Rotate(move);
 
+#if UNITY_EDITOR
+        if (Input.GetButtonDown("Jump"))
+#else
         if (TouchButton.GetButtonDown("Jump"))
+#endif
         {
             Jump();
         }
@@ -225,28 +213,6 @@ public class PlayerMove : MonoBehaviour
         if (!audioSource.isPlaying)
         {
             audioSource.Play();
-        }
-    }
-
-    public void AddEnemy(Monster enemy)
-    {
-        if (!enemyList.Contains(enemy))
-        {
-            enemyList.Add(enemy);
-        }
-    }
-
-    public void RemoveEnemy(Monster enemy)
-    {
-        if (enemyList.Contains(enemy))
-        {
-            enemyList.Remove(enemy);
-        }
-
-        if (enemyList.Count==0)
-        {
-            isLock = false;
-            currEnemy = null;
         }
     }
 }
