@@ -82,13 +82,14 @@ public class InventoryMenu : Menu<InventoryMenu>
 
         var count = new GameObject("count");
         var text = count.AddComponent<Text>();
-        text.text = overlay.count.ToString();
+        text.text ="x" + overlay.count.ToString();
         text.transform.SetParent(grid);
         text.transform.localPosition = Vector3.zero;
         text.rectTransform.anchorMin = Vector2.zero;
         text.rectTransform.anchorMax = new Vector2(1, 0.2f);
         text.rectTransform.sizeDelta = Vector2.zero;
         text.font = font;
+        text.fontSize = 20;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.red;
     }
