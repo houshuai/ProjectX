@@ -15,6 +15,8 @@ public static class Hashes
     public static readonly int CrouchState;
     public static readonly int FightMoveState;
     public static readonly int DamageState;
+    public static readonly int DiveTrigger;
+    public static readonly int DiveState;
 
     public static readonly int BasicAttackTrigger;
     public static readonly int ClawAttackTrigger;
@@ -42,6 +44,8 @@ public static class Hashes
         CrouchState = Animator.StringToHash("Crouch");
         FightMoveState = Animator.StringToHash("FightMove");
         DamageState = Animator.StringToHash("damage_20");
+        DiveTrigger = Animator.StringToHash("Dive");
+        DiveState = Animator.StringToHash("dive");
 
         BasicAttackTrigger = Animator.StringToHash("BasicAttack");
         ClawAttackTrigger = Animator.StringToHash("ClawAttack");

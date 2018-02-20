@@ -7,6 +7,7 @@
 		_ReflectTex ("Reflect Texture", 2D) = "white" {}
 		_RefractTex ("Refract Texture", 2D) = "white" {}
 		_Para ("Parameter", float) = 1
+		_Smoothness("Specular", Range(0, 1)) = 0.5
 	}
 	SubShader 
 	{
@@ -22,6 +23,7 @@
 			#pragma multi_compile REFLECTION _
 			#pragma multi_compile REFRACTION _
 			#include "UnityCG.cginc"
+			#include "UnityPBSLighting.cginc"
 
 			struct appdata
 			{
@@ -57,6 +59,7 @@
 			sampler2D _RefractTex;
 #endif
 			float _Para;
+			float _Smoothness;
 
 			
 			inline float3 calcPos(Wave w, float c, float s)
@@ -204,10 +207,15 @@
 
 			fixed4 col = fixed4(1,1,1,1);
 			col.xyz = lerp(refractCol.xyz, reflectCol.xyz, fresnel);
-			return col;
 #else
-			return reflectCol;
+			fixed4 col = reflectCol;
 #endif
+
+			float3 lightdir = _WorldSpaceLightPos0.xyz;
+			float3 halfDir = normalize(lightdir + viewDir);
+			fixed3 specular = _LightColor0.rgb * pow(DotClamped(halfDir, worldNormal), _Smoothness * 100);
+			col.xyz += specular;
+			return col;
 			}
 		
 		ENDCG

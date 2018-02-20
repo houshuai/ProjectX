@@ -33,14 +33,20 @@ public class TouchButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         }
         button.pressed = true;
         button.lastPressedFrame = Time.frameCount;
-        image.sprite = overSprite;
+        if (overSprite!=null)
+        {
+            image.sprite = overSprite;
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         button.pressed = false;
         button.releasedFrame = Time.frameCount;
-        image.sprite = upSprite;
+        if (upSprite!=null)
+        {
+            image.sprite = upSprite;
+        }
     }
 
     public static bool GetButton(string name)

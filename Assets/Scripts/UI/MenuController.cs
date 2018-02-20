@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class MenuController : MonoBehaviour
     public InventoryMenu inventoryMenu;
     public FloatVariable health;
     public GameObject HUB;
+    public GameObject charactorButton;
 
     private Stack<Menu> menuStack;
 
@@ -34,8 +36,8 @@ public class MenuController : MonoBehaviour
     private void OnEnable()
     {
         health.ValueChanged += HealthChanged;
-        Scene.Instance.BeforeUnload += SceneBeforeUnload;
-        Scene.Instance.AfterLoaded += SceneAfterLoaded;
+        Scene.Instance.BeforeUnload += BeforeUnload;
+        Scene.Instance.AfterLoaded += AfterLoaded;
     }
 
     private void OnDisable()
@@ -43,19 +45,28 @@ public class MenuController : MonoBehaviour
         health.ValueChanged -= HealthChanged;
         if (Scene.Instance != null)
         {
-            Scene.Instance.BeforeUnload -= SceneBeforeUnload;
-            Scene.Instance.AfterLoaded -= SceneAfterLoaded;
+            Scene.Instance.BeforeUnload -= BeforeUnload;
+            Scene.Instance.AfterLoaded -= AfterLoaded;
         }
     }
 
-    private void SceneBeforeUnload()
+    private void BeforeUnload()
     {
+        if (SceneManager.GetActiveScene().name == "Scene2")
+        {
+            charactorButton.SetActive(true);
+        }
         HUB.SetActive(false);
     }
 
-    private void SceneAfterLoaded()
+    private void AfterLoaded()
     {
         HUB.SetActive(true);
+        if (SceneManager.GetActiveScene().name == "Scene2")
+        {
+            charactorButton.SetActive(false);
+        }
+
     }
 
     private void HealthChanged(object sender, ValueChangedEventArgs e)

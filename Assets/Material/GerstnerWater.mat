@@ -23,7 +23,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Bump:
-        m_Texture: {fileID: 2800000, guid: da380c1d6ab5f334386127704644af7e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 44be856b964fc4b499aa2fb27375ae68, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -113,6 +113,7 @@ Material:
     - _Q: 0.3
     - _S: 2
     - _Shininess: 3
+    - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

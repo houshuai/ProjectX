@@ -23,7 +23,6 @@ Shader "Custom/Terrain" {
 		// Physically based Standard lighting model, and enable shadows on all light types
 		#pragma surface surf Standard fullforwardshadows
 
-		// Use shader model 4.0 target, to get nicer looking lighting
 		#pragma target 4.0
 
 		sampler2D _FirstTex;
