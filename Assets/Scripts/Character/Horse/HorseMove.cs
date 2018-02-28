@@ -14,9 +14,15 @@ public class HorseMove : CharacterMove
     {
         ChangeCurrSpeed();
 
-        if (CheckIsGround())
+        RaycastHit hit;
+        if (CheckIsGround(out hit))
         {
             Move();
+
+            //transform.rotation *= Quaternion.FromToRotation(Vector3.up, hit.normal);
+            //var angle = transform.rotation.eulerAngles;
+            //angle.z = 0;                             //不绕z轴旋转
+            //transform.rotation = Quaternion.Euler(angle);
         }
         else
         {
@@ -24,16 +30,14 @@ public class HorseMove : CharacterMove
         }
     }
 
-    private bool CheckIsGround()
+    private bool CheckIsGround(out RaycastHit hit)
     {
-        if (Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0), Vector3.down, 0.2f, terrainLayer))
+        if (Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0), Vector3.down, out hit, 0.3f, terrainLayer))
         {
             return true;
         }
-        else if (Physics.Raycast(transform.position + new Vector3(0.2f, 0.1f, -0.65f), Vector3.down, 0.4f, terrainLayer) ||
-            Physics.Raycast(transform.position + new Vector3(0.2f, 0.1f, 0.85f), Vector3.down, 0.4f, terrainLayer) ||
-            Physics.Raycast(transform.position + new Vector3(-0.2f, 0.1f, 0.85f), Vector3.down, 0.4f, terrainLayer) ||
-            Physics.Raycast(transform.position + new Vector3(-0.2f, 0.1f, -0.65f), Vector3.down, 0.4f, terrainLayer))
+        else if (Physics.Raycast(transform.position + new Vector3(0, 0.5f, -1.15f), Vector3.down, out hit, 0.8f, terrainLayer) ||
+            Physics.Raycast(transform.position + new Vector3(0, 0.5f, 1.25f), Vector3.down, out hit, 0.8f, terrainLayer))
         {
             return true;
         }

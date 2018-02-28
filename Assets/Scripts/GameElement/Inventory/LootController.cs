@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 管理战利品掉落
+/// </summary>
 public class LootController : MonoBehaviour
 {
     public GameObject lootPrefab;
@@ -38,6 +41,11 @@ public class LootController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 掉落战利品
+    /// </summary>
+    /// <param name="count"></param>
+    /// <param name="pos"></param>
     public void GetLoot(int count, Vector3 pos)
     {
         int currAvailable = 0;

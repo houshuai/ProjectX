@@ -2,6 +2,11 @@
 
 public class MainMenu : Menu<MainMenu>
 {
+    private void Start()
+    {
+        Setting.Load();
+    }
+
     private void OnEnable()
     {
         Cursor.lockState = CursorLockMode.None;
@@ -20,6 +25,7 @@ public class MainMenu : Menu<MainMenu>
 
     public override void Back()
     {
+        Setting.Save();
         Application.Quit();
     }
 }

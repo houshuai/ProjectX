@@ -23,7 +23,11 @@ public class ChangeCharacter : MonoBehaviour
 
     private void Update()
     {
+#if UNITY_EDITOR
+        if(Input.GetKeyDown(KeyCode.X))
+#else
         if (TouchButton.GetButtonDown("Charactor"))
+#endif
         {
             if (player.activeSelf)
             {
@@ -66,6 +70,11 @@ public class ChangeCharacter : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 将一个角色的transform复制给另一个角色
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
     private void Transform(Transform from, Transform to)
     {
         to.position = from.position;

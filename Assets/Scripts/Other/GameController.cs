@@ -30,6 +30,11 @@ public class GameController : MonoBehaviour
 
     private bool isRestart;
 
+    private void Start()
+    {
+        archives = Archive.Load();
+    }
+
     private void OnEnable()
     {
         Scene.Instance.BeforeUnload += SceneBeforeUnload;

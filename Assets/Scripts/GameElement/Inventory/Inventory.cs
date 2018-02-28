@@ -8,6 +8,11 @@ public sealed class Inventory
     public int overlay;
     public List<OverlayGoods> itemList;
 
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    /// <param name="capacity">容量</param>
+    /// <param name="overlay">最大叠加数</param>
     public Inventory(int capacity, int overlay)
     {
         this.capacity = capacity;
@@ -15,6 +20,11 @@ public sealed class Inventory
         itemList = new List<OverlayGoods>(capacity);
     }
 
+    /// <summary>
+    /// 添加物品
+    /// </summary>
+    /// <param name="newGoods"></param>
+    /// <returns></returns>
     public bool In(Goods newGoods)
     {
         foreach (var item in itemList)
@@ -35,11 +45,16 @@ public sealed class Inventory
         return false;
     }
 
-    public Goods Out(Goods goods)
+    /// <summary>
+    /// 取出物品
+    /// </summary>
+    /// <param name="id">物品id</param>
+    /// <returns></returns>
+    public Goods Out(int id)
     {
         for (int i = 0; i < itemList.Count; i++)
         {
-            if (itemList[i].goods.id == goods.id)
+            if (itemList[i].goods.id == id)
             {
                 var item = itemList[i];
                 item.count--;

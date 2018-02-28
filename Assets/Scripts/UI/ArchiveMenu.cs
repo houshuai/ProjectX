@@ -8,9 +8,8 @@ public class ArchiveMenu : Menu<ArchiveMenu>
     protected override void Awake()
     {
         base.Awake();
-
-        archives = Archive.Load();
-        GameController.Instance.archives = archives;
+        
+        archives = GameController.Instance.archives;
 
         var selectArchives = GetComponentsInChildren<SelectArchive>();
         for (int i = 0; i < archives.Length; i++)

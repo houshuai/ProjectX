@@ -50,14 +50,13 @@ public class CharacterMove : MonoBehaviour
 
         Rotate(move);
 
-        var forward = Vector3.Dot(transform.forward, move.normalized) * transform.forward * currSpeed;
-        Translate(forward);
+        Translate(move);
     }
 
-    private void Translate(Vector3 vector)
+    private void Translate(Vector3 move)
     {
-        rb.velocity = vector;
-        anim.SetFloat(Hashes.SpeedFloat, vector.magnitude / speeds[speeds.Length - 1]);
+        rb.velocity = Vector3.Dot(transform.forward, move.normalized) * transform.forward * currSpeed;
+        anim.SetFloat(Hashes.SpeedFloat, rb.velocity.magnitude / speeds[speeds.Length - 1]);
     }
 
     private void Rotate(Vector3 move)

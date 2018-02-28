@@ -8,13 +8,18 @@ using UnityEngine;
 [Serializable]
 public class Archive
 {
+    /// <summary>
+    /// 游戏当前运行的存档
+    /// </summary>
     public static Archive current;
+
     public bool isNew = true;
-    public string title;
-    public string currScene;
-    public Dictionary<string, Vector3> positions;    //player position in every scene
-    public Goods currGoods;                          //player current equiped goods
-    public Inventory inventory;
+    public string title;                             //存档的名称
+    public string currScene;                         //角色所在的场景
+    public Dictionary<string, Vector3> positions;    //角色在每个场景最后的位置
+    public Goods currGoods;                          //角色当前装备了的物品
+    public Inventory[] inventories;                  //角色的背包物品
+    public int gemCount;                             //角色的宝石数量
 
     public void Initial()
     {
@@ -23,9 +28,17 @@ public class Archive
         currScene = null;
         positions = new Dictionary<string, Vector3>(3);
         currGoods = null;
-        inventory = new Inventory(12, 3);
+        inventories = new Inventory[(int)GoodsType.count]
+        {
+            new Inventory(12,3),
+            new Inventory(12,1),
+        };
     }
 
+    /// <summary>
+    /// 保存当前场景玩家的位置
+    /// </summary>
+    /// <param name="position"></param>
     public void SetPlayerPosition(Vector3 position)
     {
         if (positions.ContainsKey(currScene))
@@ -38,6 +51,11 @@ public class Archive
         }
     }
 
+    /// <summary>
+    /// 获取当前场景角色的位置
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
     public bool GetPlayerPosition(out Vector3 position)
     {
         if (positions.ContainsKey(currScene))
@@ -54,7 +72,7 @@ public class Archive
 
     public static void Save(Archive[] archives)
     {
-        var fileName = Application.persistentDataPath + "/saves.arc";
+        var fileName = Application.persistentDataPath + "/archives.save";
         var bf = new BinaryFormatter();
         var v3ss = new Vector3SerializationSurrogate();
         var ss = new SurrogateSelector();
@@ -69,7 +87,7 @@ public class Archive
     public static Archive[] Load()
     {
         Archive[] archives = null;
-        var fileName = Application.persistentDataPath + "/saves.arc";
+        var fileName = Application.persistentDataPath + "/archives.save";
         if (File.Exists(fileName))
         {
             var bf = new BinaryFormatter();
