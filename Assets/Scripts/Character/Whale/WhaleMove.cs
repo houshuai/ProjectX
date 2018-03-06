@@ -2,11 +2,15 @@
 
 public class WhaleMove : CharacterMove
 {
-    public float diveSpeed = 10;
+    public float upSpeed = 3;
+    public Transform rayTrans;
+    public LayerMask terrainLayer;
 
     private void Start()
     {
         Initial();
+
+        terrainLayer = 1 << LayerMask.NameToLayer("Terrain");
     }
 
     private void Update()
@@ -14,19 +18,11 @@ public class WhaleMove : CharacterMove
         ChangeCurrSpeed();
         Move();
 
-#if UNITY_EDITOR
-        if (Input.GetButtonDown("Jump"))
-#else
-        if (TouchButton.GetButtonDown("Jump"))
-#endif
+        //到了陆地，上浮
+        if (Physics.Raycast(rayTrans.position, Vector3.down, terrainLayer))
         {
-            Dive();
+            rb.velocity = new Vector3(rb.velocity.x, upSpeed * Time.deltaTime, rb.velocity.z);
         }
     }
-
-    private void Dive()
-    {
-        rb.velocity = new Vector3(rb.velocity.x * diveSpeed, diveSpeed, rb.velocity.z * diveSpeed);
-        anim.SetTrigger(Hashes.DiveTrigger);
-    }
+    
 }

@@ -58,7 +58,11 @@ public class PlayerMove : MonoBehaviour
             transform.position = new Vector3(35, 10, 33);
         }
 
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.C))
+#else
+        if(TouchButton.GetButtonDown("Speed"))
+#endif
         {
             currSpeedIndex++;
             currSpeedIndex %= 3;

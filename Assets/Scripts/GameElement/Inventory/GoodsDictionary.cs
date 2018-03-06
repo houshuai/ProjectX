@@ -15,29 +15,22 @@ public class GoodsDictionary : MonoBehaviour
     {
         //Initial();
         var fileName = Application.streamingAssetsPath + "/GoodsCategory.txt";
-        if (File.Exists(fileName))
+        using (var www = new WWW(fileName))
         {
-            using (var www = new WWW(fileName))
-            {
-                yield return www;
-                var array = JsonHelper.ArrayFromJson<Goods>(www.text);
+            yield return www;
+            var array = JsonHelper.ArrayFromJson<Goods>(www.text);
 
-                allGoods = new List<Goods>[(int)GoodsType.count]
-                {
+            allGoods = new List<Goods>[(int)GoodsType.count]
+            {
                     new List<Goods>(),
                     new List<Goods>(),
-                };
-                foreach (var goods in array)
-                {
-                    allGoods[(int)goods.type].Add(goods);
-                }
+            };
+            foreach (var goods in array)
+            {
+                allGoods[(int)goods.type].Add(goods);
             }
-            
         }
-        else
-        {
-            Debug.LogWarning("not found GoodsCategory.txt");
-        }
+
 
     }
 
@@ -71,7 +64,7 @@ public class GoodsDictionary : MonoBehaviour
     {
         return allGoods[(int)type];
     }
-    
+
     /// <summary>
     /// 随机获得一个指定类型的物品
     /// </summary>

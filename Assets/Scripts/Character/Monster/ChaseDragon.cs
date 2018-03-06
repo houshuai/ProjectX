@@ -107,7 +107,7 @@ public class ChaseDragon : Monster
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == Tags.Player)
+        if (other.CompareTag(Tags.Player))
         {
             playerInBox = true;
         }
@@ -115,7 +115,7 @@ public class ChaseDragon : Monster
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == Tags.Player)
+        if (other.CompareTag(Tags.Player))
         {
             playerInBox = false;
         }
@@ -233,7 +233,7 @@ public class ChaseDragon : Monster
             RaycastHit hit;
             if (Physics.Raycast(flamePos.position, flamePos.forward, out hit, 15))
             {
-                if (hit.collider.tag == Tags.Player)
+                if (hit.collider.CompareTag(Tags.Player))
                 {
                     playerHealth.Value -= attackDamage;
                 }

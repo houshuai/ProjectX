@@ -7,9 +7,10 @@ public class Loot : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == Tags.Player)
+        if (other.CompareTag(Tags.Player))
         {
-            Archive.current.inventories[(int)GoodsType.common].In(GoodsDictionary.GetRandom(GoodsType.common));
+            var goods = GoodsDictionary.GetRandom(GoodsType.common);
+            Archive.current.inventories[(int)GoodsType.common].In(goods);
             gameObject.SetActive(false);
         }
     }

@@ -40,9 +40,12 @@ public class PlayerEquipment : MonoBehaviour
         if (currGoods != null)
         {
             var prefab = Resources.Load<GameObject>(currGoods.name);
-            var newModel = Instantiate(prefab);
-            newModel.name = currGoods.name;
-            ShiftModel(newModel.transform, currGoods);
+            if (prefab!=null)
+            {
+                var newModel = Instantiate(prefab);
+                newModel.name = currGoods.name;
+                ShiftModel(newModel.transform, currGoods);
+            }
         }
 
     }

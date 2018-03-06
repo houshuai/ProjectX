@@ -5,7 +5,7 @@ public class ChangeCharacter : MonoBehaviour
     public GameObject player;
     public Transform playerRig;
     public GameObject horse;
-    public Transform hroseRig;
+    public Transform horseRig;
     public GameObject whale;
     public Transform whaleRig;
     public float waterHeight = -1;
@@ -14,72 +14,69 @@ public class ChangeCharacter : MonoBehaviour
     public Transform currCharacter;
 
     private CameraLook cameraLook;
+    private GameObject jumpButton;
+    private GameObject fightButton;
 
     private void Start()
     {
         cameraLook = FindObjectOfType<CameraLook>();
+        jumpButton = GameObject.Find("JumpTouchButton");
+        fightButton = GameObject.Find("FireTouchButton");
         currCharacter = player.transform;
     }
 
     private void Update()
     {
 #if UNITY_EDITOR
-        if(Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.X))
 #else
         if (TouchButton.GetButtonDown("Charactor"))
 #endif
         {
+            //在水中不能切换
+            if (whale.activeSelf)
+            {
+                return;
+            }
             if (player.activeSelf)
             {
-                player.SetActive(false);
-                horse.SetActive(true);
-                Transform(player.transform, horse.transform);
-                cameraLook.rig = hroseRig;
+                Change(player, horse, horseRig, false);
             }
             else
             {
-                player.SetActive(true);
-                horse.SetActive(false);
-                Transform(horse.transform, player.transform);
-                cameraLook.rig = playerRig;
+                Change(horse, player, playerRig, true);
             }
         }
 
-        if (currCharacter.position.y < waterHeight && whale.activeSelf == false)
+        if (currCharacter.position.y < waterHeight - 1.5f && whale.activeSelf == false)
         {
-            whale.SetActive(true);
             if (player.activeSelf)
             {
-                Transform(player.transform, whale.transform);
-                player.SetActive(false);
+                Change(player, whale, whaleRig, false);
             }
             else
             {
-                Transform(horse.transform, whale.transform);
-                horse.SetActive(false);
+                Change(horse, whale, whaleRig, false);
             }
-            cameraLook.rig = whaleRig;
         }
 
         if (currCharacter.position.y > waterHeight && whale.activeSelf == true)
         {
-            whale.SetActive(false);
-            player.SetActive(true);
-            Transform(whale.transform, player.transform);
-            cameraLook.rig = playerRig;
+            Change(whale, player, playerRig, true);
         }
     }
 
-    /// <summary>
-    /// 将一个角色的transform复制给另一个角色
-    /// </summary>
-    /// <param name="from"></param>
-    /// <param name="to"></param>
-    private void Transform(Transform from, Transform to)
+    private void Change(GameObject from,GameObject to,Transform camRig,bool isButtonActive)
     {
-        to.position = from.position;
-        to.rotation = from.rotation;
-        currCharacter = to;
+        from.SetActive(false);
+        to.SetActive(true);
+        to.transform.position = from.transform.position;
+        to.transform.rotation = from.transform.rotation;
+        currCharacter = to.transform;
+        cameraLook.rig = camRig;
+        jumpButton.SetActive(isButtonActive);
+        fightButton.SetActive(isButtonActive);
     }
+    
 
 }

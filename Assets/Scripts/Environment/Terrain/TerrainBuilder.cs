@@ -42,7 +42,7 @@ public class TerrainBuilder : MonoBehaviour
         {
             lodIndices[i] = indices.InitialIndices(i);
         }
-        
+
         heights = new float[xCount, yCount];
         moisture = new float[xCount, yCount];
         plantPool = GetComponent<PlantPool>();
@@ -58,7 +58,7 @@ public class TerrainBuilder : MonoBehaviour
         var player = FindObjectOfType<PlayerMove>().transform;
         var p = player.position;
         p.y = noise.GetOctave(p.x, p.z);
-        player.position = p;
+        player.position = p + new Vector3(0, 1, 0);
     }
 
     /// <summary>

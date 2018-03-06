@@ -18,7 +18,10 @@ public class Ocean : MonoBehaviour
                 {
                     continue;
                 }
-                var pos = new Vector3(-3 * xLength + j * xLength + 1, -1f, -3 * yLength + i * yLength + 1);
+                var pos = new Vector3(
+                    transform.position.x + (j - 3) * xLength, 
+                    transform.position.y,
+                    transform.position.z + (i - 3) * yLength);
                 GenerateWater(pos);
             }
         }

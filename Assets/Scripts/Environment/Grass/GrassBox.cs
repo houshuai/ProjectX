@@ -20,7 +20,7 @@ public class GrassBox : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == Tags.Player)
+        if (other.CompareTag(Tags.Player))
         {
             player.isInGrass = true;
         }
@@ -28,7 +28,7 @@ public class GrassBox : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == Tags.Player)
+        if (other.CompareTag(Tags.Player))
         {
             player.isInGrass = false;
         }

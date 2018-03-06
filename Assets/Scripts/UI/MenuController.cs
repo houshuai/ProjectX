@@ -16,6 +16,8 @@ public class MenuController : MonoBehaviour
     public FloatVariable health;
     public GameObject HUB;
     public GameObject charactorButton;
+    public GameObject jumpButton;
+    public GameObject fireButton;
 
     private Stack<Menu> menuStack;
 
@@ -56,6 +58,8 @@ public class MenuController : MonoBehaviour
         {
             charactorButton.SetActive(true);
         }
+        jumpButton.SetActive(true);    //防止切换到其他场景GameObject.Find()无法找到
+        fireButton.SetActive(true);
         HUB.SetActive(false);
     }
 

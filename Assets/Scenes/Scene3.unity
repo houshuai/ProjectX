@@ -235,7 +235,7 @@ MonoBehaviour:
   player: {fileID: 2016361339}
   playerRig: {fileID: 1210311299}
   horse: {fileID: 774246707}
-  hroseRig: {fileID: 646493990}
+  horseRig: {fileID: 646493990}
   whale: {fileID: 1384805696}
   whaleRig: {fileID: 681649664}
   waterHeight: 40

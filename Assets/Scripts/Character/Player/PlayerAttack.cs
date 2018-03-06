@@ -55,9 +55,9 @@ public class PlayerAttack : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        if (Input.GetButtonDown("Fire1") && fireInputCount < 3)//记录最多三次攻击输入
+        if (Input.GetButtonDown("Fire1") && fireInputCount < 1)
 #else
-        if (TouchButton.GetButtonDown("Fire") && fireInputCount < 3) //记录最多三次攻击输入
+        if (TouchButton.GetButtonDown("Fire") && fireInputCount < 1)
 #endif
         {
             if (fightTimer > 0)// 处于攻击状态

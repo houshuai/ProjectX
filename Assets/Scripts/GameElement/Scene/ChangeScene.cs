@@ -7,7 +7,7 @@ public class ChangeScene : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == Tags.Player && Scene.Instance != null)
+        if (other.CompareTag(Tags.Player) && Scene.Instance != null)
         {
             Scene.Instance.SwitchScene(nextSceneName);
         }

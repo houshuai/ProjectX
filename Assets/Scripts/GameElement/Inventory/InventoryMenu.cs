@@ -22,7 +22,6 @@ public class InventoryMenu : Menu<InventoryMenu>
 
     private PlayerEquipment player;
     private Inventory[] inventories;
-    private List<GameObject> gridList;
     private GameObject currModel;              //当前衣服的预览模型
     private Goods currGoods;                   //当前的衣服
     private Vector3 modelPos;                  //实例化预览模型的位置
@@ -52,7 +51,6 @@ public class InventoryMenu : Menu<InventoryMenu>
     /// </summary>
     private void InitialGrid(Transform content, Inventory inventory)
     {
-        gridList = new List<GameObject>(inventory.capacity);
         for (int i = 0; i < inventory.capacity; i++)
         {
             var grid = new GameObject("grid");
@@ -65,7 +63,6 @@ public class InventoryMenu : Menu<InventoryMenu>
             {
                 AddItem(grid.transform, inventory.itemList[i]);
             }
-            gridList.Add(grid);
         }
 
     }
@@ -249,6 +246,9 @@ public class InventoryMenu : Menu<InventoryMenu>
         {
             player.ShiftModel(currModel.transform, currGoods);
         }
+
+        //当前选择的模型设置为null，避免关闭背包的时候将其destroy
+        currModel = null;
         dressUI.SetActive(false);
     }
 
@@ -323,20 +323,22 @@ public class InventoryMenu : Menu<InventoryMenu>
         var sellCount = int.Parse(deleteNumText.text);
         for (int i = 0; i < sellCount; i++)
         {
-            inventory.Out(goods.id);
-            Archive.current.gemCount += goods.price;
+            if (inventory.Out(goods.id) != null)
+            {
+                Archive.current.gemCount += goods.price;
+            }
         }
         gemText.text = Archive.current.gemCount.ToString();
 
         //将背包网格的显示都删除
-        for (int i = 0; i < gridList.Count; i++)
+        var itemList = commonContent.GetComponentsInChildren<GridItem>();
+        var gridList = new List<Transform>();
+        for (int i = 0; i < itemList.Length; i++)
         {
-            var item = gridList[i].GetComponentInChildren<GridItem>();
-            if (item != null)
-            {
-                Destroy(item.gameObject);
-                Destroy(item.transform.parent.GetComponentInChildren<Text>().gameObject);
-            }
+            var item = itemList[i];
+            gridList.Add(item.transform.parent);
+            Destroy(item.transform.parent.GetComponentInChildren<Text>().gameObject);
+            Destroy(item.gameObject);
 
         }
 
@@ -345,7 +347,7 @@ public class InventoryMenu : Menu<InventoryMenu>
         {
             if (i < inventory.itemList.Count)
             {
-                AddItem(gridList[i].transform, inventory.itemList[i]);
+                AddItem(gridList[i], inventory.itemList[i]);
             }
         }
     }
@@ -370,10 +372,22 @@ public class InventoryMenu : Menu<InventoryMenu>
         var grids = clothContent.GetComponentsInChildren<GridItem>();
         foreach (var grid in grids)
         {
-            if (grid.overlay.goods==goods)
+            if (grid.overlay.goods == goods)
             {
                 grid.gameObject.GetComponent<Image>().color = Color.white;
             }
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        currGoods = null;
+        if (currModel != null)
+        {
+            Destroy(currModel);
+            currModel = null;
         }
     }
 }
