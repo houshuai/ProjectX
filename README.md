@@ -34,7 +34,7 @@
 * 战斗
 
 ## 场景3
-![image](https://github.com/houshuai/ProjectX/blob/master/ScreenShots/场景3的LOD网格.jpg)
+![image](https://github.com/houshuai/ProjectX/blob/master/ScreenShots/场景3的LOD网格.JPG)
 * 根据玩家位置伪随机出周围的地形、植物和怪物。<br>
 
 ![image](https://github.com/houshuai/ProjectX/blob/master/ScreenShots/场景3_1.png)
