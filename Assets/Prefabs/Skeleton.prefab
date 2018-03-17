@@ -629,7 +629,7 @@ GameObject:
   - component: {fileID: 136081370867712418}
   - component: {fileID: 195762282774429746}
   - component: {fileID: 82478013604567282}
-  - component: {fileID: 114972027418342920}
+  - component: {fileID: 114005191900425056}
   m_Layer: 8
   m_Name: Skeleton
   m_TagString: Untagged
@@ -966,7 +966,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1986909078851782}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.15, y: 0, z: 12.21}
+  m_LocalPosition: {x: 18, y: 0, z: 18.04}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4279745657411924}
@@ -1369,6 +1369,32 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!114 &114005191900425056
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1986909078851782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 096a9521354307e499510b4ff3d00549, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalHealth: 100
+  deadClip: {fileID: 8300000, guid: 4debf191f6d7c2b42805b83d91d9b3fb, type: 3}
+  sightRange: 10
+  sightAngle: 60
+  patrolSpeed: 1
+  chaseSpeed: 2
+  attackRange: 2
+  attackDamage: 24
+  attackClip: {fileID: 8300000, guid: 068fc62a002dc6c469a65aaaba39bc39, type: 3}
+  playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
+  patrolPos:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &114793166500046940
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1380,32 +1406,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62432c9b840cd14489d4d37425e5e1d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114972027418342920
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1986909078851782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc0a26c80448aad4b8d995026b2a5c19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  totalHealth: 100
-  deadClip: {fileID: 8300000, guid: 4debf191f6d7c2b42805b83d91d9b3fb, type: 3}
-  sightRange: 10
-  sightAngle: 60
-  patrolSpeed: 1
-  chaseSpeed: 2
-  attackRange: 1.5
-  attackDamage: 24
-  attackClip: {fileID: 8300000, guid: 068fc62a002dc6c469a65aaaba39bc39, type: 3}
-  patrolPos:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
 --- !u!136 &136081370867712418
 CapsuleCollider:
   m_ObjectHideFlags: 1

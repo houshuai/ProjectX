@@ -17,12 +17,16 @@ public class ChangeCharacter : MonoBehaviour
     private GameObject jumpButton;
     private GameObject fightButton;
 
+    private void Awake()
+    {
+        currCharacter = player.transform;
+    }
+
     private void Start()
     {
         cameraLook = FindObjectOfType<CameraLook>();
         jumpButton = GameObject.Find("JumpTouchButton");
         fightButton = GameObject.Find("FireTouchButton");
-        currCharacter = player.transform;
     }
 
     private void Update()

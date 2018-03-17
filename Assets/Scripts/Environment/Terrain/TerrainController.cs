@@ -11,7 +11,7 @@ public class TerrainController : MonoBehaviour
     public int lodCount = 3;
 
     private TerrainBuilder builder;
-    private Transform character;
+    private ChangeCharacter changeCharacter;
     private Terrain[,] allTerrain;
     private float xLength, yLength;
 
@@ -19,11 +19,8 @@ public class TerrainController : MonoBehaviour
     {
         xLength = (xCount - 1) * xTick;
         yLength = (yCount - 1) * yTick;
-        character = FindObjectOfType<ChangeCharacter>().currCharacter;
-        if (character == null)
-        {
-            character = FindObjectOfType<PlayerMove>().transform;
-        }
+        changeCharacter = FindObjectOfType<ChangeCharacter>();
+
         builder = GetComponent<TerrainBuilder>();
 
         //保证下面的异步builder初始化完成之前的update不会出错
@@ -55,8 +52,8 @@ public class TerrainController : MonoBehaviour
         {
             for (int j = 0; j < 7; j++)
             {
-                allTerrain[i, j].rect = new Rect(Mathf.Floor(character.position.x / xLength) * xLength - 7 / 2 * xLength + j * xLength,
-                    Mathf.Floor(character.position.z / yLength) * yLength - 7 / 2 * yLength + i * yLength, xLength, yLength);
+                allTerrain[i, j].rect = new Rect(Mathf.Floor(changeCharacter.currCharacter.position.x / xLength) * xLength - 7 / 2 * xLength + j * xLength,
+                    Mathf.Floor(changeCharacter.currCharacter.position.z / yLength) * yLength - 7 / 2 * yLength + i * yLength, xLength, yLength);
                 builder.Build(allTerrain[i, j]);
             }
         }
@@ -64,7 +61,7 @@ public class TerrainController : MonoBehaviour
 
     private void Update()
     {
-        var pos = character.position;
+        var pos = changeCharacter.currCharacter.position;
         int yTileCount = allTerrain.GetLength(0);
         int xTileCount = allTerrain.GetLength(1);
         var center = allTerrain[yTileCount / 2, xTileCount / 2].rect;

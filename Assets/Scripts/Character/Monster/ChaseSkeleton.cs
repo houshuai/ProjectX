@@ -1,77 +1,19 @@
-﻿using UnityEngine;
-
-public class ChaseSkeleton : Monster
+﻿public sealed class ChaseSkeleton : Skeleton
 {
-    enum FSMState
-    {
-        Patrol,
-        Chase,
-        Attack,
-    }
-
-    public float sightRange = 10f;
-    public float sightAngle = 60f;
-    public float patrolSpeed = 1f;
-    public float chaseSpeed = 2f;
-    public float attackRange = 2f;
-    public float attackDamage = 24f;
-    public AudioClip attackClip;
-    public FloatVariable playerHealth;
-
-    private HealthBoard healthBoard;
     private ChaseAgent chaseAgent;
-    private float attackTime = 2.767f;
-    private float attackTimer;
-    private float halfAttackAngle = 40;
-
-    private FSMState currState;
-    private Transform playerPos;
-
-    private void Start()
+    
+    protected override void Start()
     {
-        healthBoard = GetComponentInChildren<HealthBoard>();
+        base.Start();
+
         chaseAgent = GetComponent<ChaseAgent>();
-        anim = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
-        health = totalHealth;
         chaseAgent.speed = patrolSpeed;
-        currState = FSMState.Patrol;
-
-        playerPos = FindObjectOfType<ChangeCharacter>().currCharacter;
-        if (playerPos == null)
-        {
-            playerPos = FindObjectOfType<PlayerMove>().transform;
-        }
-        isDead = false;
     }
 
-    private void Update()
+    protected override void UpdatePatrol()
     {
-        if (isDead)
-        {
-            return;
-        }
-
-        switch (currState)
-        {
-            case FSMState.Patrol:
-                UpdatePatrol();
-                break;
-            case FSMState.Chase:
-                UpdateChase();
-                break;
-            case FSMState.Attack:
-                UpdateAttack();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void UpdatePatrol()
-    {
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
+        float distance, angle;
+        PlayerSite(out distance, out angle);
 
         if (playerHealth.Value > 0 && distance < sightRange && angle < sightAngle / 2)
         {
@@ -84,83 +26,30 @@ public class ChaseSkeleton : Monster
         anim.SetFloat(Hashes.SpeedFloat, chaseAgent.actualSpeed);
     }
 
-    private void UpdateChase()
+    protected override void UpdateChase()
     {
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
+        base.UpdateChase();
 
-        if (distance < attackRange && angle < halfAttackAngle)
+        if (currState == FSMState.Chase)
         {
-            ChangeToAttack();
-            return;
-        }
-        else if (distance > sightRange)
-        {
-            ChangeToPatrol();
-            return;
-        }
-
-        chaseAgent.Chase(playerPos.position);
-
-        anim.SetFloat(Hashes.SpeedFloat, chaseAgent.actualSpeed);
-    }
-
-    private void UpdateAttack()
-    {
-        if (attackTimer > 0)
-        {
-            attackTimer -= Time.deltaTime;
-            return;
-        }
-
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
-
-        if (distance > attackRange || angle > halfAttackAngle)
-        {
-            ChangeToChase();
-            return;
-        }
-
-        anim.SetTrigger(Hashes.AttackTrigger);
-        if (audioSource.clip != attackClip)
-        {
-            audioSource.clip = attackClip;
-        }
-        audioSource.Play();
-        attackTimer = attackTime;
-    }
-
-    //由animation event 调用
-    private void Attack()
-    {
-        if (Vector3.Angle(transform.forward, playerPos.position - transform.position) < halfAttackAngle)
-        {
-            var distance = Vector3.Distance(transform.position, playerPos.position);
-            if (distance > 0.3f && distance < 1.5f)
-            {
-                playerHealth.Value -= attackDamage;
-                if (playerHealth.Value <= 0)
-                {
-                    ChangeToPatrol();
-                }
-            }
+            chaseAgent.Chase(changeCharacter.currCharacter.position);
+            anim.SetFloat(Hashes.SpeedFloat, chaseAgent.actualSpeed);
         }
     }
 
-    public void ChangeToPatrol()
+    protected override void ChangeToPatrol()
     {
         currState = FSMState.Patrol;
         chaseAgent.speed = patrolSpeed;
     }
 
-    private void ChangeToChase()
+    protected override void ChangeToChase()
     {
         currState = FSMState.Chase;
         chaseAgent.speed = chaseSpeed;
     }
 
-    private void ChangeToAttack()
+    protected override void ChangeToAttack()
     {
         currState = FSMState.Attack;
     }

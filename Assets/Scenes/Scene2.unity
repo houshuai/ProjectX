@@ -415,7 +415,7 @@ Prefab:
       propertyPath: m_LocalRotation.w
       value: 0.6592659
       objectReference: {fileID: 0}
-    - target: {fileID: 114757782809590196, guid: 59c100dd669d88f46b60555886d4dae7,
+    - target: {fileID: 114823191411861148, guid: 59c100dd669d88f46b60555886d4dae7,
         type: 2}
       propertyPath: healthSlider
       value: 

@@ -9,6 +9,16 @@ public class Monster : MonoBehaviour
     protected AudioSource audioSource;
     protected float health;
     protected bool isDead;
+    protected ChangeCharacter changeCharacter;
+
+    protected virtual void Start()
+    {
+        anim = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        health = totalHealth;
+        isDead = false;
+        changeCharacter = FindObjectOfType<ChangeCharacter>();
+    }
 
     public virtual void TakeDamage(float damage)
     {

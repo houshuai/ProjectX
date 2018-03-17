@@ -10,7 +10,6 @@ public class CharacterMove : MonoBehaviour
     private Transform cam;
     private float currSpeed;
     private int currSpeedIndex = 0;
-    private bool isRide;
 
     protected void Initial()
     {

@@ -40,11 +40,8 @@ GameObject:
   - component: {fileID: 454130}
   - component: {fileID: 9597508}
   - component: {fileID: 54171115696004970}
-  - component: {fileID: 65636423143955128}
-  - component: {fileID: 136011834494390882}
   - component: {fileID: 82657067709125740}
-  - component: {fileID: 114757782809590196}
-  - component: {fileID: 65910778464708848}
+  - component: {fileID: 114823191411861148}
   m_Layer: 8
   m_Name: RedDragon
   m_TagString: Untagged
@@ -1573,6 +1570,7 @@ Transform:
   - {fileID: 414426}
   - {fileID: 427310}
   - {fileID: 494018}
+  - {fileID: 4041070879979180}
   m_Father: {fileID: 454130}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1917,7 +1915,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 156970}
-  m_LocalRotation: {x: -0.34885344, y: 0.61206126, z: 0.2627751, w: 0.6592659}
+  m_LocalRotation: {x: -0.34885347, y: 0.6120613, z: 0.26277512, w: 0.65926594}
   m_LocalPosition: {x: -162.46858, y: 1.4210855e-14, z: 2.220446e-14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -2650,6 +2648,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1472981903002654
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4041070879979180}
+  - component: {fileID: 65533414130207352}
+  - component: {fileID: 136729912342369818}
+  m_Layer: 8
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1616306900086346
 GameObject:
   m_ObjectHideFlags: 0
@@ -2684,6 +2699,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!4 &4041070879979180
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1472981903002654}
+  m_LocalRotation: {x: -0.16625936, y: -0.687283, z: -0.16625936, w: 0.687283}
+  m_LocalPosition: {x: -295.81714, y: -124.30564, z: -0.000023841858}
+  m_LocalScale: {x: 100.00003, y: 100, z: 100.00003}
+  m_Children: []
+  m_Father: {fileID: 423030}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4472901939965248
 Transform:
   m_ObjectHideFlags: 1
@@ -2733,35 +2761,23 @@ Rigidbody:
   m_Mass: 1000
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!65 &65636423143955128
+--- !u!65 &65533414130207352
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 101568}
+  m_GameObject: {fileID: 1472981903002654}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3.23, y: 4, z: 5.03}
+  m_Size: {x: 3.23, y: 4, z: 5}
   m_Center: {x: 0, y: 2, z: -1}
---- !u!65 &65910778464708848
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 101568}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.8, y: 2, z: 2}
-  m_Center: {x: 0, y: 1, z: 4.98}
 --- !u!82 &82657067709125740
 AudioSource:
   m_ObjectHideFlags: 1
@@ -2843,7 +2859,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
---- !u!114 &114757782809590196
+--- !u!114 &114823191411861148
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -2851,7 +2867,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 101568}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4298a4550c281545a796abb5eb9e9cd, type: 3}
+  m_Script: {fileID: 11500000, guid: bab8f2ec76c83094589bccbcc3b15867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   totalHealth: 1000
@@ -2861,7 +2877,7 @@ MonoBehaviour:
   runSpeed: 4
   glideSpeed: 5
   flySpeed: 8
-  flyTime: 30
+  flyTime: 20
   chaseDistance: 30
   nearby: 10
   flameRange: 15
@@ -2878,13 +2894,12 @@ MonoBehaviour:
   flamePos: {fileID: 4472901939965248}
   playerHealth: {fileID: 11400000, guid: 687f83d49bed52041b6c2122d81cc405, type: 2}
   healthSlider: {fileID: 0}
-  flyTimer: 0
---- !u!136 &136011834494390882
+--- !u!136 &136729912342369818
 CapsuleCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 101568}
+  m_GameObject: {fileID: 1472981903002654}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
@@ -2952,7 +2967,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -173345627
+  randomSeed: -302407757
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -6313,7 +6328,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1467716074
+  randomSeed: -31235658
   InitialModule:
     serializedVersion: 3
     enabled: 1

@@ -19,7 +19,7 @@ public class PlayerAttack : MonoBehaviour
     [HideInInspector]
     public Animator anim;
 
-    private List<Monster> enemyList;
+    private List<Transform> enemyList;
     private PlayerMove playerMove;
     private Vector3 attackPos;
     private int attackCombo = 0;  //处于哪一段招数
@@ -36,7 +36,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void Start()
     {
-        enemyList = new List<Monster>();
+        enemyList = new List<Transform>();
         if (anim == null) anim = GetComponentInChildren<Animator>();
         playerMove = GetComponent<PlayerMove>();
         attackPos = new Vector3(0, 1.5f, 0);
@@ -70,7 +70,7 @@ public class PlayerAttack : MonoBehaviour
                 if (enemyList.Count > 0)
                 {
                     isLockEnemy = true;
-                    currEnemy = enemyList[0].transform;
+                    currEnemy = enemyList[0];
                 }
             }
             fightTimer = fightTime;
@@ -99,7 +99,6 @@ public class PlayerAttack : MonoBehaviour
         {
             anim.SetBool(Hashes.FightBool, false);
             isLockEnemy = false;
-            currEnemy = null;
         }
 
         if (detectTimer <= 0)
@@ -147,7 +146,7 @@ public class PlayerAttack : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position + attackPos, transform.forward, out hit, 1f, enemyLayer))
         {
-            var monster = hit.collider.gameObject.GetComponent<Monster>();
+            var monster = hit.collider.gameObject.GetComponentInParent<Monster>();
             if (monster != null)
             {
                 monster.TakeDamage(damage);
@@ -167,14 +166,13 @@ public class PlayerAttack : MonoBehaviour
         {
             foreach (var enemy in enemies)
             {
-                enemyList.Add(enemy.gameObject.GetComponent<Monster>());
+                enemyList.Add(enemy.transform);
             }
         }
 
         if (enemyList.Count == 0)
         {
             isLockEnemy = false;
-            currEnemy = null;
         }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
 public class Skeleton : Monster
 {
-    enum FSMState
+    protected enum FSMState
     {
         Patrol,
         Chase,
@@ -17,46 +16,22 @@ public class Skeleton : Monster
     public float attackRange = 2f;
     public float attackDamage = 24f;
     public AudioClip attackClip;
-    public Transform[] patrolPos;
     public FloatVariable playerHealth;
+    
+    protected HealthBoard healthBoard;
+    protected float attackTime = 2.767f;
+    protected float attackTimer;
+    protected float halfAttackAngle = 40;
+    protected FSMState currState;
 
-    private HealthBoard healthBoard;
-    private NavMeshAgent nav;
-    private CapsuleCollider capsuleCollider;
-    private int patrolPosCount;
-    private int currPatrolPos;
-    private int patrolDirection = 1;
-    private float attackTime = 2.767f;
-    private float attackTimer;
-    private float halfAttackAngle = 40;
-
-    private FSMState currState;
-    private Transform playerPos;
-    private PlayerMove playerMove;
-
-    private void Start()
+    protected override void Start()
     {
-        healthBoard = GetComponentInChildren<HealthBoard>();
-        nav = GetComponent<NavMeshAgent>();
-        capsuleCollider = GetComponent<CapsuleCollider>();
-        anim = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
-        health = totalHealth;
-        if (patrolPos != null)
-        {
-            patrolPosCount = patrolPos.Length;
-        }
-        nav.destination = patrolPos[0].position;
-        nav.speed = patrolSpeed;
+        base.Start();
 
-        currState = FSMState.Patrol;
-        var playerObj = GameObject.FindGameObjectWithTag(Tags.Player);
-        playerPos = playerObj.transform;
-        playerMove = playerObj.GetComponent<PlayerMove>();
-        isDead = false;
+        healthBoard = GetComponentInChildren<HealthBoard>();
     }
 
-    private void Update()
+    protected void Update()
     {
         if (isDead)
         {
@@ -79,45 +54,15 @@ public class Skeleton : Monster
         }
     }
 
-    private void UpdatePatrol()
+    protected virtual void UpdatePatrol()
     {
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
-        bool isHide = playerMove.isInGrass && playerMove.isCrouch;
-        bool isInSight = distance < sightRange && angle < sightAngle / 2;
 
-        if (playerHealth.Value > 0 && !isHide && isInSight)
-        {
-            ChangeToChase();
-            return;
-        }
-
-        if (nav.remainingDistance < 0.1f)
-        {
-            if (currPatrolPos == 0)
-            {
-                currPatrolPos = 1;
-                patrolDirection = 1;
-            }
-            else if (currPatrolPos == patrolPosCount - 1)
-            {
-                currPatrolPos = patrolPosCount - 2;
-                patrolDirection = -1;
-            }
-            else
-            {
-                currPatrolPos += patrolDirection;
-            }
-            nav.destination = patrolPos[currPatrolPos].position;
-        }
-
-        anim.SetFloat(Hashes.SpeedFloat, nav.velocity.magnitude);
     }
 
-    private void UpdateChase()
+    protected virtual void UpdateChase()
     {
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
+        float distance, angle;
+        PlayerSite(out distance, out angle);
 
         if (distance < attackRange && angle < halfAttackAngle)
         {
@@ -129,16 +74,9 @@ public class Skeleton : Monster
             ChangeToPatrol();
             return;
         }
-
-        if (!nav.pathPending)
-        {
-            nav.destination = playerPos.position;
-        }
-
-        anim.SetFloat(Hashes.SpeedFloat, nav.velocity.magnitude);
     }
 
-    private void UpdateAttack()
+    protected virtual void UpdateAttack()
     {
         if (attackTimer > 0)
         {
@@ -146,8 +84,8 @@ public class Skeleton : Monster
             return;
         }
 
-        var distance = Vector3.Distance(transform.position, playerPos.position);
-        var angle = Vector3.Angle(transform.forward, playerPos.position - transform.position);
+        float distance, angle;
+        PlayerSite(out distance, out angle);
 
         if (distance > attackRange || angle > halfAttackAngle)
         {
@@ -167,13 +105,14 @@ public class Skeleton : Monster
     //由animation event 调用
     private void Attack()
     {
-        if (Vector3.Angle(transform.forward, playerPos.position - transform.position) < halfAttackAngle)
+        var playerPos = changeCharacter.currCharacter.position;
+        if (Vector3.Angle(transform.forward, playerPos - transform.position) < halfAttackAngle)
         {
-            var distance = Vector3.Distance(transform.position, playerPos.position);
+            var distance = Vector3.Distance(transform.position, playerPos);
             if (distance > 0.3f && distance < 1.5f)
             {
                 playerHealth.Value -= attackDamage;
-                if (playerHealth.Value<=0)
+                if (playerHealth.Value <= 0)
                 {
                     ChangeToPatrol();
                 }
@@ -181,49 +120,25 @@ public class Skeleton : Monster
         }
     }
 
-    public void ChangeToPatrol()
+    protected virtual void ChangeToPatrol()
     {
         currState = FSMState.Patrol;
-        nav.destination = patrolPos[currPatrolPos].position;
-        nav.speed = patrolSpeed;
-        nav.isStopped = false;
     }
 
-    private void ChangeToChase()
+    protected virtual void ChangeToChase()
     {
         currState = FSMState.Chase;
-        nav.destination = playerPos.position;
-        nav.speed = chaseSpeed;
-        nav.isStopped = false;
     }
 
-    private void ChangeToAttack()
+    protected virtual void ChangeToAttack()
     {
         currState = FSMState.Attack;
-        nav.isStopped = true;
     }
 
-    public override void TakeDamage(float damage)
+    protected void PlayerSite(out float distance, out float angle)
     {
-        if (isDead)
-        {
-            return;
-        }
-
-        base.TakeDamage(damage);
-        healthBoard.ChangeMaterial(health / totalHealth);
-
-        if (isDead)
-        {
-            nav.isStopped = true;
-            capsuleCollider.enabled = false;
-        }
-        else
-        {
-            if (currState==FSMState.Patrol)
-            {
-                ChangeToChase();
-            }
-        }
+        var playerPos = changeCharacter.currCharacter.position;
+        distance = Vector3.Distance(transform.position, playerPos);
+        angle = Vector3.Angle(transform.forward, playerPos - transform.position);
     }
 }
