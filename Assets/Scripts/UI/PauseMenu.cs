@@ -4,14 +4,18 @@ public class PauseMenu : Menu<PauseMenu>
 {
     public FloatVariable health;
 
-    private Button resumeButton;
+    public Button resumeButton;
+    public Button toScene1Button;
 
     private void OnEnable()
     {
-        resumeButton = GetComponentInChildren<Button>();
         if (health.Value <= 0)
         {
             resumeButton.interactable = false;
+        }
+        if (Archive.current.currScene == "Scene3")
+        {
+            toScene1Button.gameObject.SetActive(true);
         }
     }
 
@@ -30,4 +34,8 @@ public class PauseMenu : Menu<PauseMenu>
         GameController.Instance.ExitToMainMenu();
     }
 
+    public void ToScene1()
+    {
+        GameController.Instance.ChangeScene("Scene1");
+    }
 }

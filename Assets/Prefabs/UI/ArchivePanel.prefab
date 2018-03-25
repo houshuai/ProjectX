@@ -568,10 +568,11 @@ MonoBehaviour:
     currGoods:
       id: 0
       name: 
-    inventory:
-      capacity: 0
-      overlay: 0
-      itemList: []
+      description: 
+      type: 0
+      price: 0
+    inventories: []
+    gemCount: 0
 --- !u!114 &114374955305815146
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1135,10 +1136,11 @@ MonoBehaviour:
     currGoods:
       id: 0
       name: 
-    inventory:
-      capacity: 0
-      overlay: 0
-      itemList: []
+      description: 
+      type: 0
+      price: 0
+    inventories: []
+    gemCount: 0
 --- !u!114 &114900996964996816
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1253,10 +1255,11 @@ MonoBehaviour:
     currGoods:
       id: 0
       name: 
-    inventory:
-      capacity: 0
-      overlay: 0
-      itemList: []
+      description: 
+      type: 0
+      price: 0
+    inventories: []
+    gemCount: 0
 --- !u!114 &114971183614566334
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1277,8 +1280,8 @@ MonoBehaviour:
   m_Spacing: 50
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
 --- !u!222 &222019969988859674
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -1511,7 +1514,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 280, y: 71.42857}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224531744344142120
 RectTransform:
@@ -1569,7 +1572,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 280, y: 71.42857}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224669767162894326
 RectTransform:
@@ -1626,7 +1629,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 600, y: 55.714287}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224752316403884590
 RectTransform:
@@ -1683,7 +1686,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 280, y: 71.42857}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224981637020026392
 RectTransform:

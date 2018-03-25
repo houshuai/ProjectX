@@ -1,0 +1,24 @@
+local lastTime = 0
+local interval = 1
+local frames = 0
+local unity = CS.UnityEngine
+local FPSText
+
+function awake()
+	print("fps awake")
+end
+
+function start()
+	FPSText = FPSObj:GetComponent("Text")
+	print(FPSText.text)
+end
+
+function update()
+	frames = frames + 1
+	local currTime = unity.Time.realtimeSinceStartup
+	if(currTime > lastTime + interval) then
+		FPSText.text = string.format("%.2f", frames / (currTime - lastTime))
+		frames = 0
+		lastTime = currTime
+	end
+end

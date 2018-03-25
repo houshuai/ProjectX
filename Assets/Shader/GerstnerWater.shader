@@ -182,8 +182,8 @@
 				calcBinormalAndTangent(i.worldPos.xz, binormal, tangent);
 				float3 worldNormal = normalize(cross(tangent, binormal));
 				float3x3 t2w = float3x3(tangent, binormal, worldNormal);
-				float3 bump = UnpackNormal(tex2D(_Bump, i.uv_Bump + _Time.yy * 0.05)) + 
-							UnpackNormal(tex2D(_Bump, i.uv_Bump * 4 + _Time.yy * 0.1));
+				float3 bump = UnpackNormal(tex2D(_Bump, i.uv_Bump + _Time.yy * 0.01)) + 
+							UnpackNormal(tex2D(_Bump, i.uv_Bump * 4 + _Time.yy * 0.02));
 				worldNormal = normalize(mul(normalize(bump), t2w));
 
 				float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
