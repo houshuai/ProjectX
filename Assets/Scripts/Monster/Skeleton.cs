@@ -135,13 +135,6 @@ public class Skeleton : Monster
         currState = FSMState.Attack;
     }
 
-    protected void PlayerSite(out float distance, out float angle)
-    {
-        var playerPos = changeCharacter.currCharacter.position;
-        distance = Vector3.Distance(transform.position, playerPos);
-        angle = Vector3.Angle(transform.forward, playerPos - transform.position);
-    }
-
     public override void TakeDamage(float damage)
     {
         if (isDead)

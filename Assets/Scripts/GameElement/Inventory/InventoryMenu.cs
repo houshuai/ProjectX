@@ -54,10 +54,12 @@ public class InventoryMenu : Menu<InventoryMenu>
         for (int i = 0; i < inventory.capacity; i++)
         {
             var grid = new GameObject("grid");
+            grid.transform.SetParent(content);
+            grid.transform.localPosition = Vector3.zero;
+            grid.transform.localScale = Vector3.one;
             var image = grid.AddComponent<Image>();
             image.rectTransform.localScale = new Vector3(1, 1, 1);
             image.sprite = gridImage;
-            grid.transform.SetParent(content);
 
             if (i < inventory.itemList.Count)
             {
@@ -83,15 +85,17 @@ public class InventoryMenu : Menu<InventoryMenu>
         gridItem.content = toolTipContent;
         var image = item.AddComponent<Image>();
         image.sprite = sprites[overlay.goods.id];
+        image.rectTransform.localScale = Vector3.one;
         image.rectTransform.anchorMin = new Vector2(0, 0.2f);
         image.rectTransform.anchorMax = new Vector2(1, 1);
         image.rectTransform.sizeDelta = Vector2.zero;
 
         var count = new GameObject("count");
+        count.transform.SetParent(grid);
+        count.transform.localPosition = Vector3.zero;
         var text = count.AddComponent<Text>();
         text.text = "x" + overlay.count.ToString();
-        text.transform.SetParent(grid);
-        text.transform.localPosition = Vector3.zero;
+        text.rectTransform.localScale = Vector3.one;
         text.rectTransform.anchorMin = Vector2.zero;
         text.rectTransform.anchorMax = new Vector2(1, 0.2f);
         text.rectTransform.sizeDelta = Vector2.zero;

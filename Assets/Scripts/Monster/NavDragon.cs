@@ -13,12 +13,9 @@ public class NavDragon : Dragon
     protected override void UpdateChase()
     {
         var random = Random.value;
-
-        var pos = new Vector2(transform.position.x, transform.position.z);
-        var playerPos = new Vector2(player.position.x, player.position.z);
-        var distance = Vector2.Distance(pos, playerPos);
-        var vector = playerPos - pos;
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
+        Vector2 vector;
+        float distance, angle;
+        PlayerSite2D(out vector, out distance, out angle);
 
         if (distance < attackRange && angle < 20)
         {
@@ -58,11 +55,9 @@ public class NavDragon : Dragon
 
     protected override void UpdateFlyChase()
     {
-        var pos = new Vector2(transform.position.x, transform.position.z);
-        var playerPos = new Vector2(player.position.x, player.position.z);
-        var distance = Vector2.Distance(pos, playerPos);
-        var vector = playerPos - pos;
-        var angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
+        Vector2 vector;
+        float distance, angle;
+        PlayerSite2D(out vector, out distance, out angle);
 
         if (distance < flyAttackRange && angle < 45)
         {
@@ -93,6 +88,16 @@ public class NavDragon : Dragon
 
         MoveAndRotate(vector, angle, desiredSpeed);
         flyTimer += Time.deltaTime;
+    }
+
+    private void PlayerSite2D(out Vector2 vector,out float distance,out float angle)
+    {
+        var pos = new Vector2(transform.position.x, transform.position.z);
+        var playerPosition = changeCharacter.currCharacter.position;
+        var playerPos = new Vector2(playerPosition.x, playerPosition.z);
+        distance = Vector2.Distance(pos, playerPos);
+        vector = playerPos - pos;
+        angle = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z), vector);
     }
 
     private void MoveAndRotate(Vector2 vector, float angle, float desiredSpeed)

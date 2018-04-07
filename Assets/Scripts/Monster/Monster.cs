@@ -20,6 +20,13 @@ public abstract class Monster : MonoBehaviour
         changeCharacter = FindObjectOfType<ChangeCharacter>();
     }
 
+    protected void PlayerSite(out float distance, out float angle)
+    {
+        var playerPos = changeCharacter.currCharacter.position;
+        distance = Vector3.Distance(transform.position, playerPos);
+        angle = Vector3.Angle(transform.forward, playerPos - transform.position);
+    }
+
     public virtual void TakeDamage(float damage)
     {
         health -= damage;

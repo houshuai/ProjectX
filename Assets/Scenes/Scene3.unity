@@ -271,8 +271,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xCount: 33
   yCount: 33
-  xTick: 4
-  yTick: 4
+  xTick: 3
+  yTick: 3
   lodCount: 3
 --- !u!4 &581292310
 Transform:

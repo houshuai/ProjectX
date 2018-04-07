@@ -249,10 +249,10 @@ MonoBehaviour:
   m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ReferenceResolution: {x: 1280, y: 720}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
@@ -290,8 +290,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 312637298}
-  - {fileID: 603505187}
   - {fileID: 1197172831}
+  - {fileID: 603505187}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -311,18 +311,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e631ca87db754c14d9b5106386bdac85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenu: {fileID: 114740161647899814, guid: 962d5fa0cc095874cb0adaac3ebe7d84, type: 2}
-  archiveMenu: {fileID: 114480071134363280, guid: 30e8950e61ee5754d85cf3f1ff419013,
+  mainMenu: {fileID: 114202779361832572, guid: b6874d97437c202428aa4d3539f7fc6f, type: 2}
+  archiveMenu: {fileID: 114336966112801216, guid: bcfdeab7ab2fad242a621c7569eaf644,
     type: 2}
-  newArchiveMenu: {fileID: 114650338575590316, guid: 4dee8bbac502d8d4492ec867c25db637,
+  newArchiveMenu: {fileID: 114386227873180454, guid: 58624c670ade56a4981e73db4a4723f1,
     type: 2}
-  optionMenu: {fileID: 114914792806253478, guid: f9541aaa632b4fc4991551a04c92fd53,
+  optionMenu: {fileID: 114664900772128768, guid: 24aeeb9a180c19049a07335c3bd14ec4,
     type: 2}
-  audioMenu: {fileID: 114343322073733634, guid: 7468abd4e5463684bb178ac2c493ed84,
+  audioMenu: {fileID: 114111677756376716, guid: 595d3ca4752b74044b5a424bed492db2,
     type: 2}
-  visualMenu: {fileID: 114837656787727542, guid: 43b15e0de88c56748a543f3c5c97caa6,
+  visualMenu: {fileID: 114702013749746952, guid: 0efbc37a0344aff42a8a5cd23a4e640f,
     type: 2}
-  pauseMenu: {fileID: 114146273661103004, guid: e8970215605d93947b21c5f108f8c39a,
+  pauseMenu: {fileID: 114569065045337934, guid: 61e9a065655b0034482dd93380423c02,
     type: 2}
   inventoryMenu: {fileID: 114885510634204318, guid: 1dcc9726541360f47bf2b3192fe2feb1,
     type: 2}
@@ -450,7 +450,7 @@ Prefab:
     - target: {fileID: 224396934613290338, guid: 28c0b7aed4950864591dc410f96e11da,
         type: 2}
       propertyPath: m_RootOrder
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 224396934613290338, guid: 28c0b7aed4950864591dc410f96e11da,
         type: 2}
@@ -673,7 +673,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 274252142}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

@@ -134,7 +134,7 @@ public class PlantPool : MonoBehaviour
 
     public void ReuseInCache(GameObject plant)
     {
-        plant.transform.SetParent(transform);
+        plant.transform.SetParent(transform); //从terrain的子物体转移，防止删除terrain时被删除
         for (int i = 0; i < grasses.Length; i++)
         {
             if (plant.name == grasses[i].name)
@@ -182,7 +182,7 @@ public class PlantPool : MonoBehaviour
             {
                 var plant = cache.Pop();
                 plant.SetActive(false);
-                plant.transform.SetParent(transform);
+                //plant.transform.SetParent(transform);
                 pool.Push(plant);
             }
         }

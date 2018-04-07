@@ -55,7 +55,7 @@ public class TerrainBuilder : MonoBehaviour
         gameObject.AddComponent<Reflection>().Initial(thirdHeight);
         gameObject.AddComponent<Refraction>().Initial(thirdHeight);
 
-        var player = FindObjectOfType<PlayerMove>().transform;
+        var player = FindObjectOfType<ChangeCharacter>().currCharacter.transform;
         var p = player.position;
         p.y = noise.GetOctave(p.x, p.z);
         player.position = p + new Vector3(0, 1, 0);
@@ -161,7 +161,7 @@ public class TerrainBuilder : MonoBehaviour
         terrain.mesh.RecalculateNormals();
 
         var meshCollider = terrain.terrainObject.GetComponent<MeshCollider>();
-        if (terrain.lod == 0)
+        if (terrain.lod == 0) //处于中间
         {
             var nodes = await chaseMesh.BuildMeshAsync(terrain.rect, terrain.vertices, terrain.plantObjects);
             if (nodes != null) //这块新建了nodes，说明之前没有设置enemy

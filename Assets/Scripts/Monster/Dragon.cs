@@ -42,7 +42,6 @@ public class Dragon : Monster
     protected FSMState currState;
     protected float flyTimer;
     protected float attackTimer;
-    protected Transform player;
     protected bool firstFly, secondFly;
     protected LayerMask terrainLayer;
     protected WaitForSeconds waitForAttack;
@@ -58,8 +57,6 @@ public class Dragon : Monster
         currState = FSMState.Idle;
         dustParticle.Stop();
         fireParticle.Stop();
-        var playerObject = GameObject.FindGameObjectWithTag(Tags.Player);
-        player = playerObject.transform;
         terrainLayer = 1 << LayerMask.NameToLayer("Terrain");
 
         waitForAttack = new WaitForSeconds(0.32f);
@@ -104,7 +101,7 @@ public class Dragon : Monster
 
     protected virtual void UpdateIdle()
     {
-        if (Vector3.Distance(player.position, transform.position) < chaseDistance)
+        if (Vector3.Distance(changeCharacter.currCharacter.position, transform.position) < chaseDistance)
         {
             currState = FSMState.Chase;
             return;
@@ -115,8 +112,8 @@ public class Dragon : Monster
     {
         var random = Random.value;
 
-        var distance = Vector3.Distance(player.position, transform.position);
-        var angle = Vector3.Angle(transform.forward, player.position - transform.position);
+        float distance, angle;
+        PlayerSite(out distance, out angle);
 
         if (distance < attackRange && angle < 20)
         {
@@ -154,8 +151,8 @@ public class Dragon : Monster
 
     protected virtual void UpdateFlyChase()
     {
-        var distance = Vector3.Distance(player.position, transform.position);
-        var angle = Vector3.Angle(transform.forward, player.position - transform.position);
+        float distance, angle;
+        PlayerSite(out distance, out angle);
 
         if (distance < flyAttackRange && angle < 45)
         {
@@ -243,7 +240,7 @@ public class Dragon : Monster
 
             if (attackTimer > 1.7f)  //after this, the flame attack on the ground and spreaded
             {
-                if (Vector3.Distance(hit.point, player.position) < 7)
+                if (Vector3.Distance(hit.point, changeCharacter.currCharacter.position) < 7)
                 {
                     playerHealth.Value -= attackDamage;
                 }
@@ -304,7 +301,7 @@ public class Dragon : Monster
 
     private void Attack()
     {
-        if (Vector3.Distance(transform.position + transform.forward * 5, player.position) < 2)
+        if (Vector3.Distance(transform.position + transform.forward * 5, changeCharacter.currCharacter.position) < 2)
         {
             playerHealth.Value -= attackDamage;
         }
