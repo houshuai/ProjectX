@@ -35,6 +35,13 @@ public class PlantPool : MonoBehaviour
         timer = timeToClear;
     }
 
+    /// <summary>
+    /// 初始化植物，将其放入cache中，准备首次加载场景时使用
+    /// </summary>
+    /// <param name="plants"></param>
+    /// <param name="pool"></param>
+    /// <param name="cache"></param>
+    /// <param name="size"></param>
     private void Initial(GameObject[] plants, Stack<GameObject>[] pool, Stack<GameObject>[] cache, int size)
     {
         for (int i = 0; i < plants.Length; i++)
@@ -134,7 +141,7 @@ public class PlantPool : MonoBehaviour
 
     public void ReuseInCache(GameObject plant)
     {
-        plant.transform.SetParent(transform); //从terrain的子物体转移，防止删除terrain时被删除
+        //plant.transform.SetParent(transform); //从terrain的子物体转移，防止删除terrain时被删除
         for (int i = 0; i < grasses.Length; i++)
         {
             if (plant.name == grasses[i].name)

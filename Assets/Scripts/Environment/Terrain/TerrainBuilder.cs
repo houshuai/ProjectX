@@ -105,6 +105,7 @@ public class TerrainBuilder : MonoBehaviour
     /// <param name="terrain">被建立的地形，需要先初始化lod和type</param>
     public async void Build(Terrain terrain)
     {
+        //计算高度、湿度、地形网格
         var rect = terrain.rect;
         var terrainComputing = new TerrainComputing(rect, xCount, yCount, noise);
         var terrainResult = await terrainComputing.ComputeAsync();
@@ -113,6 +114,7 @@ public class TerrainBuilder : MonoBehaviour
         moisture = terrainResult.moisture;
         terrain.vertices = terrainResult.vertices;
 
+        //建立地形mesh
         var mesh = new Mesh()
         {
             vertices = terrainResult.vertices,
@@ -122,6 +124,7 @@ public class TerrainBuilder : MonoBehaviour
         mesh.RecalculateNormals();
         terrain.mesh = mesh;
 
+        //建立地形对象
         var terrainObject = new GameObject("Terrain");
         terrainObject.AddComponent<MeshFilter>().mesh = mesh;
         var renderer = terrainObject.AddComponent<MeshRenderer>();
@@ -129,16 +132,15 @@ public class TerrainBuilder : MonoBehaviour
         var texture = GetMaskTexture();
         renderer.material.SetTexture("_Mask", texture);
         terrain.shader = renderer.material.shader;
-
         terrainObject.transform.position = new Vector3(rect.x, 0, rect.y);
         terrainObject.layer = LayerMask.NameToLayer("Terrain");
-
-        SetWater(mesh, terrainObject.transform);
-        terrain.plantObjects = SetPlant(rect, texture, terrainObject.transform, nodes);
-        terrain.plantObjects.AddRange(SetGrass(rect, texture, terrainObject.transform, mesh, nodes));
-
         terrain.terrainObject = terrainObject;
 
+        //建立水、植被、寻路网格
+        SetWater(mesh, terrainObject.transform);
+        terrain.plantObjects = SetPlant(rect, texture, nodes);
+        terrain.plantObjects.AddRange(SetGrass(rect, texture, mesh, nodes));
+        
         if (terrain.lod == 0)
         {
             terrainObject.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -279,7 +281,7 @@ public class TerrainBuilder : MonoBehaviour
 
     }
 
-    private List<GameObject> SetPlant(Rect rect, Texture2D texture, Transform terrainTransform, Node[,] nodes)
+    private List<GameObject> SetPlant(Rect rect, Texture2D texture, Node[,] nodes)
     {
         var plantList = new List<GameObject>();
         var green = new Color32(0, 255, 0, 0);
@@ -321,7 +323,6 @@ public class TerrainBuilder : MonoBehaviour
                 if (plant != null)
                 {
                     plant.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
-                    plant.transform.SetParent(terrainTransform);
                     plantList.Add(plant);
                     nodes[i, j].isWalkable = false;
                     nodes[i - 1, j].isWalkable = false;
@@ -334,7 +335,7 @@ public class TerrainBuilder : MonoBehaviour
         return plantList;
     }
 
-    private List<GameObject> SetGrass(Rect rect, Texture2D texture, Transform terrainTransform, Mesh mesh, Node[,] nodes)
+    private List<GameObject> SetGrass(Rect rect, Texture2D texture, Mesh mesh, Node[,] nodes)
     {
         var plantList = new List<GameObject>();
         var blue = new Color32(0, 0, 255, 0);
@@ -355,7 +356,6 @@ public class TerrainBuilder : MonoBehaviour
                     plant.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
                     var rotation = Quaternion.FromToRotation(Vector3.up, normal);
                     plant.transform.rotation *= rotation;
-                    plant.transform.SetParent(terrainTransform);
                     plantList.Add(plant);
                 }
             }

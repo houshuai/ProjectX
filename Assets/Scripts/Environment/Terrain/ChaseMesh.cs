@@ -56,15 +56,15 @@ public class ChaseMesh
         var xTick = rect.width / (xCountOfTile - 1);
         var yTick = rect.height / (yCountOfTile - 1);
         var pos = new Vector3(rect.x, 0, rect.y);
-        
+
         var positions = new List<Vector3>();
         foreach (var plant in plantList)
         {
-            if (plant.name!="Grass")
+            if (plant.name != "Grass")
             {
-                positions.Add(plant.transform.localPosition);
+                positions.Add(plant.transform.position);
             }
-            
+
         }
 
         var nodes = new Node[xCountOfTile, yCountOfTile];
@@ -80,8 +80,8 @@ public class ChaseMesh
 
         foreach (var p in positions)
         {
-            int x = (int)(p.x / xTick);
-            int y = (int)(p.z / yTick);
+            int x = (int)((p.x - rect.x) / xTick);
+            int y = (int)((p.z - rect.y) / yTick);
             nodes[x, y].isWalkable = false;
         }
 
@@ -157,7 +157,7 @@ public class ChaseMesh
             allRect.Add(rect);
             allNodes.Add(nodes);
         }
-        
+
     }
 
     /// <summary>

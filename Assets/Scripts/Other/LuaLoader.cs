@@ -24,8 +24,8 @@ public class LuaLoader : MonoBehaviour
     }
 
     /// <summary>
-    /// 自定义加载，xlua的文档建议全局使用一个DoString加载main.lua，然后在main.lua里加载别的，
-    /// 但是我不会在main.lua里加载的其他lua之前进行注入到其他lua里，导致调用start里的出现nil，
+    /// 自定义加载，xlua的文档建议全局使用一个DoString加载main.lua，然后在main.lua里加载别的lua文件，
+    /// 但是我不会在main.lua里加载的其他lua之前进行注入到其他lua里，导致其他lua调用start时由于没有注入cs里的对象会出现nil，
     /// 按理说在调用start之前已经注入了呀
     /// </summary>
     private static void Load()
@@ -64,9 +64,17 @@ public class LuaLoader : MonoBehaviour
         return str;
     }
 
+    /// <summary>
+    /// 获取lua表，从文件中读取lua文件
+    /// </summary>
+    /// <param name="injections">需要注入的对象</param>
+    /// <param name="self">LuaBehaviour本身</param>
+    /// <param name="fileName">文件名，需要.lua后缀</param>
+    /// <returns></returns>
     public static LuaTable GetLuaTable(Injection[] injections, LuaBehaviour self, string fileName)
     {
 #if !UNITY_EDITOR
+        //第一次打开并获取lua时将ab包解压到persistent文件夹里
         if (!isLoaded)
         {
             CopyToPersistent();
@@ -80,6 +88,7 @@ public class LuaLoader : MonoBehaviour
         result.SetMetaTable(meta);
         meta.Dispose();
 
+        //注入
         result.Set("self", self);
         foreach (var injection in injections)
         {
