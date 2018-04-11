@@ -21,6 +21,7 @@ public class LuaLoader : MonoBehaviour
                 sw.Write(txt.text);
             }
         }
+        bundle.Unload(true);
     }
 
     /// <summary>

@@ -325,10 +325,10 @@ public class TerrainBuilder : MonoBehaviour
                     plant.transform.position = new Vector3(rect.x + i * xTick, height, rect.y + j * yTick);
                     plantList.Add(plant);
                     nodes[i, j].isWalkable = false;
-                    nodes[i - 1, j].isWalkable = false;
-                    nodes[i + 1, j].isWalkable = false;
-                    nodes[i, j - 1].isWalkable = false;
-                    nodes[i, j + 1].isWalkable = false;
+                    //nodes[i - 1, j].isWalkable = false;
+                    //nodes[i + 1, j].isWalkable = false;
+                    //nodes[i, j - 1].isWalkable = false;
+                    //nodes[i, j + 1].isWalkable = false;
                 }
             }
         }

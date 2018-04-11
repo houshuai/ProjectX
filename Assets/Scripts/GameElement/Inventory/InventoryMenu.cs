@@ -130,6 +130,7 @@ public class InventoryMenu : Menu<InventoryMenu>
             commonScrollview.SetActive(false);
             sellButton.SetActive(false);
             clothScrolliew.SetActive(true);
+            CancelBtnClick();
             if (!isClothConentInitialized)
             {
                 var inventory = new Inventory(12, 1);
@@ -191,7 +192,7 @@ public class InventoryMenu : Menu<InventoryMenu>
         if (curr > 1)
         {
             deleteNumText.text = (curr - 1).ToString();
-            goodsPriceText.text = ((curr + 1) * selectedOverlay.goods.price).ToString();
+            goodsPriceText.text = ((curr - 1) * selectedOverlay.goods.price).ToString();
         }
     }
 
@@ -254,6 +255,7 @@ public class InventoryMenu : Menu<InventoryMenu>
         //当前选择的模型设置为null，避免关闭背包的时候将其destroy
         currModel = null;
         dressUI.SetActive(false);
+        Back();
     }
 
     /// <summary>
