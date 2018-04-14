@@ -1,4 +1,4 @@
-seed 155
+seed 41561
 frequencys 0.001 0.005 0.02 0.05
 amplitudes 100 50 10 2
 firstHeight 120

@@ -55,6 +55,11 @@ public class TerrainBuilder : MonoBehaviour
         gameObject.AddComponent<Reflection>().Initial(thirdHeight);
         gameObject.AddComponent<Refraction>().Initial(thirdHeight);
 
+        SetPlayerPosition();
+    }
+
+    private void SetPlayerPosition()
+    {
         var player = FindObjectOfType<ChangeCharacter>().currCharacter.transform;
         var p = player.position;
         p.y = noise.GetOctave(p.x, p.z);
@@ -99,6 +104,14 @@ public class TerrainBuilder : MonoBehaviour
         }
     }
 
+    public void ReInitial(int seed)
+    {
+        this.seed = seed;
+        noise = new SimplexNoise(seed, frequencys, amplitudes);
+        chaseMesh = new ChaseMesh(xCount, yCount);           //
+        SetPlayerPosition();
+    }
+
     /// <summary>
     /// 建立一个完整的地形
     /// </summary>
@@ -107,19 +120,19 @@ public class TerrainBuilder : MonoBehaviour
     {
         //计算高度、湿度、地形网格
         var rect = terrain.rect;
-        var terrainComputing = new TerrainComputing(rect, xCount, yCount, noise);
-        var terrainResult = await terrainComputing.ComputeAsync();
-        var nodes = terrainResult.nodes;
-        heights = terrainResult.heights;
-        moisture = terrainResult.moisture;
-        terrain.vertices = terrainResult.vertices;
+        Node[,] nodes;
+        Vector3[] vertices;
+        Vector2[] uvs;
+        ComputeMesh(rect, out vertices, out uvs, out nodes);
+
+        terrain.vertices = vertices;
 
         //建立地形mesh
         var mesh = new Mesh()
         {
-            vertices = terrainResult.vertices,
+            vertices = vertices,
             triangles = lodIndices[terrain.lod][(int)terrain.type],
-            uv = terrainResult.uvs,
+            uv = uvs,
         };
         mesh.RecalculateNormals();
         terrain.mesh = mesh;
@@ -150,6 +163,38 @@ public class TerrainBuilder : MonoBehaviour
         else
         {
             terrain.shader.maximumLOD = 110;
+        }
+    }
+
+    private void ComputeMesh(Rect rect, out Vector3[] vertices,out Vector2[] uvs,out Node[,] nodes)
+    {
+        int vertexCount = xCount * yCount;
+        float xTick = rect.width / (xCount - 1);
+        float yTick = rect.height / (yCount - 1);
+        float u = 1.0f / (xCount - 1);
+        float v = 1.0f / (yCount - 1);
+
+        nodes = new Node[xCount, yCount];
+        heights = new float[xCount, yCount];
+        moisture = new float[xCount, yCount];
+
+        int index = 0;
+        vertices = new Vector3[vertexCount];
+        uvs = new Vector2[vertexCount];
+        for (int j = 0; j < yCount; j++)
+        {
+            for (int i = 0; i < xCount; i++)
+            {
+                var x = i * xTick;
+                var y = j * yTick;
+                var height = noise.GetOctave(rect.x + x, rect.y + y);
+                heights[i, j] = height;
+                moisture[i, j] = noise.GetSingle(rect.x + x, rect.y + y);
+                vertices[index] = new Vector3(x, height, y);
+                nodes[i, j] = new Node(new Vector3(rect.x + x, height, rect.y + y), xTick, yTick, true);
+                uvs[index] = new Vector2(i * u, j * v);
+                index++;
+            }
         }
     }
 

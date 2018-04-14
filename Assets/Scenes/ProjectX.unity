@@ -318,11 +318,11 @@ MonoBehaviour:
     type: 2}
   optionMenu: {fileID: 114664900772128768, guid: 24aeeb9a180c19049a07335c3bd14ec4,
     type: 2}
-  audioMenu: {fileID: 114111677756376716, guid: 595d3ca4752b74044b5a424bed492db2,
+  audioMenu: {fileID: 114903193808592786, guid: 595d3ca4752b74044b5a424bed492db2,
     type: 2}
-  visualMenu: {fileID: 114702013749746952, guid: 0efbc37a0344aff42a8a5cd23a4e640f,
+  visualMenu: {fileID: 114733978743870854, guid: 0efbc37a0344aff42a8a5cd23a4e640f,
     type: 2}
-  pauseMenu: {fileID: 114569065045337934, guid: 61e9a065655b0034482dd93380423c02,
+  pauseMenu: {fileID: 114575559046336360, guid: 61e9a065655b0034482dd93380423c02,
     type: 2}
   inventoryMenu: {fileID: 114885510634204318, guid: 1dcc9726541360f47bf2b3192fe2feb1,
     type: 2}

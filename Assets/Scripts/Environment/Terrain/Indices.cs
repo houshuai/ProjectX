@@ -18,13 +18,19 @@ public class Indices
         int scale = 1 << lod;
         int currXGap = xGap / scale;
         int currYGap = yGap / scale;
-        if (currXGap < 4 || currYGap < 4)
-        {
-            return null;
-        }
         int totalIndexCount = currXGap * currYGap * 6;
         int xdecrease = currXGap / 2 * 3;
         int ydecrease = currYGap / 2 * 3;
+
+        if (currXGap < 2 || currYGap < 2)
+        {
+            return Initial_1x1(xGap);    //scale太大会出错，
+        }
+        else if (currXGap < 4 || currYGap < 4)
+        {
+            return Initial_2x2(scale);
+        }
+
         var original = new int[totalIndexCount];
         SetCenterIndices(original, 0, 0, xGap, 0, yGap, 1 * scale);
 
@@ -87,6 +93,124 @@ public class Indices
         index = SetBottomIndices(rightBottom, index, 0, xGap - 2 * scale, scale);
         index = SetRightBottomIndices(rightBottom, index, scale);
         index = SetRightIndices(rightBottom, index, 2 * scale, yGap, scale);
+
+        var allIndices = new int[(int)MeshType.Count][];
+        allIndices[(int)MeshType.Original] = original;
+        allIndices[(int)MeshType.LeftTop] = leftTop;
+        allIndices[(int)MeshType.Top] = top;
+        allIndices[(int)MeshType.RightTop] = rightTop;
+        allIndices[(int)MeshType.Left] = left;
+        allIndices[(int)MeshType.Center] = center;
+        allIndices[(int)MeshType.Right] = right;
+        allIndices[(int)MeshType.LeftBottom] = leftBottom;
+        allIndices[(int)MeshType.Bottom] = bottom;
+        allIndices[(int)MeshType.RightBottom] = rightBottom;
+
+        return allIndices;
+    }
+
+    private int[][] Initial_1x1(int scale)
+    {
+        var original = new int[6];
+        SetCenterIndices(original, 0, 0, xGap, 0, yGap, 1 * scale);
+
+        var allIndices = new int[(int)MeshType.Count][];
+        allIndices[(int)MeshType.Original] = original;
+        allIndices[(int)MeshType.LeftTop] = original;
+        allIndices[(int)MeshType.Top] = original;
+        allIndices[(int)MeshType.RightTop] = original;
+        allIndices[(int)MeshType.Left] = original;
+        allIndices[(int)MeshType.Center] = original;
+        allIndices[(int)MeshType.Right] = original;
+        allIndices[(int)MeshType.LeftBottom] = original;
+        allIndices[(int)MeshType.Bottom] = original;
+        allIndices[(int)MeshType.RightBottom] = original;
+
+        return allIndices;
+    }
+
+    private int[][] Initial_2x2(int scale)
+    {
+        int totalIndexCount = 2 * 2 * 6;
+        int xdecrease = 2 / 2 * 3;
+        int ydecrease = 2 / 2 * 3;
+        var original = new int[totalIndexCount];
+        SetCenterIndices(original, 0, 0, xGap, 0, yGap, 1 * scale);
+
+        int index = 0;
+        var leftTop = new int[totalIndexCount - xdecrease - ydecrease];
+        index = SetCenterIndices(leftTop, index, scale, xGap, 0, yGap - scale, scale);
+        //index = SetLeftIndices(leftTop, index, 0, yGap - 2 * scale, scale);
+        //index = SetTopIndices(leftTop, index, 2 * scale, xGap, scale);
+        index = SetLeftTopIndices(leftTop, index, scale);
+
+        index = 0;
+        var top = new int[totalIndexCount - xdecrease];
+        index = SetCenterIndices(top, index, 0, xGap, 0, yGap - scale, scale);
+        index = SetTopIndices(top, index, 0, xGap, scale);
+
+        index = 0;
+        var rightTop = new int[totalIndexCount - xdecrease - ydecrease];
+        index = SetCenterIndices(rightTop, index, 0, xGap - scale, 0, yGap - scale, scale);
+        //index = SetTopIndices(rightTop, index, 0, xGap - 2 * scale, scale);
+        index = SetRightTopIndices(rightTop, index, scale);
+        //index = SetRightIndices(rightTop, index, 0, yGap - 2 * scale, scale);
+
+        index = 0;
+        var left = new int[totalIndexCount - ydecrease];
+        index = SetCenterIndices(left, index, scale, xGap, 0, yGap, scale);
+        index = SetLeftIndices(left, index, 0, yGap, scale);
+
+        index = 0;
+        var center = new int[totalIndexCount - (2 + 2) * 3];
+        //index = SetCenterIndices(center, index, scale, xGap - scale, scale, yGap - scale, scale);
+        //index = SetLeftIndices(center, index, 2 * scale, yGap - 2 * scale, scale);
+        //index = SetTopIndices(center, index, 2 * scale, xGap - 2 * scale, scale);
+        //index = SetRightIndices(center, index, 2 * scale, yGap - 2 * scale, scale);
+        //index = SetBottomIndices(center, index, 2 * scale, xGap - 2 * scale, scale);
+        //index = SetLeftTopIndices(center, index, scale);
+        //index = SetRightTopIndices(center, index, scale);
+        //index = SetLeftBottomIndices(center, index, scale);
+        //index = SetRightBottomIndices(center, index, scale);
+        int self = 0 + 0 * xCount;
+        int next = 0 + scale * xCount;
+        int nextNext = 0 + 2 * scale * xCount;
+        center[index++] = nextNext;
+        center[index++] = next + scale;
+        center[index++] = self;
+        center[index++] = self;
+        center[index++] = next + scale;
+        center[index++] = self + 2 * scale;
+        center[index++] = self + 2 * scale;
+        center[index++] = next + scale;
+        center[index++] = nextNext + 2 * scale;
+        center[index++] = nextNext + 2 * scale;
+        center[index++] = next + scale;
+        center[index++] = nextNext;
+
+        index = 0;
+        var right = new int[totalIndexCount - ydecrease];
+        index = SetCenterIndices(right, index, 0, xGap - scale, 0, yGap, scale);
+        index = SetRightIndices(right, index, 0, yGap, scale);
+
+        index = 0;
+        var leftBottom = new int[totalIndexCount - xdecrease - ydecrease];
+        index = SetCenterIndices(leftBottom, index, scale, xGap, scale, yGap, scale);
+        //index = SetLeftIndices(leftBottom, index, 2 * scale, yGap, scale);
+        index = SetLeftBottomIndices(leftBottom, index, scale);
+        //index = SetBottomIndices(leftBottom, index, 2 * scale, xGap, scale);
+
+        index = 0;
+        var bottom = new int[totalIndexCount - xdecrease];
+        index = SetCenterIndices(bottom, index, 0, xGap, scale, yGap, scale);
+        index = SetBottomIndices(bottom, index, 0, xGap, scale);
+
+        index = 0;
+        var rightBottom = new int[totalIndexCount - xdecrease - ydecrease];
+        index = SetCenterIndices(rightBottom, index, 0, xGap - scale, scale, yGap, scale);
+        //index = SetBottomIndices(rightBottom, index, 0, xGap - 2 * scale, scale);
+        index = SetRightBottomIndices(rightBottom, index, scale);
+        //index = SetRightIndices(rightBottom, index, 2 * scale, yGap, scale);
 
         var allIndices = new int[(int)MeshType.Count][];
         allIndices[(int)MeshType.Original] = original;

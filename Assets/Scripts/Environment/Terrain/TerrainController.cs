@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class TerrainController : MonoBehaviour
 {
-    [Header("must be 2^n + 1")]
+    [Header("一定要等于 2^n + 1")]
     public int xCount = 33;
     public int yCount = 33;
     public float xTick = 1.0f;
     public float yTick = 1.0f;
-    public int lodCount = 3;
+    public int lodCount = 6;
 
     private TerrainBuilder builder;
     private ChangeCharacter changeCharacter;
@@ -16,21 +16,30 @@ public class TerrainController : MonoBehaviour
     private float xLength, yLength;
     private float updateGap = 10;
     private WaitForSeconds[] waits;
-    private int xTileCount = 7;
-    private int yTileCount = 7;
+    private int xTileCount;
+    private int yTileCount;
 
 
     private IEnumerator Start()
     {
         xLength = (xCount - 1) * xTick;
         yLength = (yCount - 1) * yTick;
+        xTileCount = yTileCount = lodCount * 2 + 1;
+
         changeCharacter = FindObjectOfType<ChangeCharacter>();
+
+        //保证从场景3开始可以调试
+        if (changeCharacter==null)
+        {
+            changeCharacter = gameObject.AddComponent<ChangeCharacter>();
+            changeCharacter.currCharacter = FindObjectOfType<PlayerMove>().transform;
+        }
 
         builder = GetComponent<TerrainBuilder>();
 
         //保证下面的异步builder初始化完成之前的update不会出错
-        allTerrain = new Terrain[7, 7];
-        allTerrain[3, 3] = new Terrain(0, MeshType.Original)
+        allTerrain = new Terrain[yTileCount, xTileCount];             //行数是y方向
+        allTerrain[yTileCount / 2, xTileCount / 2] = new Terrain(0, MeshType.Original)
         {
             rect = new Rect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity)
         };
@@ -38,31 +47,136 @@ public class TerrainController : MonoBehaviour
         yield return StartCoroutine(builder.InitialAsync(xCount, yCount, lodCount));
 
         //这里在几帧之后才会执行到
-        allTerrain = new Terrain[,]
-        {
-            { new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(1, MeshType.LeftBottom), new Terrain(1, MeshType.Bottom),     new Terrain(1, MeshType.Bottom),   new Terrain(1, MeshType.Bottom),      new Terrain(1, MeshType.RightBottom), new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(1, MeshType.Left),       new Terrain(0, MeshType.LeftBottom), new Terrain(0, MeshType.Bottom),   new Terrain(0, MeshType.RightBottom), new Terrain(1, MeshType.Right),       new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(1, MeshType.Left),       new Terrain(0, MeshType.Left),       new Terrain(0, MeshType.Original), new Terrain(0, MeshType.Right),       new Terrain(1, MeshType.Right),       new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(1, MeshType.Left),       new Terrain(0, MeshType.LeftTop),    new Terrain(0, MeshType.Top),      new Terrain(0, MeshType.RightTop),    new Terrain(1, MeshType.Right),       new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(1, MeshType.LeftTop),    new Terrain(1, MeshType.Top),        new Terrain(1, MeshType.Top),      new Terrain(1, MeshType.Top),         new Terrain(1, MeshType.RightTop),    new Terrain(2, MeshType.Original)},
-            { new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original),   new Terrain(2, MeshType.Original), new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original),    new Terrain(2, MeshType.Original)},
-        };
+        InitialTerrain();
 
-        for (int i = 0; i < 7; i++)
+        waits = new WaitForSeconds[xTileCount]; //xcount等于ycount,用哪个都一样。
+        for (int i = 0; i < xTileCount; i++)
         {
-            for (int j = 0; j < 7; j++)
+            waits[i] = new WaitForSeconds(0.1f * i);
+        }
+    }
+
+    private void InitialTerrain()
+    {
+        allTerrain = new Terrain[yTileCount, xTileCount];
+        allTerrain[yTileCount / 2, xTileCount / 2] = new Terrain(0, MeshType.Original);
+        for (int i = 0; i < lodCount; i++)
+        {
+            ConfigTerrain(i);
+        }
+
+        BuildTerrain();
+    }
+
+    /// <summary>
+    /// 配置一圈的地形参数
+    /// </summary>
+    /// <param name="lod"></param>
+    private void ConfigTerrain(int lod)
+    {
+        int xCenter = xTileCount / 2;
+        int yCenter = yTileCount / 2;
+        int offset = lod + 1;
+
+        //四个边
+        for (int i = -lod; i <= lod; i++)
+        {
+            allTerrain[yCenter - offset, xCenter + i] = new Terrain(lod, MeshType.Bottom);
+            allTerrain[yCenter + offset, xCenter + i] = new Terrain(lod, MeshType.Top);
+            allTerrain[yCenter + i, xCenter - offset] = new Terrain(lod, MeshType.Left);
+            allTerrain[yCenter + i, xCenter + offset] = new Terrain(lod, MeshType.Right);
+        }
+        
+        //四个角的
+        allTerrain[yCenter - offset, xCenter - offset] = new Terrain(lod, MeshType.LeftBottom);
+        allTerrain[yCenter + offset, xCenter - offset] = new Terrain(lod, MeshType.LeftTop);
+        allTerrain[yCenter - offset, xCenter + offset] = new Terrain(lod, MeshType.RightBottom);
+        allTerrain[yCenter + offset, xCenter + offset] = new Terrain(lod, MeshType.RightTop);
+    }
+
+    private void BuildTerrain()
+    {
+        for (int i = 0; i < yTileCount; i++)
+        {
+            for (int j = 0; j < xTileCount; j++)
             {
-                allTerrain[i, j].rect = new Rect(Mathf.Floor(changeCharacter.currCharacter.position.x / xLength) * xLength - 7 / 2 * xLength + j * xLength,
-                    Mathf.Floor(changeCharacter.currCharacter.position.z / yLength) * yLength - 7 / 2 * yLength + i * yLength, xLength, yLength);
+                allTerrain[i, j].rect = new Rect(Mathf.Floor(changeCharacter.currCharacter.position.x / xLength) * xLength - xTileCount / 2 * xLength + j * xLength,
+                    Mathf.Floor(changeCharacter.currCharacter.position.z / yLength) * yLength - yTileCount / 2 * yLength + i * yLength, xLength, yLength);
                 builder.Build(allTerrain[i, j]);
             }
         }
+    }
 
-        waits = new WaitForSeconds[7];
-        for (int i = 0; i < 7; i++)
+    public void ReInitialTerrain(int seed)
+    {
+        builder.ReInitial(seed);
+        for (int i = 0; i < yTileCount; i++)
         {
-            waits[i] = new WaitForSeconds(0.3f * i);
+            for (int j = 0; j < xTileCount; j++)
+            {
+                builder.Delete(allTerrain[i, j]);
+            }
+        }
+        BuildTerrain();
+    }
+
+    private void Update()
+    {
+        var pos = changeCharacter.currCharacter.position;
+        var center = allTerrain[yTileCount / 2, xTileCount / 2].rect;
+
+        if (pos.x < center.xMin - updateGap)
+        {
+            //删除最后一列
+            for (int i = 0; i < yTileCount; i++)
+            {
+                builder.Delete(allTerrain[i, xTileCount - 1]);
+            }
+            //从最后一列往前更新
+            for (int j = xTileCount - 1; j >= 1; j--)
+            {
+                StartCoroutine(UpdateY(j, false));
+            }
+            //新建第一列
+            StartCoroutine(BuildY(0, false));
+        }
+        else if (pos.z < center.yMin - updateGap)
+        {
+            for (int j = 0; j < xTileCount; j++)
+            {
+                builder.Delete(allTerrain[yTileCount - 1, j]);
+            }
+
+            for (int i = yTileCount - 1; i >= 1; i--)
+            {
+                StartCoroutine(UpdateX(i, false));
+            }
+            StartCoroutine(BuildX(0, false));
+
+        }
+        else if (pos.x > center.xMax + updateGap)
+        {
+            for (int i = 0; i < yTileCount; i++)
+            {
+                builder.Delete(allTerrain[i, 0]);
+            }
+            for (int j = 0; j < xTileCount - 1; j++)
+            {
+                StartCoroutine(UpdateY(j, true));
+            }
+            StartCoroutine(BuildY(xTileCount - 1, true));
+        }
+        else if (pos.z > center.yMax + updateGap)
+        {
+            for (int j = 0; j < xTileCount; j++)
+            {
+                builder.Delete(allTerrain[0, j]);
+            }
+            for (int i = 0; i < yTileCount - 1; i++)
+            {
+                StartCoroutine(UpdateX(i, true));
+            }
+            StartCoroutine(BuildX(yTileCount - 1, true));
         }
     }
 
@@ -157,66 +271,6 @@ public class TerrainController : MonoBehaviour
             builder.Build(allTerrain[index, j]);
         }
 
-    }
-
-    private void Update()
-    {
-        var pos = changeCharacter.currCharacter.position;
-        var center = allTerrain[yTileCount / 2, xTileCount / 2].rect;
-
-        if (pos.x < center.xMin - updateGap)
-        {
-            //删除最后一列
-            for (int i = 0; i < yTileCount; i++)
-            {
-                builder.Delete(allTerrain[i, xTileCount - 1]);
-            }
-            //从最后一列往前更新
-            for (int j = xTileCount - 1; j >= 1; j--)
-            {
-                StartCoroutine(UpdateY(j, false));
-            }
-            //新建第一列
-            StartCoroutine(BuildY(0, false));
-        }
-        else if (pos.z < center.yMin - updateGap)
-        {
-            for (int j = 0; j < xTileCount; j++)
-            {
-                builder.Delete(allTerrain[yTileCount - 1, j]);
-            }
-
-            for (int i = yTileCount - 1; i >= 1; i--)
-            {
-                StartCoroutine(UpdateX(i, false));
-            }
-            StartCoroutine(BuildX(0, false));
-
-        }
-        else if (pos.x > center.xMax + updateGap)
-        {
-            for (int i = 0; i < yTileCount; i++)
-            {
-                builder.Delete(allTerrain[i, 0]);
-            }
-            for (int j = 0; j < xTileCount - 1; j++)
-            {
-                StartCoroutine(UpdateY(j, true));
-            }
-            StartCoroutine(BuildY(xTileCount - 1, true));
-        }
-        else if (pos.z > center.yMax + updateGap)
-        {
-            for (int j = 0; j < xTileCount; j++)
-            {
-                builder.Delete(allTerrain[0, j]);
-            }
-            for (int i = 0; i < yTileCount - 1; i++)
-            {
-                StartCoroutine(UpdateX(i, true));
-            }
-            StartCoroutine(BuildX(yTileCount - 1, true));
-        }
     }
 
     private void MoveTerrain(Terrain source, Terrain target)
